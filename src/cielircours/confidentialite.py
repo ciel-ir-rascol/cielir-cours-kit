@@ -91,11 +91,14 @@ def controler(racine: Path, motifs: Path) -> list[Infraction]:
     infractions = []
     candidats = [p for p in sorted(racine.rglob("*")) if p.is_file() and not p.is_symlink()]
     exclus_par: dict[str, int] = {}
+    exclus_d_office = 0
     for fichier in candidats:
         raison = _ignore(fichier.relative_to(racine), ignores)
         if raison is not None:
             if raison:
                 exclus_par[raison] = exclus_par.get(raison, 0) + 1
+            else:
+                exclus_d_office += 1
             continue
         texte = _lire_texte(fichier)
         if texte is None:
@@ -108,7 +111,7 @@ def controler(racine: Path, motifs: Path) -> list[Infraction]:
                         trouvees.append((m.start(), nom, m.end()))
             for debut, nom, fin in sorted(trouvees):
                 infractions.append(Infraction(fichier, numero, nom, _extrait(ligne, debut, fin)))
-    if candidats and sum(exclus_par.values()) == len(candidats):
+    if exclus_par and sum(exclus_par.values()) == len(candidats) - exclus_d_office:
         motifs_en_cause = ", ".join(f"« {m} »" for m in exclus_par)
         warnings.warn(
             f".cielir-ignore exclut tous les fichiers du dépôt ({motifs_en_cause}) : "

@@ -213,6 +213,9 @@ def test_des_paires_de_chiffres_qui_ne_sont_pas_un_numero(tmp_path, texte):
         "Tel : +33(0)600000000",
         "Tel : 06 00 00 00 00 (bureau)",
         "Tel:06-00-00-00-00",
+        "Tel : 06  00  00  00  00",
+        "Tel : 06/00/00/00/00",
+        "Tel : +33 6//00//00//00//00",
     ],
 )
 def test_notations_francaises_courantes_detectees(tmp_path, texte):
@@ -273,5 +276,31 @@ def test_un_cielir_ignore_raisonnable_n_avertit_pas(tmp_path, recwarn):
     ecrire(tmp_path, ".cielir-ignore", "vendor\n")
     ecrire(tmp_path, "vendor/a.md", "x")
     ecrire(tmp_path, "b.md", "propre")
+    controler(tmp_path, MOTIFS)
+    assert len(recwarn) == 0
+
+
+@pytest.mark.parametrize("motif", ["*", "**", "**/*"])
+def test_l_avertissement_fonctionne_dans_un_vrai_depot_avec_git(tmp_path, motif):
+    ecrire(tmp_path, ".git/config", "[core]")
+    ecrire(tmp_path, ".git/HEAD", "ref: refs/heads/main")
+    ecrire(tmp_path, ".cielir-ignore", motif + "\n")
+    ecrire(tmp_path, "a.md", "x@lycee-fictif.fr")
+    with pytest.warns(UserWarning, match="exclut tous les fichiers"):
+        assert controler(tmp_path, MOTIFS) == []
+
+
+def test_pas_d_avertissement_avec_git_et_un_ignore_raisonnable(tmp_path, recwarn):
+    ecrire(tmp_path, ".git/config", "[core]")
+    ecrire(tmp_path, ".cielir-ignore", "vendor\n")
+    ecrire(tmp_path, "vendor/a.md", "x")
+    ecrire(tmp_path, "b.md", "propre")
+    controler(tmp_path, MOTIFS)
+    assert len(recwarn) == 0
+
+
+def test_depot_ou_tout_est_ignore_d_office_n_avertit_pas(tmp_path, recwarn):
+    ecrire(tmp_path, ".git/config", "[core]")
+    ecrire(tmp_path, "node_modules/a.md", "x")
     controler(tmp_path, MOTIFS)
     assert len(recwarn) == 0
