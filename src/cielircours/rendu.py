@@ -41,7 +41,9 @@ def _environnement() -> Environment:
 
 def rendre_html(source: str, cours: Cours, pub: Publication, mode: Mode) -> str:
     gabarit = (files("cielircours.donnees") / "gabarits" / "cours.html.j2").read_text(encoding="utf-8")
+    feuille = Path(str(files("cielircours.donnees") / "themes" / "cours.css")).as_uri()
     return _environnement().from_string(gabarit).render(
+        feuille=feuille,
         cours=cours,
         pub=pub,
         mode=mode,
