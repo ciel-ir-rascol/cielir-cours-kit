@@ -1,0 +1,64 @@
+"""Enveloppe du document : gabarit HTML (cartouche, capacités, licence) puis sortie PDF."""
+
+import datetime
+from dataclasses import dataclass
+from importlib.resources import files
+from pathlib import Path
+
+from jinja2 import Environment, StrictUndefined
+from weasyprint import HTML
+from weasyprint.urls import FatalURLFetchingError, URLFetcher
+
+from cielircours.config import Cours
+from cielircours.mdtext import Mode, rendre_corps
+
+LICENCE = "CC BY-NC-SA 4.0"
+
+_TYPES_DOCUMENT = {Mode.COMPLET: "Cours", Mode.TROUS: "Cours à trous"}
+
+
+class SourceIntrouvable(FileNotFoundError):
+    """Une ressource du document (image, feuille de style…) n'a pas pu être chargée."""
+
+
+@dataclass(frozen=True)
+class Publication:
+    version: str
+    date: datetime.date
+
+    @property
+    def libelle(self) -> str:
+        return f"{self.version} du {self.date:%d.%m.%y}"
+
+
+def _environnement() -> Environment:
+    return Environment(autoescape=True, undefined=StrictUndefined, trim_blocks=True, lstrip_blocks=True)
+
+
+def rendre_html(source: str, cours: Cours, pub: Publication, mode: Mode) -> str:
+    gabarit = (files("cielircours.donnees") / "gabarits" / "cours.html.j2").read_text(encoding="utf-8")
+    return _environnement().from_string(gabarit).render(
+        cours=cours,
+        pub=pub,
+        mode=mode,
+        type_document=_TYPES_DOCUMENT[mode],
+        licence=LICENCE,
+        corps=rendre_corps(source, mode),
+    )
+
+
+class _FetcherStrict(URLFetcher):
+    """Toute ressource introuvable arrête le rendu (WeasyPrint se contenterait d'un avertissement)."""
+
+    def __init__(self) -> None:
+        super().__init__(fail_on_errors=True)
+
+
+def ecrire_pdf(html: str, base_url: Path, sortie: Path) -> None:
+    document = HTML(string=html, base_url=str(base_url), url_fetcher=_FetcherStrict())
+    try:
+        rendu = document.render()
+    except FatalURLFetchingError as e:
+        cause = e.__cause__
+        raise SourceIntrouvable(f"{e} ({cause})" if cause else str(e)) from e
+    rendu.write_pdf(sortie)

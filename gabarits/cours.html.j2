@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>{{ cours.titre }}</title>
+{# Seul le câblage des pieds de page (éléments « running ») est ici ; la mise en forme viendra du thème. #}
+<style>
+.pied-gauche { position: running(pied-gauche); }
+.pied-droit { position: running(pied-droit); }
+.entete-gauche { position: running(entete-gauche); }
+.entete-droit { position: running(entete-droit); }
+@page { @bottom-left { content: element(pied-gauche); }
+        @bottom-center { content: counter(page) " / " counter(pages); }
+        @bottom-right { content: element(pied-droit); }
+        @top-left { content: element(entete-gauche); }
+        @top-right { content: element(entete-droit); } }
+@page :first { @top-left { content: none; } @top-right { content: none; } }
+</style>
+</head>
+<body class="mode-{{ mode.value }}">
+
+<div class="entete-gauche">{{ cours.sequence }}</div>
+<div class="entete-droit">{{ cours.titre }}</div>
+<div class="pied-gauche">{{ cours.discipline }} – {{ cours.classe }}</div>
+<div class="pied-droit">{{ cours.etablissement }} · {{ licence }}</div>
+
+<header class="cartouche">
+  <div class="cartouche-ligne">
+    <span class="matiere">{{ cours.discipline }} – {{ cours.classe }}</span>
+    <span class="sequence">{{ cours.sequence }}</span>
+  </div>
+  <div class="cartouche-ligne">
+    <span class="type">{{ type_document }}</span>
+    <h1 class="titre">{{ cours.titre }}</h1>
+  </div>
+  <div class="cartouche-ligne">
+    <span class="etablissement">{{ cours.etablissement }}</span>
+    <span class="meta">
+      {%- if cours.duree %}<span class="duree">{{ cours.duree }}</span> {% endif -%}
+      <span class="version">{{ pub.libelle }}</span>
+    </span>
+  </div>
+</header>
+
+{% if cours.capacites %}
+<section class="capacites">
+  <h2>Capacités attendues</h2>
+  <ul>
+  {% for c in cours.capacites %}
+    <li>{{ c }}</li>
+  {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+<main class="corps">
+{{ corps | safe }}
+</main>
+
+<footer class="licence">
+  Ce document est publié sous licence {{ licence }}.
+</footer>
+
+</body>
+</html>
