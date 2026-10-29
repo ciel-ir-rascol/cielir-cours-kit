@@ -1,4 +1,5 @@
 from datetime import date
+from pathlib import Path
 
 import pytest
 
@@ -123,3 +124,62 @@ def test_le_premier_du_mois_s_ecrit_1er():
 def test_deck_sans_entete_refuse():
     with pytest.raises(ValueError):
         preparer_deck("# Pas d'en-tête\n", PUB)
+
+
+def _deck_une_slide(contenu):
+    """Deck dont la première slide est `contenu`, suivie d'une seconde slide."""
+    return ENTETE.format(pied="footer: 'X'\n") + "\n" + contenu + "\n\n---\n\n## Deux\n"
+
+
+def _dans_la_premiere_slide(sortie):
+    """Vrai si l'unique ligne de version précède la seconde slide (repérée par son titre)."""
+    suivante = "## Suite" if "## Suite" in sortie else "## Deux"
+    return sortie.count("**v1.02** —") == 1 and sortie.index("**v1.02** —") < sortie.index(suivante)
+
+
+@pytest.mark.parametrize("contenu", [
+    "# Titre\n---\n\n## Suite",
+    "```text\ncode\n```\n---\n\n## Suite",
+    "<!-- note -->\n---\n\n## Suite",
+    "<!--\nnote\n-->\n---\n\n## Suite",
+    "~~~text\n---\n~~~\n\nTexte",
+    "```text\n---\n```\n\nTexte",
+    "<!--\nNote\n\n---\n\nsuite de la note\n-->",
+], ids=["titre-atx", "fin-de-code", "commentaire-colle", "commentaire-multiligne-colle",
+        "tildes", "backticks", "commentaire-avec-vide-et-tirets"])
+def test_la_version_va_toujours_dans_la_premiere_slide(contenu):
+    sortie = preparer_deck(_deck_une_slide(contenu), PUB)
+    assert _dans_la_premiere_slide(sortie)
+
+
+def test_la_version_n_est_pas_dans_un_commentaire():
+    deck = _deck_une_slide("# T\n\n<!--\nNote\n\n---\n\nsuite\n-->")
+    sortie = preparer_deck(deck, PUB)
+    assert sortie.index("**v1.02** —") > sortie.index("-->")
+
+
+def test_un_titre_setext_n_est_pas_un_separateur():
+    deck = _deck_une_slide("Titre\n---\n\nSuite du texte")
+    sortie = preparer_deck(deck, PUB)
+    assert "Suite du texte\n\n**v1.02**" in sortie
+    assert _dans_la_premiere_slide(sortie)
+
+
+def test_entete_non_referme_refuse():
+    with pytest.raises(ValueError):
+        preparer_deck("---\nmarp: true\n\n# Titre\n", PUB)
+
+
+def test_le_vrai_deck_git_cours01():
+    chemin = (Path(__file__).resolve().parents[2]
+              / "git-cours01-decouverte/slides/01-decouverte-git-github.md")
+    if not chemin.exists():
+        pytest.skip("dépôt git-cours01-decouverte absent")
+    source = chemin.read_text(encoding="utf-8")
+    sortie = preparer_deck(source, PUB)
+    assert "footer: 'BTS CIEL-IR · Git et GitHub · 1re année · v1.02 du 29.10.26'" in sortie
+    assert sortie.count("**v1.02** — 29 octobre 2026") == 1
+    notes = sortie.index("Commencer par un tour de table")
+    assert notes < sortie.index("**v1.02**") < sortie.index("## Vous avez déjà vu ça ?")
+    ajoutees = [l for l in sortie.splitlines() if l not in source.splitlines()]
+    assert len(ajoutees) == 2

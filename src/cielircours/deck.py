@@ -14,6 +14,7 @@ _MOIS = (
 )
 _SEPARATEUR = re.compile(r"---[ \t]*")
 _FENCE = re.compile(r"\s{0,3}(`{3,}|~{3,})")
+_AUTRE_BLOC = re.compile(r"\s{0,3}(#{1,6}(\s|$)|[>|<]|[-*+]\s|\d+[.)]\s|---)")
 _PIED = re.compile(r"footer:[ \t]*(.*?)[ \t]*")
 
 
@@ -46,19 +47,41 @@ def _fin_entete(lignes: list[str]) -> int:
     raise ValueError("l'en-tête YAML du deck n'est pas refermé par ---")
 
 
+def _est_paragraphe(ligne: str) -> bool:
+    """Ligne de texte courant : un `---` qui la suit la souligne (Setext) au lieu de séparer."""
+    return bool(ligne.strip()) and not _AUTRE_BLOC.match(ligne)
+
+
 def _fin_premiere_slide(lignes: list[str], debut: int) -> int:
-    """Indice du premier séparateur de slide hors bloc de code, ou len(lignes)."""
+    """Indice du premier séparateur de slide, ou len(lignes).
+
+    Ne sont pas des séparateurs : un `---` dans un bloc de code, dans un
+    commentaire HTML, ou souligne un paragraphe (titre Setext).
+    """
     cloture = None
+    en_commentaire = False
+    precedente_paragraphe = False
     for i in range(debut, len(lignes)):
         ligne = lignes[i].rstrip("\r")
+        if en_commentaire:
+            en_commentaire = "-->" not in ligne
+            precedente_paragraphe = False
+            continue
         fence = _FENCE.match(ligne)
-        if cloture is None:
-            if fence:
-                cloture = fence.group(1)
-            elif _SEPARATEUR.fullmatch(ligne) and (i == debut or not lignes[i - 1].strip()):
-                return i
-        elif fence and fence.group(1)[0] == cloture[0] and len(fence.group(1)) >= len(cloture):
-            cloture = None
+        if cloture is not None:
+            if fence and fence.group(1)[0] == cloture[0] and len(fence.group(1)) >= len(cloture):
+                cloture = None
+            precedente_paragraphe = False
+            continue
+        if fence:
+            cloture = fence.group(1)
+            precedente_paragraphe = False
+            continue
+        if _SEPARATEUR.fullmatch(ligne) and not precedente_paragraphe:
+            return i
+        if "<!--" in ligne:
+            en_commentaire = "-->" not in ligne.split("<!--", 1)[1]
+        precedente_paragraphe = _est_paragraphe(ligne)
     return len(lignes)
 
 
