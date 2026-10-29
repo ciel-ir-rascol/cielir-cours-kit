@@ -26,10 +26,15 @@ def _texte(jetons: list[Token]) -> str:
 
 
 def _remplacer(enfants: list[Token], mode: Mode) -> list[Token]:
+    from cielircours.mdtext import Mode  # import tardif : mdtext importe ce module
+
     resultat: list[Token] = []
     i = 0
     while i < len(enfants):
         jeton = enfants[i]
+        if jeton.type == "image" and jeton.children:
+            # le texte alternatif est rendu depuis les enfants de l'image
+            jeton.children = _remplacer(jeton.children, mode)
         if jeton.type == "html_inline" and jeton.content.lower() == "<ins>":
             fin = next(
                 (
@@ -42,7 +47,7 @@ def _remplacer(enfants: list[Token], mode: Mode) -> list[Token]:
             )
             if fin is not None:
                 interieur = enfants[i + 1 : fin]
-                if mode == "trous":
+                if mode is Mode.TROUS:
                     n = len(_texte(interieur).strip())
                     resultat.append(_html(f'<span class="trou" style="--car:{n}"></span>'))
                 else:
@@ -57,6 +62,11 @@ def _remplacer(enfants: list[Token], mode: Mode) -> list[Token]:
 
 
 def trous_plugin(md: MarkdownIt, mode: Mode) -> None:
+    from cielircours.mdtext import Mode
+
+    if not isinstance(mode, Mode):
+        raise TypeError(f"mode attendu : un Mode, reçu {mode!r}")
+
     def regle(state: StateCore) -> None:
         for jeton in state.tokens:
             if jeton.type == "inline" and jeton.children:
