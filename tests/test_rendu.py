@@ -5,7 +5,7 @@ from datetime import date
 import pytest
 
 from cielircours.mdtext import Mode
-from cielircours.rendu import Publication, SourceIntrouvable, ecrire_pdf, rendre_html
+from cielircours.rendu import Publication, SchemeInterdit, SourceIntrouvable, ecrire_pdf, rendre_html
 
 
 def test_le_libelle_suit_le_format_du_cartouche_latex():
@@ -43,7 +43,7 @@ def test_le_titre_est_echappe(cours, pub):  # Review Focus 3
 def test_sans_capacites_pas_de_section_vide(cours, pub):
     html = rendre_html("# T", replace(cours, capacites=[]), pub, Mode.COMPLET)
     assert "Capacités attendues" not in html
-    assert "<ul class=\"capacites\"" not in html
+    assert 'class="capacites"' not in html
 
 
 def test_sans_duree_pas_de_duree_vide(cours, pub):
@@ -95,5 +95,13 @@ def test_image_presente_se_rend(cours, pub, tmp_path):
 def test_image_absente_fait_echouer(cours, pub, tmp_path):  # Review Focus 5
     html = rendre_html("![s](img/absent.svg)", cours, pub, Mode.COMPLET)
     with pytest.raises(SourceIntrouvable, match="absent.svg"):
+        ecrire_pdf(html, tmp_path, tmp_path / "x.pdf")
+    assert not (tmp_path / "x.pdf").exists()
+
+
+@pytest.mark.parametrize("url", ["http://exemple.invalid/s.svg", "https://exemple.invalid/s.svg"])
+def test_image_distante_est_refusee(cours, pub, tmp_path, url):
+    html = rendre_html(f"![s]({url})", cours, pub, Mode.COMPLET)
+    with pytest.raises(SchemeInterdit, match="exemple.invalid"):
         ecrire_pdf(html, tmp_path, tmp_path / "x.pdf")
     assert not (tmp_path / "x.pdf").exists()

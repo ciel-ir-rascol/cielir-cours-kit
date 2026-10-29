@@ -18,7 +18,11 @@ _TYPES_DOCUMENT = {Mode.COMPLET: "Cours", Mode.TROUS: "Cours à trous"}
 
 
 class SourceIntrouvable(FileNotFoundError):
-    """Une ressource du document (image, feuille de style…) n'a pas pu être chargée."""
+    """Une ressource locale du document (image, feuille de style…) est introuvable."""
+
+
+class SchemeInterdit(ValueError):
+    """Le document référence une ressource hors `file:`/`data:` (réseau : génération non reproductible)."""
 
 
 @dataclass(frozen=True)
@@ -51,7 +55,7 @@ class _FetcherStrict(URLFetcher):
     """Toute ressource introuvable arrête le rendu (WeasyPrint se contenterait d'un avertissement)."""
 
     def __init__(self) -> None:
-        super().__init__(fail_on_errors=True)
+        super().__init__(fail_on_errors=True, allowed_protocols=("file", "data"))
 
 
 def ecrire_pdf(html: str, base_url: Path, sortie: Path) -> None:
@@ -60,5 +64,8 @@ def ecrire_pdf(html: str, base_url: Path, sortie: Path) -> None:
         rendu = document.render()
     except FatalURLFetchingError as e:
         cause = e.__cause__
-        raise SourceIntrouvable(f"{e} ({cause})" if cause else str(e)) from e
+        detail = f"{e} ({cause})" if cause else str(e)
+        if isinstance(cause, ValueError):
+            raise SchemeInterdit(detail) from e
+        raise SourceIntrouvable(detail) from e
     rendu.write_pdf(sortie)

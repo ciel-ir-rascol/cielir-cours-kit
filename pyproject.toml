@@ -27,12 +27,14 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/cielircours"]
-# Les liens src/cielircours/donnees/* ne servent qu'à l'installation éditable (dev) :
-# le wheel reçoit les vraies données par force-include, sans doublon.
-exclude = ["src/cielircours/donnees"]
+# Données de paquet (gabarits, thèmes, motifs…) : poser simplement les fichiers sous
+# src/cielircours/donnees/ ; hatch les embarque seul, et on les lit par
+# importlib.resources.files("cielircours.donnees"). Aucune autre déclaration à faire.
 
-# Données de paquet : chaque dossier de données du dépôt est recopié sous
-# cielircours/donnees/ et lu par importlib.resources.files("cielircours.donnees").
-# Prochaines entrées : themes/, motifs.yml (ajouter ici ET un lien dans src/cielircours/donnees/).
-[tool.hatch.build.targets.wheel.force-include]
-"gabarits" = "cielircours/donnees/gabarits"
+[tool.pytest.ini_options]
+filterwarnings = [
+    # Filtre ciblé : WeasyPrint annonce que libharfbuzz-subset deviendra obligatoire.
+    # À retirer quand la bibliothèque est installée (action GitHub : tâche 10) ou quand
+    # WeasyPrint rend l'avertissement caduc.
+    "ignore:HarfBuzz-Subset will be required:DeprecationWarning",
+]
