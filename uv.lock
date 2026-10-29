@@ -189,6 +189,7 @@ dependencies = [
     { name = "jinja2" },
     { name = "markdown-it-py" },
     { name = "mdit-py-plugins" },
+    { name = "pygments" },
     { name = "pyyaml" },
     { name = "weasyprint" },
 ]
@@ -204,6 +205,7 @@ requires-dist = [
     { name = "jinja2" },
     { name = "markdown-it-py" },
     { name = "mdit-py-plugins" },
+    { name = "pygments" },
     { name = "pyyaml" },
     { name = "weasyprint" },
 ]

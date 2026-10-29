@@ -194,6 +194,21 @@ pre code { font: inherit; background: none; padding: 0; }
   border-left: 3pt solid #444;
 }
 
+/* Code coloré (classes courtes de Pygments). Imprimé en niveaux de gris, la couleur disparaît :
+   mots-clés en gras, commentaires en italique ; chaînes et nombres ne se distinguent que par
+   leur forme (guillemets, chiffres), ce qui suffit à la lecture. Tous sont à contraste ≥ 7. */
+pre.code .k, pre.code .kd, pre.code .kn, pre.code .kr, pre.code .kc, pre.code .kp,
+pre.code .kt, pre.code .ow { color: #0b3d91; font-weight: 700; }
+pre.code .cp, pre.code .cpf { color: #6b3a00; }
+pre.code .c, pre.code .c1, pre.code .cm, pre.code .cs, pre.code .sd { color: #4a4a4a; font-style: italic; }
+pre.code .s, pre.code .s1, pre.code .s2, pre.code .sc, pre.code .se, pre.code .sa,
+pre.code .sb, pre.code .sh, pre.code .si, pre.code .sx { color: #0b5b2a; }
+pre.code .m, pre.code .mi, pre.code .mf, pre.code .mh, pre.code .mo, pre.code .il { color: #7a1f5c; }
+pre.code .nf, pre.code .fm, pre.code .nc, pre.code .nn { font-weight: 700; }
+pre.code .err { color: inherit; }
+/* dans une réponse (fond rouge pâle), le rouge reste la seule couleur : le code garde noir, gras, italique */
+.reponse-bloc pre.code span { color: inherit; }
+
 /* ---------- Tableaux à compléter ---------- */
 table {
   width: 100%;
