@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from typing import TYPE_CHECKING
 
 from markdown_it import MarkdownIt
@@ -10,6 +11,36 @@ from markdown_it.token import Token
 
 if TYPE_CHECKING:
     from cielircours.mdtext import Mode
+
+
+_INS = re.compile(r"</?ins\b", re.IGNORECASE)
+
+
+def _fragment(valeur: str) -> str:
+    m = _INS.search(valeur)
+    debut = max(0, m.start() - 30) if m else 0
+    return valeur[debut : debut + 90].replace("\n", " ")
+
+
+def _controler_jeton(jeton: Token) -> None:
+    """Refuse un `<ins>` dans la valeur d'un attribut ou l'info d'un bloc de code.
+
+    Ces valeurs sortent échappées (`&lt;ins&gt;`) : le contrôle après rendu ne les voit
+    pas, et la réponse apparaîtrait en clair. Le texte d'un code span ou d'un bloc de
+    code n'est pas concerné et reste littéral.
+    """
+    for nom, valeur in jeton.attrs.items():
+        if isinstance(valeur, str) and _INS.search(valeur):
+            raise ValueError(
+                f"balise <ins> dans l'attribut {nom!r} (titre de lien ou d'image) : "
+                f"…{_fragment(valeur)}…"
+            )
+    if jeton.type == "fence" and _INS.search(jeton.info):
+        raise ValueError(
+            f"balise <ins> dans l'info d'un bloc de code : …{_fragment(jeton.info)}…"
+        )
+    for enfant in jeton.children or []:
+        _controler_jeton(enfant)
 
 
 def _html(content: str) -> Token:
@@ -72,4 +103,9 @@ def trous_plugin(md: MarkdownIt, mode: Mode) -> None:
             if jeton.type == "inline" and jeton.children:
                 jeton.children = _remplacer(jeton.children, mode)
 
+    def controle(state: StateCore) -> None:
+        for jeton in state.tokens:
+            _controler_jeton(jeton)
+
     md.core.ruler.after("inline", "trous_ins", regle)
+    md.core.ruler.after("trous_ins", "trous_attributs", controle)

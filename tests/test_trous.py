@@ -1,3 +1,5 @@
+import pytest
+
 from cielircours.mdtext import Mode, rendre_corps
 
 
@@ -10,9 +12,6 @@ def test_ins_devient_un_trou_calibre_en_mode_trous():
     html = rendre_corps("Le hash fait <ins>40</ins> chiffres.", Mode.TROUS)
     assert '<span class="trou" style="--car:2"></span>' in html
     assert "40" not in html
-
-
-import pytest
 
 
 @pytest.mark.parametrize("mode", list(Mode))
@@ -84,3 +83,29 @@ def test_mode_inattendu_est_refuse():
 
     with pytest.raises(TypeError, match="Mode"):
         construire_markdown("Trous")
+
+
+@pytest.mark.parametrize("mode", list(Mode))
+@pytest.mark.parametrize(
+    "source",
+    [
+        '[x](http://u "<ins>SECRET</ins>")',
+        '![i](a.png "<ins>SECRET</ins>")',
+        '[r]: http://u "<ins>SECRET</ins>"\n\nvoir [r]',
+        "```<ins>SECRET</ins>\ncode\n```",
+    ],
+)
+def test_ins_dans_un_attribut_est_refuse(source, mode):
+    with pytest.raises(ValueError, match="attribut|bloc de code"):
+        rendre_corps(source, mode)
+
+
+def test_erreur_attribut_montre_le_fragment_fautif():
+    with pytest.raises(ValueError, match="SECRET"):
+        rendre_corps('[x](http://u "<ins>SECRET</ins>")', Mode.TROUS)
+
+
+@pytest.mark.parametrize("mode", list(Mode))
+def test_ins_litteral_dans_code_span_et_bloc_de_code_passe(mode):
+    html = rendre_corps("`<ins>x</ins>`\n\n```\n<ins>y</ins>\n```\n", mode)
+    assert "&lt;ins&gt;x" in html and "&lt;ins&gt;y" in html
