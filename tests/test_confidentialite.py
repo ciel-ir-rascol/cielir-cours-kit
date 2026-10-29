@@ -107,7 +107,7 @@ def test_un_etablissement_n_est_pas_une_infraction(tmp_path):
     [
         "Écrire à prenom.nom@example.org",
         "Écrire à prenom.nom@example.com ou x@sous.example.net",
-        "root@localhost, admin@serveur.invalid, a@b.test",
+        "admin@serveur.invalid, a@b.test",
         "Un décorateur @property et @pytest.fixture",
     ],
 )
@@ -164,3 +164,114 @@ def test_fichier_binaire_ignore(tmp_path):
 def test_parcourt_les_sous_dossiers(tmp_path):
     ecrire(tmp_path, "a/b/c.md", "x@lycee-fictif.fr")
     assert [i.fichier for i in controler(tmp_path, MOTIFS)] == [tmp_path / "a/b/c.md"]
+
+
+# --- ronde 2 : faux positifs courants dans les TP -----------------------------
+
+@pytest.mark.parametrize(
+    "texte",
+    [
+        "git clone git@github.com:organisation/depot.git",
+        "ssh eleve@192.168.100.10",
+        "scp fichier eleve@serveur.lan:/tmp",
+        "ssh eleve@d116-01.salle.local",
+        "ssh eleve@bastion.interne.internal",
+        "![logo](images/logo@2x.png)",
+        "ssh root@localhost",
+    ],
+)
+def test_une_connexion_ssh_ou_une_image_n_est_pas_un_courriel(tmp_path, texte):
+    ecrire(tmp_path, "a.md", texte)
+    assert controler(tmp_path, MOTIFS) == []
+
+
+def test_une_adresse_reelle_a_cote_d_une_connexion_ssh_reste_detectee(tmp_path):
+    ecrire(tmp_path, "a.md", "ssh eleve@192.168.100.10 puis écrire à prof.fictif@lycee-fictif.fr")
+    assert motifs_de(tmp_path) == ["courriel"]
+
+
+@pytest.mark.parametrize(
+    "texte",
+    [
+        "05.03.2026 14:00",
+        "08-00-27-12-34-56",
+        "08:00:27:12:34:56",
+        "01 02 03 04 05 06",
+        "06 00-00 00.00",
+    ],
+)
+def test_des_paires_de_chiffres_qui_ne_sont_pas_un_numero(tmp_path, texte):
+    ecrire(tmp_path, "a.md", texte)
+    assert controler(tmp_path, MOTIFS) == []
+
+
+@pytest.mark.parametrize(
+    "texte",
+    [
+        "Tel : +33 (0)6 00 00 00 00",
+        "Tel : +33 (0)6.00.00.00.00",
+        "Tel : +33(0)600000000",
+        "Tel : 06 00 00 00 00 (bureau)",
+        "Tel:06-00-00-00-00",
+    ],
+)
+def test_notations_francaises_courantes_detectees(tmp_path, texte):
+    ecrire(tmp_path, "a.md", texte)
+    assert motifs_de(tmp_path) == ["telephone"]
+
+
+def test_deux_numeros_sur_une_ligne_font_deux_infractions(tmp_path):
+    ecrire(tmp_path, "a.md", "06 00 00 00 00, 05 63 00 00 00")
+    assert motifs_de(tmp_path) == ["telephone", "telephone"]
+
+
+def test_fichier_cp1252_est_controle(tmp_path):
+    (tmp_path / "ancien.txt").write_bytes("Contact : prof.fictif@lycee-fictif.fr (accentué é)".encode("cp1252"))
+    assert motifs_de(tmp_path) == ["courriel"]
+
+
+def test_fichier_utf8_avec_un_octet_invalide_est_controle(tmp_path):
+    (tmp_path / "a.txt").write_bytes(b"debut \xff fin 06 00 00 00 00")
+    assert motifs_de(tmp_path) == ["telephone"]
+
+
+def test_fichier_utf16_avec_bom_est_controle(tmp_path):
+    (tmp_path / "a.txt").write_bytes("prof.fictif@lycee-fictif.fr".encode("utf-16"))
+    assert motifs_de(tmp_path) == ["courriel"]
+
+
+def test_les_noms_ont_des_bornes_de_mot(tmp_path):
+    motifs = ecrire(tmp_path, "m.yml", "noms: [Roux]\n")
+    depot = tmp_path / "depot"
+    ecrire(depot, "a.md", "Le nombre de Rouxel, prénom Rouxe.\nCours de Roux.")
+    assert [(i.ligne, i.motif) for i in controler(depot, motifs)] == [(2, "nom_enseignant")]
+
+
+def test_cielir_ignore_avec_bom_est_lu(tmp_path):
+    (tmp_path / ".cielir-ignore").write_bytes("\ufeffvendor\n".encode("utf-8"))
+    ecrire(tmp_path, "vendor/a.md", "x@lycee-fictif.fr")
+    ecrire(tmp_path, "b.md", "propre")
+    assert controler(tmp_path, MOTIFS) == []
+
+
+def test_cielir_ignore_non_utf8_ne_plante_pas(tmp_path):
+    (tmp_path / ".cielir-ignore").write_bytes(b"# \xe9t\xe9\nvendor\n")
+    ecrire(tmp_path, "vendor/a.md", "x@lycee-fictif.fr")
+    ecrire(tmp_path, "b.md", "x@lycee-fictif.fr")
+    assert [i.fichier.name for i in controler(tmp_path, MOTIFS)] == ["b.md"]
+
+
+@pytest.mark.parametrize("motif", ["*", "**", "**/*"])
+def test_un_cielir_ignore_qui_exclut_tout_avertit(tmp_path, motif):
+    ecrire(tmp_path, ".cielir-ignore", motif + "\n")
+    ecrire(tmp_path, "a.md", "x@lycee-fictif.fr")
+    with pytest.warns(UserWarning, match="exclut tous les fichiers"):
+        assert controler(tmp_path, MOTIFS) == []
+
+
+def test_un_cielir_ignore_raisonnable_n_avertit_pas(tmp_path, recwarn):
+    ecrire(tmp_path, ".cielir-ignore", "vendor\n")
+    ecrire(tmp_path, "vendor/a.md", "x")
+    ecrire(tmp_path, "b.md", "propre")
+    controler(tmp_path, MOTIFS)
+    assert len(recwarn) == 0

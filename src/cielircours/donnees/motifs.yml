@@ -6,16 +6,27 @@
 # l'occurrence entière, l'écartent (adresses d'exemple réservées par la RFC 2606).
 
 courriel:
+  # Une partie hôte avec au moins un point : « root@localhost » n'est pas un courriel.
   expression: '[\w.+-]+@[\w-]+(?:\.[\w-]+)+'
   exceptions:
-    - '.*@(?:[\w-]+\.)*(?:example\.(?:com|net|org|edu)|[\w-]+\.(?:invalid|test|example)|localhost)'
+    # Exemples réservés par la RFC 2606.
+    - '.*@(?:[\w-]+\.)*(?:example\.(?:com|net|org|edu)|[\w-]+\.(?:invalid|test|example))'
+    # Accès git par SSH : git@github.com:org/depot.git
+    - 'git@.*'
+    # Connexion SSH/scp vers une adresse IP ou un nom d'hôte de réseau local.
+    - '.*@\d{1,3}(?:\.\d{1,3}){3}'
+    - '.*@(?:[\w-]+\.)+(?:local|lan|internal)'
+    # Noms d'images pour écrans à haute densité : logo@2x.png
+    - '.*@\d+x\.(?:png|jpe?g|gif|webp|svg)'
 
-# Numéro français : 0X XX XX XX XX avec séparateur (espace, point, tiret), forme
-# compacte 0X + 8 chiffres (exactement dix chiffres, sans chiffre ni lettre
-# autour), ou +33 / 0033 avec ou sans séparateurs. Un faux positif se neutralise
-# par .cielir-ignore ; un numéro manqué se publie.
+# Numéro français, avec un séparateur (espace, point, tiret) identique d'un bout
+# à l'autre ou sans séparateur :
+#   0X XX XX XX XX, 0XXXXXXXXX, +33 X XX XX XX XX, +33 (0)X XX XX XX XX, 0033 ...
+# Refusé : suite plus longue (chiffre ou « -xx », « .xx », « :xx », « xx » à la
+# suite ou en amont : liste, adresse MAC) ou collée à un mot. Un faux positif se neutralise par
+# .cielir-ignore ; un numéro manqué se publie.
 telephone:
-  expression: '(?<![\w.])(?:(?:\+33|0033)[\s.-]?[1-9](?:[\s.-]?\d{2}){4}|0[1-9](?:[\s.-]?\d{2}){4})(?![\d])'
+  expression: '(?<![\w.])(?<!\d[ .:-])(?:(?:\+33|0033)[ .-]?(?:\(0\)[ .-]?)?[1-9](?P<t>[ .-]?)\d{2}(?:(?P=t)\d{2}){3}|0[1-9](?P<s>[ .-]?)\d{2}(?:(?P=s)\d{2}){3})(?!\d|[ .:-]\d\d)'
 
 # Noms à ne pas publier, un par entrée, insensibles à la casse et à la mise en
 # page (espaces multiples). Volontairement VIDE dans le kit : il est public, y

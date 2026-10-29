@@ -5,6 +5,7 @@ Porte sur les fichiers du dépôt, jamais sur l'historique git.
 
 import fnmatch
 import re
+import warnings
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -29,7 +30,8 @@ def _charger_motifs(motifs: Path):
         if nom == "noms":
             for personne in definition or []:
                 morceaux = [re.escape(m) for m in str(personne).split()]
-                compiles.append(("nom_enseignant", re.compile(r"\s+".join(morceaux), re.IGNORECASE), []))
+                motif = r"(?<!\w)" + r"\s+".join(morceaux) + r"(?!\w)"
+                compiles.append(("nom_enseignant", re.compile(motif, re.IGNORECASE), []))
         else:
             exceptions = [re.compile(e + r"\Z") for e in definition.get("exceptions", [])]
             compiles.append((nom, re.compile(definition["expression"]), exceptions))
@@ -40,20 +42,24 @@ def _motifs_ignores(racine: Path) -> list[str]:
     fichier = racine / ".cielir-ignore"
     if not fichier.is_file():
         return []
-    lignes = (l.strip() for l in fichier.read_text(encoding="utf-8").splitlines())
+    lignes = (l.strip() for l in fichier.read_text(encoding="utf-8-sig", errors="replace").splitlines())
     return [l.strip("/") for l in lignes if l and not l.startswith("#")]
 
 
-def _ignore(relatif: Path, ignores: list[str]) -> bool:
+def _ignore(relatif: Path, ignores: list[str]) -> str | None:
+    """Renvoie la raison de l'exclusion (le motif de .cielir-ignore, ou "" pour
+    les dossiers ignorés d'office), ou None si le fichier doit être contrôlé."""
     if DOSSIERS_IGNORES.intersection(relatif.parts):
-        return True
+        return ""
     chemin = relatif.as_posix()
     for motif in ignores:
         if chemin == motif or chemin.startswith(motif + "/"):
-            return True
-        if fnmatch.fnmatch(chemin, motif) or fnmatch.fnmatch(relatif.name, motif):
-            return True
-    return False
+            return motif
+        sans_prefixe = motif.removeprefix("**/")
+        if (fnmatch.fnmatch(chemin, motif) or fnmatch.fnmatch(chemin, sans_prefixe)
+                or fnmatch.fnmatch(relatif.name, sans_prefixe)):
+            return motif
+    return None
 
 
 def _extrait(ligne: str, debut: int, fin: int) -> str:
@@ -67,12 +73,15 @@ def _extrait(ligne: str, debut: int, fin: int) -> str:
 
 def _lire_texte(fichier: Path) -> str | None:
     donnees = fichier.read_bytes()
+    if donnees.startswith((b"\xff\xfe", b"\xfe\xff")):
+        return donnees.decode("utf-16", errors="replace")
     if b"\x00" in donnees:
-        return None
+        return None  # binaire
     try:
         return donnees.decode("utf-8")
     except UnicodeDecodeError:
-        return None
+        # Ni UTF-8 ni binaire : texte hérité (cp1252…). On le contrôle quand même.
+        return donnees.decode("cp1252", errors="replace")
 
 
 def controler(racine: Path, motifs: Path) -> list[Infraction]:
@@ -80,8 +89,13 @@ def controler(racine: Path, motifs: Path) -> list[Infraction]:
     compiles = _charger_motifs(motifs)
     ignores = _motifs_ignores(racine)
     infractions = []
-    for fichier in sorted(p for p in racine.rglob("*") if p.is_file() or p.is_symlink()):
-        if fichier.is_symlink() or _ignore(fichier.relative_to(racine), ignores):
+    candidats = [p for p in sorted(racine.rglob("*")) if p.is_file() and not p.is_symlink()]
+    exclus_par: dict[str, int] = {}
+    for fichier in candidats:
+        raison = _ignore(fichier.relative_to(racine), ignores)
+        if raison is not None:
+            if raison:
+                exclus_par[raison] = exclus_par.get(raison, 0) + 1
             continue
         texte = _lire_texte(fichier)
         if texte is None:
@@ -94,4 +108,11 @@ def controler(racine: Path, motifs: Path) -> list[Infraction]:
                         trouvees.append((m.start(), nom, m.end()))
             for debut, nom, fin in sorted(trouvees):
                 infractions.append(Infraction(fichier, numero, nom, _extrait(ligne, debut, fin)))
+    if candidats and sum(exclus_par.values()) == len(candidats):
+        motifs_en_cause = ", ".join(f"« {m} »" for m in exclus_par)
+        warnings.warn(
+            f".cielir-ignore exclut tous les fichiers du dépôt ({motifs_en_cause}) : "
+            "aucun contrôle n'a eu lieu.",
+            stacklevel=2,
+        )
     return infractions
