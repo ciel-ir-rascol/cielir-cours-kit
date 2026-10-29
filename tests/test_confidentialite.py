@@ -198,6 +198,10 @@ def test_une_adresse_reelle_a_cote_d_une_connexion_ssh_reste_detectee(tmp_path):
         "08:00:27:12:34:56",
         "01 02 03 04 05 06",
         "06 00-00 00.00",
+        "06  00-00 00 00",
+        "06/00.00/00/00",
+        "05/03/2026",
+        "05.03.2026 14:00",
     ],
 )
 def test_des_paires_de_chiffres_qui_ne_sont_pas_un_numero(tmp_path, texte):
@@ -214,6 +218,9 @@ def test_des_paires_de_chiffres_qui_ne_sont_pas_un_numero(tmp_path, texte):
         "Tel : 06 00 00 00 00 (bureau)",
         "Tel:06-00-00-00-00",
         "Tel : 06  00  00  00  00",
+        "Tel : 06  00 00 00 00",
+        "Tel : 06 00  00 00 00",
+        "Tel : 06 00 00 00   00",
         "Tel : 06/00/00/00/00",
         "Tel : +33 6//00//00//00//00",
     ],

@@ -19,14 +19,14 @@ courriel:
     # Noms d'images pour écrans à haute densité : logo@2x.png
     - '.*@\d+x\.(?:png|jpe?g|gif|webp|svg)'
 
-# Numéro français, avec un séparateur (espace, point, tiret, barre oblique, éventuellement répété) identique d'un bout
-# à l'autre ou sans séparateur :
+# Numéro français, avec un séparateur (espace, point, tiret, barre oblique, éventuellement répété) de même nature d'un bout
+# à l'autre (longueur libre : l'extraction de PDF espace de façon irrégulière) ou sans séparateur :
 #   0X XX XX XX XX, 0XXXXXXXXX, +33 X XX XX XX XX, +33 (0)X XX XX XX XX, 0033 ...
 # Refusé : suite plus longue (chiffre ou « -xx », « .xx », « :xx », « xx » à la
 # suite ou en amont : liste, adresse MAC) ou collée à un mot. Un faux positif se neutralise par
 # .cielir-ignore ; un numéro manqué se publie.
 telephone:
-  expression: '(?<![\w.])(?<!\d[ .:/-])(?:(?:\+33|0033)[ .-]*(?:\(0\)[ .-]*)?[1-9](?P<t>| +|\.+|-+|/+)\d{2}(?:(?P=t)\d{2}){3}|0[1-9](?P<s>| +|\.+|-+|/+)\d{2}(?:(?P=s)\d{2}){3})(?!\d|[ .:/-]\d\d)'
+  expression: '(?<![\w.])(?<!\d[ .:/-])(?:(?:\+33|0033)[ .-]*(?:\(0\)[ .-]*)?[1-9](?:\d{8}|(?P<d>[ ./-])(?P=d)*\d{2}(?:(?P=d)+\d{2}){3})|0[1-9](?:\d{8}|(?P<c>[ ./-])(?P=c)*\d{2}(?:(?P=c)+\d{2}){3}))(?!\d|[ .:/-]\d\d)'
 
 # Noms à ne pas publier, un par entrée, insensibles à la casse et à la mise en
 # page (espaces multiples). Volontairement VIDE dans le kit : il est public, y
