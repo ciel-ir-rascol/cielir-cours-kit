@@ -148,7 +148,7 @@ def test_la_fiche_tient_en_trois_pages_au_plus(tmp_path, mode):
 def test_les_polices_sont_embarquees_dans_le_pdf(tmp_path, cours, pub):
     html = rendre_html(FICHE, cours, pub, Mode.TROUS)
     sortie = tmp_path / "f.pdf"
-    ecrire_pdf(html, tmp_path, sortie)
+    ecrire_pdf(html, tmp_path, sortie, Mode.TROUS)
     polices = {}
     for page in PdfReader(sortie).pages:
         for f in page["/Resources"].get("/Font", {}).values():
@@ -161,7 +161,7 @@ def test_les_polices_sont_embarquees_dans_le_pdf(tmp_path, cours, pub):
 
 def _texte_pdf(tmp_path, source, mode, cours, pub):
     sortie = tmp_path / f"{mode.value}.pdf"
-    ecrire_pdf(rendre_html(source, cours, pub, mode), tmp_path, sortie)
+    ecrire_pdf(rendre_html(source, cours, pub, mode), tmp_path, sortie, mode)
     return "\n".join(p.extract_text() for p in PdfReader(sortie).pages)
 
 
@@ -171,15 +171,10 @@ def test_une_etiquette_remplissable_html_est_absente_du_pdf_a_trous(tmp_path, co
     assert "ETIQUETTE-SECRETE" not in _texte_pdf(tmp_path, source, Mode.TROUS, cours, pub)
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="WeasyPrint n'applique pas la feuille du document aux éléments d'un <svg> en ligne : "
-    "la règle .remplissable ne masque pas encore les étiquettes d'un schéma. À traiter par le "
-    "convertisseur (tâche 9) : injecter un <style> dans le SVG en mode trous.",
-)
 def test_une_etiquette_remplissable_de_svg_est_absente_du_pdf_a_trous(tmp_path, cours, pub):
     source = (
         '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="40">'
         '<text class="remplissable" x="5" y="20">ETIQUETTE-SVG</text></svg>'
     )
+    assert "ETIQUETTE-SVG" in _texte_pdf(tmp_path, source, Mode.COMPLET, cours, pub)
     assert "ETIQUETTE-SVG" not in _texte_pdf(tmp_path, source, Mode.TROUS, cours, pub)

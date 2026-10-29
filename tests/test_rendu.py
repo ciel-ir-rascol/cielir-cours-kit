@@ -68,7 +68,7 @@ def test_aucune_information_personnelle(cours, pub):
 
 def test_un_cours_sans_trou_se_rend_quand_meme(cours, pub, tmp_path):  # Review Focus 1
     html = rendre_html("# T\n\nUn paragraphe sans trou.", cours, pub, Mode.TROUS)
-    ecrire_pdf(html, tmp_path, tmp_path / "x.pdf")
+    ecrire_pdf(html, tmp_path, tmp_path / "x.pdf", Mode.TROUS)
     assert (tmp_path / "x.pdf").stat().st_size > 0
 
 
@@ -76,7 +76,7 @@ def test_le_pdf_contient_cartouche_et_corps(cours, pub, tmp_path):
     from pypdf import PdfReader
 
     html = rendre_html("# Mon corps\n\nBonjour.", cours, pub, Mode.COMPLET)
-    ecrire_pdf(html, tmp_path, tmp_path / "x.pdf")
+    ecrire_pdf(html, tmp_path, tmp_path / "x.pdf", Mode.COMPLET)
     texte = PdfReader(tmp_path / "x.pdf").pages[0].extract_text()
     assert "v1.02 du 29.10.26" in texte
     assert "Bonjour." in texte
@@ -88,14 +88,14 @@ def test_image_presente_se_rend(cours, pub, tmp_path):
         '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"/>'
     )
     html = rendre_html("![s](img/ok.svg)", cours, pub, Mode.COMPLET)
-    ecrire_pdf(html, tmp_path, tmp_path / "x.pdf")
+    ecrire_pdf(html, tmp_path, tmp_path / "x.pdf", Mode.COMPLET)
     assert (tmp_path / "x.pdf").stat().st_size > 0
 
 
 def test_image_absente_fait_echouer(cours, pub, tmp_path):  # Review Focus 5
     html = rendre_html("![s](img/absent.svg)", cours, pub, Mode.COMPLET)
     with pytest.raises(SourceIntrouvable, match="absent.svg"):
-        ecrire_pdf(html, tmp_path, tmp_path / "x.pdf")
+        ecrire_pdf(html, tmp_path, tmp_path / "x.pdf", Mode.COMPLET)
     assert not (tmp_path / "x.pdf").exists()
 
 
@@ -103,5 +103,5 @@ def test_image_absente_fait_echouer(cours, pub, tmp_path):  # Review Focus 5
 def test_image_distante_est_refusee(cours, pub, tmp_path, url):
     html = rendre_html(f"![s]({url})", cours, pub, Mode.COMPLET)
     with pytest.raises(SchemeInterdit, match="exemple.invalid"):
-        ecrire_pdf(html, tmp_path, tmp_path / "x.pdf")
+        ecrire_pdf(html, tmp_path, tmp_path / "x.pdf", Mode.COMPLET)
     assert not (tmp_path / "x.pdf").exists()

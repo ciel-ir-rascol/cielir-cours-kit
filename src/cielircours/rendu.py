@@ -7,10 +7,11 @@ from pathlib import Path
 
 from jinja2 import Environment, StrictUndefined
 from weasyprint import HTML
-from weasyprint.urls import FatalURLFetchingError, URLFetcher
+from weasyprint.urls import FatalURLFetchingError, URLFetcher, URLFetcherResponse
 
 from cielircours.config import Cours
 from cielircours.mdtext import Mode, rendre_corps
+from cielircours.schemas import filtrer_svg, retirer_remplissables
 
 LICENCE = "CC BY-NC-SA 4.0"
 
@@ -54,16 +55,41 @@ def rendre_html(source: str, cours: Cours, pub: Publication, mode: Mode) -> str:
 
 
 class _FetcherStrict(URLFetcher):
-    """Toute ressource introuvable arrête le rendu (WeasyPrint se contenterait d'un avertissement)."""
+    """Toute ressource introuvable arrête le rendu (WeasyPrint se contenterait d'un avertissement).
 
-    def __init__(self) -> None:
+    En mode trous, tout SVG reçu (image, fond CSS, `data:`, `<embed>`, image d'un autre SVG)
+    est débarrassé de ses étiquettes `.remplissable` avant que WeasyPrint ne le lise.
+    """
+
+    def __init__(self, mode: Mode) -> None:
         super().__init__(fail_on_errors=True, allowed_protocols=("file", "data"))
+        self._retirer_reponses = mode is Mode.TROUS
+
+    def fetch(self, url, headers=None):  # type: ignore[no-untyped-def]
+        reponse = super().fetch(url, headers)
+        if not self._retirer_reponses:
+            return reponse
+        try:
+            donnees = reponse.read()
+        finally:
+            reponse.close()
+        return URLFetcherResponse(reponse.url, filtrer_svg(donnees), reponse.headers, reponse.status)
 
 
-def ecrire_pdf(html: str, base_url: Path, sortie: Path) -> None:
-    document = HTML(string=html, base_url=str(base_url), url_fetcher=_FetcherStrict())
+def ouvrir_document(html: str, base_url: Path, mode: Mode) -> HTML:
+    """Document WeasyPrint prêt à rendre : ressources contrôlées, réponses des schémas retirées en mode trous."""
+    document = HTML(string=html, base_url=str(base_url), url_fetcher=_FetcherStrict(mode))
+    if mode is Mode.TROUS:
+        retirer_remplissables(document.etree_element)
+    return document
+
+
+def ecrire_pdf(html: str, base_url: Path, sortie: Path, mode: Mode) -> None:
+    """Écrit le PDF. `mode` est obligatoire : c'est lui qui retire les réponses des schémas SVG."""
+    if not isinstance(mode, Mode):
+        raise TypeError(f"mode attendu : un Mode ({', '.join(Mode)}), reçu {mode!r}")
     try:
-        rendu = document.render()
+        rendu = ouvrir_document(html, base_url, mode).render()
     except FatalURLFetchingError as e:
         cause = e.__cause__
         detail = f"{e} ({cause})" if cause else str(e)

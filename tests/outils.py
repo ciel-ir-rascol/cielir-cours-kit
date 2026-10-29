@@ -9,11 +9,9 @@ from datetime import date
 from importlib.resources import files
 from pathlib import Path
 
-from weasyprint import HTML
-
 from cielircours.config import lire_config
 from cielircours.mdtext import Mode
-from cielircours.rendu import Publication, _FetcherStrict, rendre_html
+from cielircours.rendu import Publication, ouvrir_document, rendre_html
 
 DONNEES = Path(__file__).parent / "data"
 COURS_CSS = Path(str(files("cielircours.donnees") / "themes" / "cours.css"))
@@ -79,7 +77,7 @@ def pages_rendues(source: str, mode: Mode, tmp_path: Path) -> list:
     """Rend `source` (markdown) avec le gabarit et la feuille réels ; renvoie `document.pages`."""
     cours = lire_config(DONNEES / "cours-cpp.yml")
     html = rendre_html(source, cours, Publication("v1.02", date(2026, 10, 29)), mode)
-    return HTML(string=html, base_url=str(tmp_path), url_fetcher=_FetcherStrict()).render().pages
+    return ouvrir_document(html, tmp_path, mode).render().pages
 
 
 _TYPES_DE_BOITE = {"BlockBox", "InlineBlockBox", "TableBox", "InlineBox"}
