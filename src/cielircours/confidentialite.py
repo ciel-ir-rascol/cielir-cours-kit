@@ -11,6 +11,7 @@ from pathlib import Path
 import yaml
 
 LONGUEUR_EXTRAIT = 80
+DOSSIERS_IGNORES = {".git", ".venv", "node_modules", "__pycache__", "_site", "dist"}
 
 
 @dataclass(frozen=True)
@@ -44,7 +45,7 @@ def _motifs_ignores(racine: Path) -> list[str]:
 
 
 def _ignore(relatif: Path, ignores: list[str]) -> bool:
-    if ".git" in relatif.parts:
+    if DOSSIERS_IGNORES.intersection(relatif.parts):
         return True
     chemin = relatif.as_posix()
     for motif in ignores:
@@ -53,6 +54,15 @@ def _ignore(relatif: Path, ignores: list[str]) -> bool:
         if fnmatch.fnmatch(chemin, motif) or fnmatch.fnmatch(relatif.name, motif):
             return True
     return False
+
+
+def _extrait(ligne: str, debut: int, fin: int) -> str:
+    """Fenêtre de 80 caractères maximum centrée sur l'occurrence."""
+    if len(ligne) > LONGUEUR_EXTRAIT:
+        milieu = (debut + fin) // 2
+        premier = min(max(0, milieu - LONGUEUR_EXTRAIT // 2), len(ligne) - LONGUEUR_EXTRAIT)
+        ligne = ligne[premier:premier + LONGUEUR_EXTRAIT]
+    return ligne.strip()
 
 
 def _lire_texte(fichier: Path) -> str | None:
@@ -81,7 +91,7 @@ def controler(racine: Path, motifs: Path) -> list[Infraction]:
             for nom, motif, exceptions in compiles:
                 for m in motif.finditer(ligne):
                     if not any(e.match(m.group(0)) for e in exceptions):
-                        trouvees.append((m.start(), nom))
-            for _, nom in sorted(trouvees):
-                infractions.append(Infraction(fichier, numero, nom, ligne.strip()[:LONGUEUR_EXTRAIT]))
+                        trouvees.append((m.start(), nom, m.end()))
+            for debut, nom, fin in sorted(trouvees):
+                infractions.append(Infraction(fichier, numero, nom, _extrait(ligne, debut, fin)))
     return infractions

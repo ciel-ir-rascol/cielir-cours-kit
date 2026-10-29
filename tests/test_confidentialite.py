@@ -47,6 +47,8 @@ def test_detecte_une_adresse_dans_un_texte(tmp_path):
         "Tel : +33600000000",
         "Tel : 0033 6 00 00 00 00",
         "Tel : 05 63 00 00 00",
+        "Tel : 0600000000",
+        "Tel:0600000000.",
     ],
 )
 def test_detecte_un_telephone_francais(tmp_path, texte):
@@ -60,10 +62,18 @@ def test_infraction_porte_fichier_ligne_motif_et_extrait(tmp_path):
     assert i == Infraction(fichier=chemin, ligne=2, motif="telephone", extrait="Tel : 06 00 00 00 00")
 
 
-def test_extrait_tronque_a_80_caracteres(tmp_path):
-    ecrire(tmp_path, "a.md", "x" * 200 + " prof.fictif@lycee-fictif.fr " + "y" * 200)
+@pytest.mark.parametrize("avant, apres", [(0, 200), (200, 200), (200, 0), (10, 10)])
+def test_extrait_limite_a_80_caracteres_et_contient_l_occurrence(tmp_path, avant, apres):
+    ecrire(tmp_path, "a.md", "x " * (avant // 2) + "prof.fictif@lycee-fictif.fr" + " y" * (apres // 2))
     [i] = controler(tmp_path, MOTIFS)
     assert len(i.extrait) <= 80
+    assert "prof.fictif@lycee-fictif.fr" in i.extrait
+
+
+def test_extrait_d_un_telephone_en_fin_de_longue_ligne(tmp_path):
+    ecrire(tmp_path, "a.md", "mot " * 60 + "06 00 00 00 00")
+    [i] = controler(tmp_path, MOTIFS)
+    assert i.extrait.endswith("06 00 00 00 00") and len(i.extrait) <= 80
 
 
 def test_une_occurrence_une_infraction(tmp_path):
@@ -110,7 +120,9 @@ def test_une_adresse_d_exemple_n_est_pas_une_infraction(tmp_path, texte):
     "texte",
     [
         "date : 2026-10-29 et 29/10/2026",
-        "```\nx = 0123456789\n```",
+        "horodatage 1700000000, uid=1000(eleve) gid=1000",
+        "int mode = 0755; int m = 01234567;",
+        "suite 012345678901234 et 2006000000003",
         "ip 192.168.100.10, masque 255.255.255.0",
         "build 20261029123456 et 1006000000003 (sans rapport)",
         "version 1.06.00.00.00.00",
@@ -126,6 +138,12 @@ def test_un_numero_qui_n_en_est_pas_un_n_est_pas_une_infraction(tmp_path, texte)
 
 def test_git_est_ignore(tmp_path):
     ecrire(tmp_path, ".git/config", "email = prof.fictif@lycee-fictif.fr")
+    assert controler(tmp_path, MOTIFS) == []
+
+
+@pytest.mark.parametrize("dossier", [".git", ".venv", "node_modules", "__pycache__", "_site", "dist"])
+def test_dossiers_lourds_ignores_par_defaut(tmp_path, dossier):
+    ecrire(tmp_path, f"{dossier}/sous/a.md", "x@lycee-fictif.fr")
     assert controler(tmp_path, MOTIFS) == []
 
 

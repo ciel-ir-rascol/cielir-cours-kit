@@ -10,11 +10,12 @@ courriel:
   exceptions:
     - '.*@(?:[\w-]+\.)*(?:example\.(?:com|net|org|edu)|[\w-]+\.(?:invalid|test|example)|localhost)'
 
-# Numéro français : 0X XX XX XX XX avec séparateur (espace, point, tiret), ou
-# +33 / 0033 avec ou sans séparateurs. Dix chiffres collés sans +33 ne sont pas
-# retenus : trop de faux positifs (code, identifiants).
+# Numéro français : 0X XX XX XX XX avec séparateur (espace, point, tiret), forme
+# compacte 0X + 8 chiffres (exactement dix chiffres, sans chiffre ni lettre
+# autour), ou +33 / 0033 avec ou sans séparateurs. Un faux positif se neutralise
+# par .cielir-ignore ; un numéro manqué se publie.
 telephone:
-  expression: '(?<![\w.])(?:(?:\+33|0033)[\s.-]?[1-9](?:[\s.-]?\d{2}){4}|0[1-9](?:[\s.-]\d{2}){4})(?!\d)'
+  expression: '(?<![\w.])(?:(?:\+33|0033)[\s.-]?[1-9](?:[\s.-]?\d{2}){4}|0[1-9](?:[\s.-]?\d{2}){4})(?![\d])'
 
 # Noms à ne pas publier, un par entrée, insensibles à la casse et à la mise en
 # page (espaces multiples). Volontairement VIDE dans le kit : il est public, y
