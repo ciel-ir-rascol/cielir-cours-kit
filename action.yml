@@ -1,0 +1,7 @@
+name: Essai de visibilité
+description: Action minimale pour tester la résolution depuis un dépôt public.
+runs:
+  using: composite
+  steps:
+    - run: echo ok
+      shell: bash
