@@ -1,0 +1,12 @@
+sequence: cpp
+bloc: 0
+slug: tableauxVecteurs
+titre: Tableaux et vecteurs
+discipline: Informatique
+classe: BTS CIEL-IR 1ère année
+etablissement: Lycée Louis Rascol, Albi
+duree: 2 h
+tp: tp04-tableaux
+capacites:
+  - Manipuler un tableau
+  - Utiliser un vecteur
