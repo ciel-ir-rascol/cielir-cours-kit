@@ -19,7 +19,7 @@ from cielircours.rendu import Publication, SchemeInterdit, SourceIntrouvable, ec
 
 # Un tag de dépôt de cours : v, un numéro de séquence, un point, deux chiffres (v1.02, v12.03).
 # Exporté : l'action GitHub du kit le reprend pour refuser un tag malformé avant toute génération.
-TAG_VALIDE = re.compile(r"v\d+\.\d{2}\Z")
+TAG_VALIDE = re.compile(r"v[0-9]+\.[0-9]{2}\Z")
 TAG_ATTENDU = "vN.NN, par exemple v1.02"
 _ERREURS = (ConfigInvalide, SourceIntrouvable, SchemeInterdit, ValueError, OSError)
 

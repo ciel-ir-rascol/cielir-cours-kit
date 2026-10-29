@@ -17,7 +17,7 @@ runs:
   using: composite
   steps:
     # 1. Installer le paquet du kit (le dossier de l'action) : sans cela, pas de contrôle de tag.
-    - uses: actions/setup-python@v5
+    - uses: actions/setup-python@v7
       with:
         python-version: "3.12"
 
@@ -55,10 +55,20 @@ runs:
         REF_KIT: ${{ github.action_ref }}
       run: |
         sha=$(git -C "$GITHUB_ACTION_PATH" rev-parse HEAD 2>/dev/null || true)
-        if [ -z "$sha" ] && [ -n "$DEPOT_KIT" ] && [ -n "$REF_KIT" ]; then
-          sha=$(git ls-remote "https://github.com/$DEPOT_KIT" "$REF_KIT" "$REF_KIT^{}" | tail -n1 | cut -f1)
+        origine="lu dans le code exécuté"
+        if [ -z "$sha" ]; then
+          # Cas normal sur un runner : le dossier de l'action est une archive, sans .git.
+          # On interroge alors le dépôt du kit (anonymement : suppose le kit public).
+          origine="résolu auprès de GitHub au moment de la génération"
+          if [ -n "$DEPOT_KIT" ] && [ -n "$REF_KIT" ]; then
+            sha=$(git ls-remote "https://github.com/$DEPOT_KIT" "$REF_KIT" "$REF_KIT^{}" | tail -n1 | cut -f1)
+          fi
         fi
-        echo "kit=${REF_KIT:-?} @ ${sha:-SHA introuvable}" >> "$GITHUB_OUTPUT"
+        if [ -z "$sha" ]; then
+          echo "::error title=Kit non tracé::SHA du kit introuvable (dépôt '$DEPOT_KIT', référence '$REF_KIT'). Sans lui la génération ne serait pas rejouable : publication arrêtée."
+          exit 1
+        fi
+        echo "kit=$REF_KIT (SHA $sha, $origine)" >> "$GITHUB_OUTPUT"
 
     # 5. Bibliothèques système de WeasyPrint. libharfbuzz-subset évite son avertissement de dépréciation.
     - name: Installer les bibliothèques système
@@ -88,7 +98,11 @@ runs:
         VERSION: ${{ inputs.version }}
       run: |
         date=$(git log -1 --format=%cs)
-        deck=$(ls slides/[0-9][0-9]-*.md | head -n1)
+        deck=$(ls slides/[0-9][0-9]-*.md 2>/dev/null | head -n1 || true)
+        if [ -z "$deck" ]; then
+          echo "::error title=Deck introuvable::aucun fichier slides/NN-*.md (par exemple slides/01-intro.md). Convention d'un dépôt de cours : COURS.md, cours.yml, slides/NN-*.md."
+          exit 1
+        fi
         tmp=.cielir-deck
         rm -rf "$tmp" && mkdir -p "$tmp" dist/slides
         cielir-cours deck "$deck" --version "$VERSION" --date "$date" -o "$tmp/$(basename "$deck")"

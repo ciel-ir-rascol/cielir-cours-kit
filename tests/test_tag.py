@@ -5,7 +5,7 @@ import pytest
 from cielircours.cli import TAG_VALIDE
 
 
-@pytest.mark.parametrize("tag", ["v1.2", "1.01", "v1.01-rc", "v1.012", "v1.01\n", "", "v.01", "xv1.01"])
+@pytest.mark.parametrize("tag", ["v1.2", "1.01", "v1.01-rc", "v1.012", "v1.01\n", "", "v.01", "xv1.01", "v\u0661.\u0660\u0661"])
 def test_un_tag_malforme_est_refuse(tag):
     assert not TAG_VALIDE.match(tag)
 

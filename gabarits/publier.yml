@@ -1,6 +1,8 @@
 # Publication d'un cours CIEL-IR.
 # Fichier à copier tel quel dans .github/workflows/publier.yml de chaque dépôt de cours :
-# il ne contient rien de propre à un cours.
+# il ne contient rien de propre à un cours. Il suppose seulement la convention du kit :
+#     COURS.md, cours.yml, slides/NN-*.md (le premier deck, par ordre de nom, est publié),
+#     et éventuellement slides/img/ pour les images des slides.
 #
 # Pour publier : poussez un tag de la forme vN.NN (v1.01, v1.02, v2.01…)
 #     git tag v1.01 && git push origin v1.01
@@ -32,7 +34,7 @@ jobs:
     outputs:
       kit: ${{ steps.kit.outputs.kit }}   # tag et SHA de l'outillage, pour les notes de release
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # L'outillage vit dans le kit ; « @v1 » suit ses évolutions compatibles.
       - id: kit
@@ -41,12 +43,12 @@ jobs:
           version: ${{ github.ref_name }}
 
       # Les PDF sont gardés tels quels pour la release ; le HTML des slides est préparé pour Pages.
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: pdf
           path: dist/*.pdf
           if-no-files-found: error
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: dist/slides
 
@@ -61,7 +63,7 @@ jobs:
       url: ${{ steps.deploiement.outputs.page_url }}
     steps:
       - id: deploiement
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
 
   release:
     needs: construire
@@ -69,7 +71,7 @@ jobs:
     permissions:
       contents: write          # nécessaire pour créer la release
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: pdf
           path: dist
