@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 175" width="900" height="175"
+     font-family="'Liberation Sans', Arial, Helvetica, sans-serif" font-size="15">
+  <!--
+    Schéma à compléter : UN SEUL fichier pour le cours complet, le cours à trous et les slides.
+    Les étiquettes de la classe « remplissable » sont les réponses : le kit les retire de
+    l'arbre dans cours-a-trous.pdf (voir src/cielircours/schemas.py), il ne reste alors
+    que les cases vides. Les pointillés sous chaque réponse restent : c'est la ligne où écrire.
+    Lisible en niveaux de gris : traits noirs, aucune information portée par la couleur seule.
+  -->
+  <style>
+    .remplissable { fill: #be1e2d; font-weight: 700; }
+    .trait { fill: none; stroke: #000; stroke-width: 1.4; }
+    .tirets { fill: none; stroke: #000; stroke-width: 1.4; stroke-dasharray: 6 4; }
+    .ecrire { stroke: #000; stroke-width: 1; stroke-dasharray: 1 3; }
+    .titre { font-size: 14px; }
+    .note { font-size: 13px; }
+  </style>
+  <defs>
+    <marker id="fleche" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#000"/>
+    </marker>
+  </defs>
+
+  <!-- Éditeur -> code source -->
+  <text class="titre" x="85" y="24" text-anchor="middle">Éditeur</text>
+  <rect class="trait" x="10" y="32" width="150" height="72"/>
+  <text x="30" y="55">Code</text>
+  <text class="remplissable" x="76" y="55">source</text>
+  <line class="ecrire" x1="74" y1="59" x2="146" y2="59"/>
+  <text class="remplissable" x="85" y="88" text-anchor="middle">.cpp / .h</text>
+  <line class="ecrire" x1="40" y1="92" x2="130" y2="92"/>
+
+  <path class="trait" d="M160,68 H200" marker-end="url(#fleche)"/>
+
+  <!-- Étape 1 -->
+  <text class="titre" x="260" y="24" text-anchor="middle">Étape 1</text>
+  <rect class="tirets" x="200" y="42" width="120" height="52" rx="26"/>
+  <text class="remplissable" x="260" y="73" text-anchor="middle">compilation</text>
+  <line class="ecrire" x1="222" y1="78" x2="298" y2="78"/>
+
+  <path class="trait" d="M320,68 H360" marker-end="url(#fleche)"/>
+
+  <!-- Code objet -->
+  <rect class="trait" x="360" y="32" width="150" height="72"/>
+  <text x="380" y="55">Code</text>
+  <text class="remplissable" x="426" y="55">objet</text>
+  <line class="ecrire" x1="424" y1="59" x2="496" y2="59"/>
+  <text class="note" x="435" y="90" text-anchor="middle">(fichier binaire)</text>
+
+  <path class="trait" d="M510,68 H550" marker-end="url(#fleche)"/>
+
+  <!-- Étape 2 -->
+  <text class="titre" x="610" y="24" text-anchor="middle">Étape 2</text>
+  <rect class="tirets" x="550" y="42" width="120" height="52" rx="26"/>
+  <text class="remplissable" x="610" y="73" text-anchor="middle">édition de liens</text>
+  <line class="ecrire" x1="560" y1="78" x2="660" y2="78"/>
+
+  <path class="trait" d="M670,68 H710" marker-end="url(#fleche)"/>
+
+  <!-- Programme -->
+  <rect class="trait" x="710" y="32" width="180" height="72"/>
+  <text x="800" y="55" text-anchor="middle">Programme</text>
+  <text class="remplissable" x="800" y="88" text-anchor="middle">exécutable</text>
+  <line class="ecrire" x1="740" y1="92" x2="860" y2="92"/>
+
+  <!-- Bibliothèques -> étape 2 -->
+  <path class="trait" d="M610,128 V96" marker-end="url(#fleche)"/>
+  <rect class="trait" x="520" y="128" width="180" height="34"/>
+  <text class="remplissable" x="610" y="150" text-anchor="middle">bibliothèques</text>
+  <line class="ecrire" x1="545" y1="154" x2="675" y2="154"/>
+</svg>

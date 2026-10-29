@@ -1,0 +1,15 @@
+# Dépôt témoin du kit : un cours jouet qui exerce tous les éléments de mise en page.
+# Il est régénéré à chaque modification du kit ; le tag v1 ne bouge que s'il se régénère
+# sans régression. Aucune donnée personnelle ici (le contrôle du kit le vérifie).
+sequence: kit
+bloc: 1
+slug: temoin
+titre: Du code source au programme
+discipline: Informatique
+classe: BTS CIEL-IR 1ère année
+etablissement: Lycée Louis Rascol, Albi
+duree: 1 h
+tp: tp01-temoin
+capacites:
+  - Distinguer code source, code objet et programme
+  - Compiler et exécuter un programme C++ en ligne de commande

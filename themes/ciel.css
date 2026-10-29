@@ -1,0 +1,191 @@
+/*
+ * @theme ciel
+ * @auto-scaling true
+ * @size 16:9 1280px 720px
+ *
+ * Theme commun des slides d'administration systeme Linux — BTS CIEL-IR.
+ *
+ * Classes de slide (directive <!-- _class: … --> en tete de slide) :
+ *   lead      page de titre (fond colore)
+ *   chapitre  intercalaire de partie
+ *   piege     les citations (>) deviennent des encadres d'avertissement orange
+ *   dense     texte et tableaux plus petits, pour une slide chargee
+ */
+
+@import 'default';
+
+:root {
+  --c-primaire: #0b4f6c;
+  --c-primaire-clair: #e6f0f4;
+  --c-accent: #d9661f;
+  --c-accent-clair: #fdf0e6;
+  --c-texte: #1f2933;
+  --c-attenue: #52606d;
+  --c-bordure: #cbd2d9;
+  --c-code-fond: #1e2430;
+  --c-code-texte: #e6edf3;
+  --police: "Ubuntu", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --police-code: "Ubuntu Mono", "JetBrains Mono", Consolas, "DejaVu Sans Mono", monospace;
+}
+
+section {
+  background: #ffffff;
+  color: var(--c-texte);
+  font-family: var(--police);
+  font-size: 26px;
+  line-height: 1.4;
+  padding: 64px 72px 56px;
+  /* Mise en page explicite : colonne ancree en haut, pour que les titres
+     restent a la meme place d'une slide a l'autre (le theme default centre). */
+  display: flex !important;
+  flex-direction: column;
+  justify-content: flex-start !important;
+}
+
+h1, h2, h3 {
+  color: var(--c-primaire);
+  font-weight: 700;
+  margin: 0 0 0.5em;
+}
+h1 { font-size: 1.7em; }
+h2 { font-size: 1.35em; border-bottom: 3px solid var(--c-accent); padding-bottom: 0.15em; }
+h3 { font-size: 1.05em; }
+
+strong { color: var(--c-primaire); }
+em { color: var(--c-attenue); }
+a { color: var(--c-accent); }
+
+ul, ol { margin: 0.3em 0; padding-left: 1.2em; }
+li { margin: 0.2em 0; }
+li::marker { color: var(--c-accent); }
+
+/* --- Code : blocs facon terminal, code en ligne discret ------------------ */
+
+code {
+  font-family: var(--police-code);
+  background: var(--c-primaire-clair);
+  color: var(--c-primaire);
+  border-radius: 4px;
+  padding: 0.05em 0.3em;
+  font-size: 0.92em;
+}
+
+pre {
+  background: var(--c-code-fond);
+  border-radius: 8px;
+  padding: 0.7em 1em;
+  margin: 0.5em 0;
+  font-size: 0.78em;
+  line-height: 1.35;
+}
+pre code {
+  background: transparent;
+  color: var(--c-code-texte);
+  padding: 0;
+  font-size: 1em;
+}
+/* Couleurs de coloration syntaxique (highlight.js) lisibles sur fond sombre */
+pre .hljs-comment { color: #8b98a5; font-style: italic; }
+pre .hljs-string { color: #a5d6a7; }
+pre .hljs-keyword, pre .hljs-built_in { color: #f8b26a; }
+pre .hljs-number, pre .hljs-literal { color: #9ecbff; }
+pre .hljs-variable, pre .hljs-attr, pre .hljs-meta { color: #d2a8ff; }
+
+/* --- Tableaux ----------------------------------------------------------------- */
+
+table {
+  border-collapse: collapse;
+  font-size: 0.8em;
+  margin: 0.5em 0;
+}
+th {
+  background: var(--c-primaire);
+  color: #ffffff;
+  font-weight: 600;
+  text-align: left;
+}
+th, td {
+  border: 1px solid var(--c-bordure);
+  padding: 0.3em 0.6em;
+}
+tr:nth-child(even) td { background: #f5f7fa; }
+td code, th code { font-size: 0.95em; }
+
+/* --- Encadres : les citations servent de « Note » ----------------------------- */
+
+blockquote {
+  border-left: 6px solid var(--c-primaire);
+  background: var(--c-primaire-clair);
+  color: var(--c-texte);
+  margin: 0.6em 0;
+  padding: 0.5em 0.9em;
+  border-radius: 0 6px 6px 0;
+  font-size: 0.9em;
+}
+blockquote p { margin: 0.2em 0; }
+
+section.piege blockquote {
+  border-left-color: var(--c-accent);
+  background: var(--c-accent-clair);
+}
+
+/* --- En-tete, pied de page, pagination -------------------------------------------- */
+
+header, footer {
+  position: absolute;
+  font-size: 15px;
+  color: var(--c-attenue);
+  margin: 0;
+}
+header { top: 22px; left: 72px; }
+footer { bottom: 20px; left: 72px; }
+section::after {
+  font-size: 15px;
+  color: var(--c-attenue);
+  right: 72px;
+  bottom: 20px;
+}
+
+/* --- Page de titre --------------------------------------------------------------- */
+
+section.lead {
+  background: var(--c-primaire);
+  color: #ffffff;
+  justify-content: center !important;
+}
+section.lead h1 {
+  color: #ffffff;
+  font-size: 2.1em;
+  margin-bottom: 0.2em;
+}
+section.lead h2 {
+  color: #ffffff;
+  border-bottom: none;
+  font-weight: 400;
+  font-size: 1.2em;
+}
+section.lead p { color: #d9e8ef; }
+section.lead strong { color: #ffd2b0; }
+section.lead a { color: #ffd2b0; }
+section.lead header, section.lead footer, section.lead::after { color: #d9e8ef; }
+
+/* --- Intercalaire de chapitre ------------------------------------------------------- */
+
+section.chapitre {
+  justify-content: center !important;
+  border-left: 18px solid var(--c-accent);
+}
+section.chapitre h1 {
+  font-size: 2em;
+  margin-bottom: 0.3em;
+}
+section.chapitre h1 + p {
+  font-size: 1.1em;
+  color: var(--c-attenue);
+}
+
+/* --- Slide dense ------------------------------------------------------------------ */
+
+section.dense { font-size: 22px; }
+section.dense table { font-size: 0.85em; }
+section.dense pre { font-size: 0.75em; }
