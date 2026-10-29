@@ -1,7 +1,108 @@
-name: Essai de visibilité
-description: Action minimale pour tester la résolution depuis un dépôt public.
+name: Publier un cours CIEL-IR
+description: >-
+  Contrôle l'absence d'information personnelle, puis produit slides.pdf, cours.pdf,
+  cours-a-trous.pdf et le HTML des slides dans dist/. Licence CC BY-NC-SA 4.0.
+
+inputs:
+  version:
+    description: "Le tag poussé (vN.NN, par exemple v1.02) ; il est écrit sur les documents."
+    required: true
+
+outputs:
+  kit:
+    description: "Tag et SHA du kit utilisés (ex. « v1 @ 0123abc… »), à reporter dans les notes de release."
+    value: ${{ steps.trace.outputs.kit }}
+
 runs:
   using: composite
   steps:
-    - run: echo ok
+    # 1. Installer le paquet du kit (le dossier de l'action) : sans cela, pas de contrôle de tag.
+    - uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+
+    - name: Installer le kit
       shell: bash
+      run: python -m pip install --quiet "$GITHUB_ACTION_PATH"
+
+    # 2. Refuser un tag malformé AVANT toute génération. Le motif vient du kit (TAG_VALIDE).
+    - name: Contrôler le tag
+      shell: bash
+      env:
+        VERSION: ${{ inputs.version }}
+      run: |
+        python - <<'PY'
+        import os, sys
+        from cielircours.cli import TAG_ATTENDU, TAG_VALIDE
+        tag = os.environ["VERSION"]
+        if not TAG_VALIDE.match(tag):
+            print(f"::error title=Tag refusé::{tag!r} n'est pas un tag de publication. Attendu : {TAG_ATTENDU}.")
+            sys.exit(1)
+        PY
+
+    # 3. Le contrôle d'information personnelle bloque la publication : il passe avant le reste.
+    - name: Contrôler l'absence d'information personnelle
+      shell: bash
+      run: cielir-cours verifier .
+
+    # 4. Trace du kit utilisé. « v1 » est un tag flottant : sans le SHA, une génération passée
+    #    ne pourrait pas être rejouée.
+    - name: Relever le tag et le SHA du kit
+      id: trace
+      shell: bash
+      env:
+        DEPOT_KIT: ${{ github.action_repository }}
+        REF_KIT: ${{ github.action_ref }}
+      run: |
+        sha=$(git -C "$GITHUB_ACTION_PATH" rev-parse HEAD 2>/dev/null || true)
+        if [ -z "$sha" ] && [ -n "$DEPOT_KIT" ] && [ -n "$REF_KIT" ]; then
+          sha=$(git ls-remote "https://github.com/$DEPOT_KIT" "$REF_KIT" "$REF_KIT^{}" | tail -n1 | cut -f1)
+        fi
+        echo "kit=${REF_KIT:-?} @ ${sha:-SHA introuvable}" >> "$GITHUB_OUTPUT"
+
+    # 5. Bibliothèques système de WeasyPrint. libharfbuzz-subset évite son avertissement de dépréciation.
+    - name: Installer les bibliothèques système
+      shell: bash
+      run: |
+        sudo apt-get update -qq
+        sudo apt-get install -y -qq libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz-subset0
+
+    # 6. Les deux PDF papier. La date est celle du commit étiqueté : la même à chaque rejeu.
+    - name: Produire cours.pdf et cours-a-trous.pdf
+      shell: bash
+      env:
+        VERSION: ${{ inputs.version }}
+      run: |
+        date=$(git log -1 --format=%cs)
+        mkdir -p dist
+        cielir-cours pdf COURS.md --config cours.yml --mode complet \
+          --version "$VERSION" --date "$date" -o dist/cours.pdf
+        cielir-cours pdf COURS.md --config cours.yml --mode trous \
+          --version "$VERSION" --date "$date" -o dist/cours-a-trous.pdf
+
+    # 7. Le deck : copie portant la version, images à côté, thème du kit, puis Marp (image
+    #    épinglée) pour le PDF et pour le HTML. Même démarche que `make slides` du kit.
+    - name: Produire slides.pdf et le HTML des slides
+      shell: bash
+      env:
+        VERSION: ${{ inputs.version }}
+      run: |
+        date=$(git log -1 --format=%cs)
+        deck=$(ls slides/[0-9][0-9]-*.md | head -n1)
+        tmp=.cielir-deck
+        rm -rf "$tmp" && mkdir -p "$tmp" dist/slides
+        cielir-cours deck "$deck" --version "$VERSION" --date "$date" -o "$tmp/$(basename "$deck")"
+        [ -d slides/img ] && cp -R slides/img "$tmp/img"
+        cp "$GITHUB_ACTION_PATH/themes/ciel.css" "$tmp/ciel.css"
+        marp() {
+          docker run --rm --init \
+            -e MARP_USER="$(id -u):$(id -g)" -e CHROME_NO_SANDBOX=1 \
+            -v "$PWD:/work" -w /work \
+            marpteam/marp-cli:v4.5.1 \
+            --theme-set "$tmp/ciel.css" --allow-local-files --html "$@"
+        }
+        marp --pdf  "$tmp/$(basename "$deck")" -o dist/slides.pdf
+        marp        "$tmp/$(basename "$deck")" -o dist/slides/index.html
+        [ -d "$tmp/img" ] && cp -R "$tmp/img" dist/slides/img
+        rm -rf "$tmp"
+        ls -l dist dist/slides

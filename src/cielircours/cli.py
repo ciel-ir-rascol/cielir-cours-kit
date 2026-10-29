@@ -17,13 +17,16 @@ from cielircours.deck import preparer_deck
 from cielircours.mdtext import Mode
 from cielircours.rendu import Publication, SchemeInterdit, SourceIntrouvable, ecrire_pdf, rendre_html
 
-_VERSION = re.compile(r"v\d+\.\d{2}")
+# Un tag de dépôt de cours : v, un numéro de séquence, un point, deux chiffres (v1.02, v12.03).
+# Exporté : l'action GitHub du kit le reprend pour refuser un tag malformé avant toute génération.
+TAG_VALIDE = re.compile(r"v\d+\.\d{2}\Z")
+TAG_ATTENDU = "vN.NN, par exemple v1.02"
 _ERREURS = (ConfigInvalide, SourceIntrouvable, SchemeInterdit, ValueError, OSError)
 
 
 def _version(texte: str) -> str:
-    if not _VERSION.fullmatch(texte):
-        raise argparse.ArgumentTypeError(f"version mal formée : {texte!r} (attendu : v1.02)")
+    if not TAG_VALIDE.match(texte):
+        raise argparse.ArgumentTypeError(f"version mal formée : {texte!r} (attendu : {TAG_ATTENDU})")
     return texte
 
 

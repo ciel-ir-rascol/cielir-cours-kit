@@ -1,0 +1,87 @@
+# Publication d'un cours CIEL-IR.
+# Fichier à copier tel quel dans .github/workflows/publier.yml de chaque dépôt de cours :
+# il ne contient rien de propre à un cours.
+#
+# Pour publier : poussez un tag de la forme vN.NN (v1.01, v1.02, v2.01…)
+#     git tag v1.01 && git push origin v1.01
+# Un tag mal formé (v1.2, 1.01, v1.01-rc) arrête tout, avec un message qui dit ce qui est attendu.
+#
+# Ce qui se passe, dans l'ordre :
+#   1. construire : contrôle qu'aucune information personnelle ne traîne (sinon : arrêt),
+#                   puis fabrique slides.pdf, cours.pdf et cours-a-trous.pdf.
+#   2. pages      : met les slides en ligne sur GitHub Pages.
+#   3. release    : crée la release du tag avec les trois PDF.
+# Rien de tout cela n'est enregistré dans le dépôt : les fichiers générés n'y sont jamais.
+#
+# Réglage à faire une fois par dépôt : Settings > Pages > Source = « GitHub Actions ».
+# Si le job « pages » est refusé, vérifier dans Settings > Environments > github-pages que les
+# tags v* sont autorisés à déployer.
+
+name: Publier
+
+on:
+  push:
+    tags: ['v*']          # uniquement sur tag : jamais sur un simple push de branche
+
+permissions:
+  contents: read
+
+jobs:
+  construire:
+    runs-on: ubuntu-latest
+    outputs:
+      kit: ${{ steps.kit.outputs.kit }}   # tag et SHA de l'outillage, pour les notes de release
+    steps:
+      - uses: actions/checkout@v4
+
+      # L'outillage vit dans le kit ; « @v1 » suit ses évolutions compatibles.
+      - id: kit
+        uses: ciel-ir-rascol/cielir-cours-kit@v1
+        with:
+          version: ${{ github.ref_name }}
+
+      # Les PDF sont gardés tels quels pour la release ; le HTML des slides est préparé pour Pages.
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pdf
+          path: dist/*.pdf
+          if-no-files-found: error
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/slides
+
+  pages:
+    needs: construire
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploiement.outputs.page_url }}
+    steps:
+      - id: deploiement
+        uses: actions/deploy-pages@v4
+
+  release:
+    needs: construire
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write          # nécessaire pour créer la release
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: pdf
+          path: dist
+
+      - name: Créer la release avec les trois PDF
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+          KIT: ${{ needs.construire.outputs.kit }}
+        run: |
+          gh release create "$TAG" \
+            dist/slides.pdf dist/cours.pdf dist/cours-a-trous.pdf \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "$TAG" \
+            --notes "Version $TAG du cours. Générée avec le kit $KIT (CC BY-NC-SA 4.0)."
