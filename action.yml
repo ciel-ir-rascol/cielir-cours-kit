@@ -61,7 +61,9 @@ runs:
           # On interroge alors le dépôt du kit (anonymement : suppose le kit public).
           origine="résolu auprès de GitHub au moment de la génération"
           if [ -n "$DEPOT_KIT" ] && [ -n "$REF_KIT" ]; then
-            sha=$(git ls-remote "https://github.com/$DEPOT_KIT" "$REF_KIT" "$REF_KIT^{}" | tail -n1 | cut -f1)
+            # « || true » : si la requête échoue (réseau coupé), on veut le message
+            # explicite ci-dessous, pas l'erreur brute de git sous « set -eo pipefail ».
+            sha=$(git ls-remote "https://github.com/$DEPOT_KIT" "$REF_KIT" "$REF_KIT^{}" 2>/dev/null | tail -n1 | cut -f1 || true)
           fi
         fi
         if [ -z "$sha" ]; then
