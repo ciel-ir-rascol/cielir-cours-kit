@@ -50,3 +50,23 @@ def test_la_regle_css_existe():
     from outils import COURS_CSS, regle
 
     assert "break-after: avoid" in regle(COURS_CSS.read_text(encoding="utf-8"), "p.amorce")
+
+
+def _p(html):
+    return html.split("</p>")[0]
+
+
+@pytest.mark.parametrize("mode", list(Mode))
+@pytest.mark.parametrize(
+    ("nom", "suite"),
+    [
+        ("figure", '<figure><img src="x.png" alt=""><figcaption>légende</figcaption></figure>'),
+        ("image seule", '![schéma](img/s.svg "titre")'),
+        ("bloc de code", "```cpp\nint x;\n```"),
+        ("bloc terminal", "```terminal\n$ ls\n```"),
+    ],
+)
+def test_chaque_bloc_annonce_marque_son_amorce_et_pas_le_paragraphe_d_avant(nom, suite, mode):
+    html = rendre_corps(f"Premier.\n\nConsigne.\n\n{suite}\n", mode)
+    assert '<p>Premier.</p>' in html, nom
+    assert '<p class="amorce">Consigne.</p>' in html, nom

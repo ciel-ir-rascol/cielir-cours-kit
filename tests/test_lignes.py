@@ -79,11 +79,43 @@ def test_forme_longue_mal_formee_est_refusee_en_mode_trous(source):
         rendre_corps(source, Mode.TROUS)
 
 
-def test_ancienne_syntaxe_est_refusee_avec_un_message_qui_dit_quoi_ecrire():
-    for src in (":::reponse 3\nSECRET\n:::", ":::reponse\nSECRET\n:::", ":::reponse3\nSECRET\n:::"):
-        for mode in Mode:
-            with pytest.raises(ValueError, match="ins lignes"):
-                rendre_corps(src, mode)
+@pytest.mark.parametrize(
+    "src",
+    [
+        ":::reponse 3\nSECRETX\n:::",
+        ":::reponse\nSECRETX\n:::",
+        ":::reponse3\nSECRETX\n:::",
+        "a\n:::reponse 2\nSECRETX\n:::",              # collée à un paragraphe
+        "a\n\n:::REPONSE 2\nSECRETX\n:::",             # casse
+        "  :::Reponse 2\nSECRETX\n:::",
+        "- item\n\n  :::reponse 2\n  SECRETX\n  :::",   # dans une liste
+        "> :::reponse 2\n> SECRETX\n> :::",             # dans une citation
+        "> [!NOTE]\n> :::reponse 2\n> SECRETX\n> :::",
+        "::: reponse 2\nSECRETX\n:::",
+        "```\n:::reponse 2\n```",                       # même dans un bloc de code : refusé
+    ],
+)
+@pytest.mark.parametrize("mode", list(Mode))
+def test_ancienne_syntaxe_est_refusee_ou_qu_elle_soit(src, mode):
+    with pytest.raises(ValueError, match="ins lignes"):
+        rendre_corps(src, mode)
+
+
+def test_un_mot_qui_contient_la_syntaxe_au_milieu_d_une_ligne_n_est_pas_refuse():
+    assert "reponse" in rendre_corps("la syntaxe :::reponse est partie", Mode.COMPLET)
+
+
+@pytest.mark.parametrize("valeur", ["31", "100000", "99999999999999999999", "٢", "²", "１", "٣٠"])
+@pytest.mark.parametrize("mode", list(Mode))
+def test_valeur_hors_borne_ou_non_ascii_est_refusee_proprement(valeur, mode):
+    with pytest.raises(ValueError, match=r"nombre de lignes|borne"):
+        rendre_corps(f'<ins lignes="{valeur}">secret</ins>', mode)
+
+
+def test_la_borne_est_incluse_et_le_message_la_donne():
+    assert "--n:30" in rendre_corps('<ins lignes="30">x</ins>', Mode.TROUS)
+    with pytest.raises(ValueError, match=r"'31'.*30"):
+        rendre_corps('<ins lignes="31">x</ins>', Mode.TROUS)
 
 
 def test_le_trou_court_n_est_pas_touche():

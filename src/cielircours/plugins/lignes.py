@@ -27,6 +27,10 @@ if TYPE_CHECKING:
 _OUVERTURE = re.compile(r"<ins\s+lignes\s*=\s*\"([^\"]*)\"\s*>\Z", re.IGNORECASE)
 _FERMETURE = "</ins>"
 _ANCIENNE_SYNTAXE = ":::reponse"
+# toute ligne qui commence par l'ancienne syntaxe (casse libre, dans une citation ou une liste aussi)
+_ANCIEN_BLOC = re.compile(r"^[ \t>]*:::[ \t]*reponse", re.IGNORECASE | re.MULTILINE)
+LIGNES_MAX = 30
+_ENTIER = re.compile(r"[0-9]+")
 
 
 def _html(content: str, level: int) -> Token:
@@ -39,9 +43,14 @@ def _html(content: str, level: int) -> Token:
 
 def _nombre_de_lignes(valeur: str) -> int:
     texte = valeur.strip()
-    if not texte.isdigit() or int(texte) < 1:
+    if _ENTIER.fullmatch(texte) is None or int(texte) < 1:
         # échec franc : deviner un nombre laisserait des lignes de la mauvaise taille
-        raise ValueError(f'`<ins lignes="n">` attend un nombre de lignes entier positif, reçu {valeur!r}')
+        raise ValueError(f'`<ins lignes="n">` attend un nombre de lignes entier positif (chiffres 0-9), reçu {valeur!r}')
+    if len(texte) > 4 or int(texte) > LIGNES_MAX:
+        raise ValueError(
+            f'`<ins lignes="n">` : {valeur!r} lignes, au-delà de la borne de {LIGNES_MAX} '
+            "(plus que cela n'est plus une réponse rédigée mais une page blanche)"
+        )
     return int(texte)
 
 
@@ -62,6 +71,13 @@ def lignes_plugin(md: MarkdownIt, mode: Mode) -> None:
         raise TypeError(f"mode attendu : un Mode, reçu {mode!r}")
 
     def regle(state: StateCore) -> None:
+        ancien = _ANCIEN_BLOC.search(state.src)
+        if ancien is not None:
+            ligne = state.src[ancien.start() :].splitlines()[0]
+            raise ValueError(
+                f"la syntaxe `{_ANCIENNE_SYNTAXE} n` n'existe plus : écrire "
+                f'`<ins lignes="n">réponse</ins>` dans son propre paragraphe ({ligne.strip()!r})'
+            )
         jetons = state.tokens
         i = 0
         while i < len(jetons):
@@ -70,11 +86,6 @@ def lignes_plugin(md: MarkdownIt, mode: Mode) -> None:
                 i += 1
                 continue
             enfants = inline.children or []
-            if inline.content.lstrip().startswith(_ANCIENNE_SYNTAXE):
-                raise ValueError(
-                    f"la syntaxe `{_ANCIENNE_SYNTAXE} n` n'existe plus : écrire "
-                    f'`<ins lignes="n">réponse</ins>` ({_fragment(inline)!r})'
-                )
             ouvertures = [k for k, e in enumerate(enfants) if _ouverture(e)]
             if not ouvertures:
                 i += 1

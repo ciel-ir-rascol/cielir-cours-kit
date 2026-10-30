@@ -190,12 +190,22 @@ def test_un_trou_de_terminal_occupe_autant_de_caracteres_que_sa_reponse(tmp_path
     assert dix.margin_width() == pytest.approx(60, abs=4)
 
 
+def _variable(css: str, nom: str) -> str:
+    m = re.search(rf"{re.escape(nom)}:\s*(#[0-9a-fA-F]{{3,6}})", css)
+    assert m, f"variable {nom} introuvable dans la feuille"
+    return m.group(1)
+
+
 def test_le_pointille_d_un_trou_de_terminal_se_voit_sur_le_fond_du_bloc():
     css = COURS_CSS.read_text(encoding="utf-8")
-    fond = re.search(r"background:\s*var\(--gris-clair\)", regle(css, ".terminal"))
-    trait = re.search(r"border-bottom:\s*[\d.]+pt\s+dotted\s+(#[0-9a-fA-F]{3,6})", regle(css, ".terminal .trou"))
+    fond = re.search(r"background:\s*(var\((--[\w-]+)\)|#[0-9a-fA-F]{3,6})", regle(css, ".terminal"))
+    trait = re.search(r"border-bottom:\s*[\d.]+pt\s+dotted\s+(var\((--[\w-]+)\)|#[0-9a-fA-F]{3,6})", regle(css, ".terminal .trou"))
     assert fond and trait
-    assert contraste(trait.group(1), "#efefef") >= 7
+
+    def couleur(m):
+        return _variable(css, m.group(2)) if m.group(2) else m.group(1)
+
+    assert contraste(couleur(trait), couleur(fond)) >= 7
 
 
 def _page_de(pages, balise=None, classe=None):
