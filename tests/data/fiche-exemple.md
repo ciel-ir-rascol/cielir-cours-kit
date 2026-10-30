@@ -37,12 +37,7 @@ int main() {
 
 Si l'utilisateur saisit 42, le programme affiche :
 
-:::reponse 2
-```text
-Entrez votre nombre favori : 42
-Super ! C'est aussi le mien !
-```
-:::
+<ins lignes="2">`Entrez votre nombre favori : 42` puis `Super ! C'est aussi le mien !`</ins>
 
 > [!TIP]
 > Compiler avec `g++ -Wall -Wextra` révèle déjà la moitié des erreurs d'étourderie.
@@ -68,12 +63,7 @@ Le type de la valeur saisie doit correspondre au <ins>type</ins> de la variable 
 
 *Écrire les instructions qui affichent « Quel âge as-tu ? » puis lisent la saisie dans `age` :*
 
-:::reponse 3
-```cpp
-cout << "Quel âge as-tu ? ";
-cin >> age;
-```
-:::
+<ins lignes="3">`cout << "Quel âge as-tu ? ";` puis `cin >> age;`</ins>
 
 > [!CAUTION]
 > Un `int` non initialisé contient une valeur quelconque : ne jamais le lire avant de l'avoir écrit.

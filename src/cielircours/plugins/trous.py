@@ -39,6 +39,13 @@ def _controler_jeton(jeton: Token) -> None:
         raise ValueError(
             f"balise <ins> dans l'info d'un bloc de code : …{_fragment(jeton.info)}…"
         )
+    if jeton.type == "image":
+        # dans le texte alternatif, les balises sont retirées au rendu mais leur contenu reste :
+        # une balise `<ins` que `trous_ins` n'a pas consommée (non appariée, forme à attribut)
+        # ferait sortir sa réponse en clair, sans que le garde-fou après rendu ne la voie
+        for enfant in jeton.children or []:
+            if enfant.type == "html_inline" and _INS.match(enfant.content):
+                raise ValueError(f"balise <ins> mal formée dans un texte alternatif d'image : …{_fragment(enfant.content)}…")
     for enfant in jeton.children or []:
         _controler_jeton(enfant)
 
