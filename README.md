@@ -29,17 +29,19 @@ Le code source est écrit dans un langage de <ins>haut</ins> niveau.
 
 Document complet : la réponse apparaît. Document à trous : un pointillé dont la longueur est calculée d'après la réponse.
 
-Pour une réponse rédigée, sur plusieurs lignes :
+Pour une réponse rédigée, sur plusieurs lignes, la même balise porte le nombre de lignes à laisser à l'étudiant et occupe un paragraphe à elle seule :
 
 ```markdown
 *Que signifie l'option `-Wall` ?*
 
-:::reponse 2
-`-Wall` demande au compilateur de signaler tous les avertissements.
-:::
+<ins lignes="2">`-Wall` demande au compilateur de signaler tous les avertissements.</ins>
 ```
 
-Le chiffre est le nombre de lignes laissées à l'étudiant.
+Document complet : la réponse, dans un encadré. Document à trous : deux lignes réglées. La réponse est du texte en ligne (gras, code…), sur une ou plusieurs lignes de source ; elle ne peut pas contenir de bloc (liste, bloc de code).
+
+Une seule balise, donc : `<ins>` court dans une phrase, `<ins lignes="n">` long dans son paragraphe. C'est voulu : `COURS.md` se lit aussi sur github.com, où la balise s'affiche comme un trou souligné, sans rien qui ressemble à du gabarit.
+
+Une balise mal formée (non appariée, imbriquée, à cheval sur deux paragraphes, nombre de lignes qui n'est pas un entier positif) arrête la génération avec un message : jamais une réponse ne passe en clair dans le document à trous.
 
 ### Les encadrés
 
@@ -48,6 +50,18 @@ Les cinq alertes GitHub deviennent des encadrés : `> [!NOTE]`, `> [!TIP]`, `> [
 ### Les blocs de code
 
 Un bloc dont le langage est `terminal` est rendu comme une session de terminal ; les autres langages sont colorés.
+
+Dans un bloc `terminal`, et là seulement, `<ins>` est un trou comme dans le texte courant :
+
+````markdown
+```terminal
+$ g++ -Wall -o <ins>age</ins> age.cpp
+```
+````
+
+Le blanc occupe autant de caractères que la réponse. Dans tout autre bloc, `<ins>` reste du texte.
+
+Un paragraphe immédiatement suivi d'un tableau, d'une figure ou d'un bloc de code reste avec lui d'une page à l'autre : la consigne n'est jamais séparée de son exercice.
 
 ### Les schémas
 
@@ -82,6 +96,7 @@ cpp-c04-tableauxVecteurs/
 │   ├── 04-tableauxVecteurs.md    deck Marp
 │   └── img/                      SVG et images, partagés avec la fiche
 ├── .vscode/settings.json         thème Marp pour l'aperçu dans VS Code
+├── .vscode/extensions.json       recommande l'extension Marp for VS Code
 └── .github/workflows/publier.yml copie de gabarits/publier.yml
 ```
 

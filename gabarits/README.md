@@ -48,6 +48,7 @@ Les deux fiches — complète et à trous — sortent du même `COURS.md` et son
 │   ├── «NN»-«séance».md             source des slides (Marp)
 │   └── img/                         schémas SVG et images
 ├── .vscode/settings.json            thème Marp pour l'aperçu dans VS Code
+├── .vscode/extensions.json          recommande l'extension Marp for VS Code
 └── .github/workflows/publier.yml    publication sur tag
 ```
 
@@ -55,7 +56,7 @@ Aucun fichier généré n'est enregistré ici : les PDF et les slides en ligne s
 
 ## Travailler le cours
 
-L'aperçu des slides se fait dans VS Code avec l'extension **Marp for VS Code** ; le thème `ciel` est déjà déclaré dans `.vscode/settings.json`.
+L'aperçu des slides se fait dans VS Code avec l'extension **Marp for VS Code** (recommandée dans `.vscode/extensions.json`) ; le thème `ciel` est déjà déclaré dans `.vscode/settings.json`.
 
 Pour régénérer les trois PDF en local, depuis une copie du kit :
 
