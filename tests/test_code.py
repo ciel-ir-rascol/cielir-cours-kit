@@ -36,9 +36,64 @@ def test_un_bloc_terminal_est_style_terminal_sans_coloration():
 
 
 def test_le_terminal_echappe_son_contenu():
-    html = rendre_corps("```terminal\n$ echo '<ins>x</ins>' > f & ls\n```\n", Mode.COMPLET)
-    assert "&lt;ins&gt;x&lt;/ins&gt;" in html and "&amp; ls" in html
-    assert "<ins" not in html
+    html = rendre_corps("```terminal\n$ echo '<script>x</script>' > f & ls\n```\n", Mode.COMPLET)
+    assert "&lt;script&gt;x&lt;/script&gt;" in html and "&amp; ls" in html
+    assert "<script" not in html
+
+
+def test_un_trou_dans_un_terminal_est_la_reponse_en_mode_complet():
+    html = rendre_corps("```terminal\n$ g++ -o <ins>age</ins> age.cpp\n```\n", Mode.COMPLET)
+    assert html == '<pre class="terminal"><code>$ g++ -o <span class="reponse">age</span> age.cpp\n</code></pre>\n'
+
+
+def test_un_trou_dans_un_terminal_est_un_blanc_calibre_en_mode_trous():
+    html = rendre_corps("```terminal\n$ g++ -o <ins>age</ins> age.cpp\n```\n", Mode.TROUS)
+    assert html == '<pre class="terminal"><code>$ g++ -o <span class="trou" style="--car:3"></span> age.cpp\n</code></pre>\n'
+    assert "age</span>" not in html
+
+
+def test_la_reponse_d_un_trou_de_terminal_reste_echappee():
+    html = rendre_corps("```terminal\n$ <ins>a < b & <i>c</i></ins>\n```\n", Mode.COMPLET)
+    assert '<span class="reponse">a &lt; b &amp; &lt;i&gt;c&lt;/i&gt;</span>' in html
+
+
+def test_plusieurs_trous_sur_une_ligne_et_sur_plusieurs_lignes():
+    src = "```terminal\n<ins>git</ins> add <ins>f.txt</ins>\n<ins>git</ins> commit\n```\n"
+    html = rendre_corps(src, Mode.TROUS)
+    assert html.count('class="trou"') == 3 and "--car:5" in html
+    for secret in ("git</", "f.txt</"):
+        assert secret not in html
+
+
+@pytest.mark.parametrize(
+    "contenu",
+    [
+        "$ a <ins>SECRET fin",
+        "$ a SECRET</ins> fin",
+        "$ <ins>a <ins>b</ins> SECRET</ins>",
+        '$ <ins class="x">SECRET</ins>',
+        '$ <ins lignes="2">SECRET</ins>',
+        "$ <ins>SECRET\nsuite</ins>",
+        "$ <INS>SECRET",
+        "$ <ins SECRET",
+    ],
+)
+@pytest.mark.parametrize("mode", list(Mode))
+def test_un_trou_mal_forme_dans_un_terminal_est_refuse(contenu, mode):
+    with pytest.raises(ValueError, match="<ins.*terminal"):
+        rendre_corps(f"```terminal\n{contenu}\n```\n", mode)
+
+
+def test_un_trou_mal_forme_dans_un_terminal_montre_le_fragment_fautif():
+    with pytest.raises(ValueError, match="SECRET"):
+        rendre_corps("```terminal\n$ a <ins>SECRET fin\n```\n", Mode.TROUS)
+
+
+@pytest.mark.parametrize("langue", ["bash", "cpp", "", "text", "sh"])
+@pytest.mark.parametrize("mode", list(Mode))
+def test_hors_terminal_ins_reste_litteral_meme_mal_forme(langue, mode):
+    html = rendre_corps(f"```{langue}\n# <ins>SECRET fin\n```\n", mode)
+    assert "&lt;ins&gt;SECRET" in html and "<ins" not in html
 
 
 @pytest.mark.parametrize("info", ["", "text", "langage-inconnu"])
@@ -57,11 +112,10 @@ def test_ins_litteral_dans_un_bloc_colore_reste_litteral():
         assert "&lt;ins&gt;" in html and "<ins" not in html
 
 
-def test_un_bloc_colore_dans_une_reponse_se_rend():
-    html = rendre_corps(":::reponse 2\n```cpp\nint x;\n```\n:::\n", Mode.COMPLET)
-    assert '<div class="reponse-bloc">' in html and '<span class="kt">int</span>' in html
-    assert "reponse-bloc" not in rendre_corps(":::reponse 2\n```cpp\nint x;\n```\n:::\n", Mode.TROUS)
-    assert "int x" not in rendre_corps(":::reponse 2\n```cpp\nint x;\n```\n:::\n", Mode.TROUS)
+def test_un_code_en_ligne_dans_une_reponse_se_rend():
+    html = rendre_corps('<ins lignes="2">`int x;`</ins>\n', Mode.COMPLET)
+    assert '<div class="reponse-bloc">' in html and "<code>int x;</code>" in html
+    assert "int x" not in rendre_corps('<ins lignes="2">`int x;`</ins>\n', Mode.TROUS)
 
 
 # ---------- feuille de style ----------

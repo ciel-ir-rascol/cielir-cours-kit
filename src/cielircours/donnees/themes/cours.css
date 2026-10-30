@@ -67,6 +67,9 @@ a { color: inherit; text-decoration: none; }
 ul, ol { margin: 2pt 0 4pt; padding-left: 14pt; }
 li { margin: 0; }
 h3 { font-size: 10.5pt; margin: 7pt 0 2pt; break-after: avoid; }
+/* phrase d'amorce : posée à la génération (plugins/amorces.py) sur le paragraphe qui annonce un
+   tableau, une figure ou un bloc de code ; elle reste avec lui */
+p.amorce { break-after: avoid; }
 h4 { font-size: 10pt; margin: 5pt 0 2pt; break-after: avoid; }
 
 code, pre, kbd, samp { font-family: "Inconsolata", monospace; }
@@ -193,6 +196,16 @@ pre code { font: inherit; background: none; padding: 0; }
   border: none;
   border-left: 3pt solid #444;
 }
+
+/* Trou dans un bloc terminal : police à chasse fixe, un trou de N caractères occupe N caractères
+   (--car) ; le pointillé noir se voit sur le fond gris du bloc. */
+.terminal .trou {
+  width: calc(var(--car) * 1ch);
+  margin: 0;
+  border-bottom: 1pt dotted #000;
+}
+/* réponse dans un terminal : rouge, gras et souligné comme ailleurs, sur le fond gris */
+.terminal .reponse { background: none; }
 
 /* Code coloré (classes courtes de Pygments). Imprimé en niveaux de gris, la couleur disparaît :
    mots-clés en gras, commentaires en italique ; chaînes et nombres ne se distinguent que par

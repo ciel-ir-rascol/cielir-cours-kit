@@ -113,6 +113,11 @@ def test_le_temoin_a_des_lignes_de_reponse():
     assert '<div class="reponse-bloc">' in _html(Mode.COMPLET)
 
 
+def test_le_temoin_a_un_trou_dans_un_terminal():
+    assert re.search(r'<pre class="terminal"><code>[^<]*<span class="trou"', _html(Mode.TROUS))
+    assert re.search(r'<pre class="terminal"><code>[^<]*<span class="reponse"', _html(Mode.COMPLET))
+
+
 # ---------- le schéma : un seul fichier ----------
 
 def _etiquettes(arbre: ET.Element) -> list[str]:
@@ -148,8 +153,8 @@ def test_le_recuperateur_vide_les_cases_du_schema():
 
 def _reponses() -> list[str]:
     source = (TEMOIN / "COURS.md").read_text(encoding="utf-8")
-    ins = re.findall(r"<ins>(.*?)</ins>", source)
-    blocs = re.findall(r"^:::reponse \d+\n(.*?)^:::", source, re.DOTALL | re.MULTILINE)
+    ins = re.findall(r'<ins(?: lignes="\d+")?>(.*?)</ins>', source)
+    blocs = []
     svg = _etiquettes(ET.parse(TEMOIN / "slides" / "img" / "schema.svg").getroot())
     return [re.sub(r"[`*]", "", r) for r in ins + blocs + svg]
 

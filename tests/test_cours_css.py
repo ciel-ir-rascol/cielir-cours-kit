@@ -17,6 +17,7 @@ from outils import (
     debordement_horizontal,
     fonds_des_encadres,
     luminances_des_fonds,
+    _racine,
     pages_rendues,
     regle,
 )
@@ -178,3 +179,42 @@ def test_une_etiquette_remplissable_de_svg_est_absente_du_pdf_a_trous(tmp_path, 
     )
     assert "ETIQUETTE-SVG" in _texte_pdf(tmp_path, source, Mode.COMPLET, cours, pub)
     assert "ETIQUETTE-SVG" not in _texte_pdf(tmp_path, source, Mode.TROUS, cours, pub)
+
+
+def test_un_trou_de_terminal_occupe_autant_de_caracteres_que_sa_reponse(tmp_path):
+    source = "```terminal\n$ <ins>0123456789</ins>|<ins>01234567890123456789</ins>\n```\n"
+    pages = pages_rendues(source, Mode.TROUS, tmp_path)
+    (_, dix), (_, vingt) = boites(pages, "trou")
+    assert vingt.margin_width() == pytest.approx(2 * dix.margin_width(), rel=0.02)
+    # chasse de la police du terminal (Inconsolata, 0,5 em) : 10 caractères = 10 * 4,5 pt = 60 px
+    assert dix.margin_width() == pytest.approx(60, abs=4)
+
+
+def test_le_pointille_d_un_trou_de_terminal_se_voit_sur_le_fond_du_bloc():
+    css = COURS_CSS.read_text(encoding="utf-8")
+    fond = re.search(r"background:\s*var\(--gris-clair\)", regle(css, ".terminal"))
+    trait = re.search(r"border-bottom:\s*[\d.]+pt\s+dotted\s+(#[0-9a-fA-F]{3,6})", regle(css, ".terminal .trou"))
+    assert fond and trait
+    assert contraste(trait.group(1), "#efefef") >= 7
+
+
+def _page_de(pages, balise=None, classe=None):
+    for i, page in enumerate(pages):
+        for b in _racine(page).descendants():
+            el = getattr(b, "element", None)
+            if el is not None and type(b).__name__ in {"BlockBox", "TableBox"}:
+                if (balise and el.tag == balise) or (classe and classe in (el.get("class") or "").split()):
+                    return i
+    return None
+
+
+def test_la_phrase_d_amorce_reste_avec_son_tableau_a_tous_les_sauts_de_page(tmp_path):
+    tableau = "| a | b |\n| --- | --- |\n" + "| <ins>x</ins> | <ins>y</ins> |\n" * 6
+    separees = 0
+    for fiches in range(14, 40):
+        source = "\n\n".join(["Un paragraphe de remplissage assez long pour occuper une ligne."] * fiches)
+        source += "\n\nConsigne annonçant le tableau :\n\n" + tableau
+        pages = pages_rendues(source, Mode.TROUS, tmp_path)
+        if _page_de(pages, classe="amorce") != _page_de(pages, balise="table"):
+            separees += 1
+    assert separees == 0

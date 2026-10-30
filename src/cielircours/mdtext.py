@@ -7,6 +7,7 @@ from markdown_it import MarkdownIt
 from markdown_it.renderer import RendererHTML
 
 from cielircours.plugins.alertes import alertes_plugin
+from cielircours.plugins.amorces import amorces_plugin
 from cielircours.plugins.code import code_plugin
 from cielircours.plugins.lignes import lignes_plugin
 from cielircours.plugins.trous import trous_plugin
@@ -42,7 +43,8 @@ def construire_markdown(mode: Mode) -> MarkdownIt:
         raise TypeError(f"mode attendu : un Mode ({', '.join(Mode)}), reçu {mode!r}")
     md = MarkdownIt("commonmark", {"html": True}, renderer_cls=_RenduGarde).enable("table")
     alertes_plugin(md)
-    code_plugin(md)
+    amorces_plugin(md)
+    code_plugin(md, mode)
     trous_plugin(md, mode)
     lignes_plugin(md, mode)
     return md

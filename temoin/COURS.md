@@ -43,7 +43,7 @@ int main() {
 Pour le compiler puis l'exécuter, on saisit dans le terminal :
 
 ```terminal
-$ g++ -Wall -o age age.cpp
+$ g++ -Wall -o <ins>age</ins> age.cpp
 $ ./age
 Quel âge as-tu ? 17
 Tu as 17 ans.
@@ -51,18 +51,14 @@ Tu as 17 ans.
 
 *Que signifient les options `-Wall` et `-o` de la première commande ?*
 
-:::reponse 2
-`-Wall` demande au compilateur de signaler tous les avertissements ; `-o age` donne le nom `age` à l'exécutable produit.
-:::
+<ins lignes="2">`-Wall` demande au compilateur de signaler tous les avertissements ; `-o age` donne le nom `age` à l'exécutable produit.</ins>
 
 > [!WARNING]
 > `cin` laisse le retour à la ligne dans le tampon : une lecture de texte qui suit peut échouer.
 
 *Que se passe-t-il si `age` n'est pas initialisé avant d'être lu ?*
 
-:::reponse 3
-Un `int` non initialisé contient une valeur quelconque, restée en mémoire : le comportement du programme est imprévisible.
-:::
+<ins lignes="3">Un `int` non initialisé contient une valeur quelconque, restée en mémoire : le comportement du programme est imprévisible.</ins>
 
 > [!CAUTION]
 > Ne jamais lire une variable avant de l'avoir écrite.
