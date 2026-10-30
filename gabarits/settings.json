@@ -1,0 +1,8 @@
+{
+  "//": "À copier en .vscode/settings.json. Le thème des slides est celui du kit, pris à son tag v1 : l'aperçu de VS Code montre exactement ce que la publication produira.",
+  "markdown.marp.themes": [
+    "https://raw.githubusercontent.com/ciel-ir-rascol/cielir-cours-kit/v1/themes/ciel.css"
+  ],
+  "markdown.marp.enableHtml": true,
+  "markdown.marp.exportType": "pdf"
+}
