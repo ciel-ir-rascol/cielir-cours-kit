@@ -45,7 +45,7 @@ git rm -r build.sh .github/workflows/pages.yml slides/themes slides/output works
 git mv slides/01-<ancien>.md slides/01-decouverte.md      # convention NN-slug
 cp <kit>/gabarits/publier.yml  .github/workflows/publier.yml    # copie TELLE QUELLE
 cp <kit>/gabarits/settings.json .vscode/settings.json
-cp <kit>/temoin/.gitignore .gitignore                           # ou cielir-cours-temoin/.gitignore
+cp ../cielir-cours-temoin/.gitignore .gitignore      # une seule ligne utile : build/
 ```
 
 Avant de supprimer `workspace_LaTex/`, **copier le `.tex` et les PDF d'origine hors du dépôt** : on en a besoin pour la §3. Ne pas utiliser `git rm --cached` pour « garder une copie » : on se retrouve avec un dossier non suivi qui traîne.
@@ -112,7 +112,7 @@ Les chemins d'image sont relatifs à la racine du dépôt : `slides/img/x.jpg`. 
 - Un `<ins>` qui reste dans la sortie (non apparié, imbriqué, sur plusieurs paragraphes, dans un titre de lien) **arrête la génération**. C'est voulu : un trou mal formé laisserait la réponse en clair.
 - Une réponse ne peut pas être répartie sur deux paragraphes : un trou = une réponse sur une ligne ; plus long, c'est un `:::reponse`.
 - Un `:::reponse` ne se combine pas bien avec une liste numérotée (le bloc coupe la liste, et la numérotation recommence à 1) : écrire les questions en paragraphes `**1.** …`.
-- Les `<ins>` dans un **titre** (`##`) ou une cellule d'en-tête de tableau fonctionnent, mais un en-tête de tableau vide (`| | | |`) produit une barre vide : mettre quelque chose dans l'en-tête.
+- Les `<ins>` dans une cellule d'en-tête de tableau fonctionnent. Un en-tête de tableau vide (`| | | |`) produit une barre vide en haut du tableau : mettre quelque chose dans l'en-tête.
 
 ### 3.2 Un trou dans un bloc `terminal` : le cas qui ne passe pas
 
