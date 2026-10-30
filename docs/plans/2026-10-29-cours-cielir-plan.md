@@ -51,7 +51,7 @@ cielir-cours-kit/
 │   ├── mdtext.py                    markdown-it configuré selon le mode
 │   ├── plugins/alertes.py           > [!NOTE] -> <aside class="alerte …">
 │   ├── plugins/trous.py             <ins>…</ins> -> trou ou réponse
-│   ├── plugins/lignes.py            :::reponse n -> lignes à écrire ou réponse
+│   ├── plugins/lignes.py            <ins lignes="n"> -> lignes à écrire ou réponse
 │   ├── rendu.py                     gabarit HTML + cartouche + WeasyPrint
 │   ├── deck.py                      injection de la version dans une copie du deck Marp
 │   ├── confidentialite.py           contrôle des motifs interdits
@@ -218,12 +218,10 @@ git commit -m "feat: alertes GitHub converties en encadrés"
   - `def construire_markdown(mode: Mode) -> MarkdownIt`
   - `def rendre_corps(source: str, mode: Mode) -> str`
 
-Syntaxe d'une réponse rédigée, par le plugin `container` de mdit-py-plugins :
+Syntaxe d'une réponse rédigée : la balise `<ins>` avec l'attribut `lignes`, seule dans son paragraphe (entier de 1 à 30 ; l'ancienne forme `:::reponse n` n'existe plus et est refusée) :
 
 ```markdown
-:::reponse 3
-Git est distribué : chaque poste possède une copie complète de l'historique.
-:::
+<ins lignes="3">Git est distribué : chaque poste possède une copie complète de l'historique.</ins>
 ```
 
 - [ ] **Step 1 : Écrire les tests qui échouent**
@@ -239,12 +237,12 @@ def test_ins_devient_un_trou_calibre_en_mode_trous():
     assert "40" not in html
 
 def test_lignes_en_mode_trous_ne_laissent_pas_la_reponse():
-    html = rendre_corps(":::reponse 3\nParce que c'est distribué.\n:::", Mode.TROUS)
+    html = rendre_corps('<ins lignes="3">Parce que c\'est distribué.</ins>', Mode.TROUS)
     assert '<div class="lignes" style="--n:3"></div>' in html
     assert "distribué" not in html
 
 def test_lignes_en_mode_complet_rendent_la_reponse():
-    html = rendre_corps(":::reponse 3\nParce que c'est distribué.\n:::", Mode.COMPLET)
+    html = rendre_corps('<ins lignes="3">Parce que c\'est distribué.</ins>', Mode.COMPLET)
     assert '<div class="reponse-bloc">' in html and "distribué" in html
 ```
 
@@ -589,7 +587,7 @@ Puis, en local : `cours.yml`, `publier.yml`, suppression de `build.sh`, `.github
 
 - [ ] **Step 2 : Convertir le `.tex` en `COURS.md`**
 
-Les `\trou{x}` deviennent `<ins>x</ins>`, les `\lignes{n}{x}` des blocs `:::reponse n`, les `tcolorbox` des alertes, l'environnement `terminal` un bloc de code. Les schémas TikZ sont redessinés en SVG dans `slides/img/`. **Devant une macro qu'on ne sait pas transposer, s'arrêter et demander** — ne jamais laisser de syntaxe brute.
+Les `\trou{x}` deviennent `<ins>x</ins>`, les `\lignes{n}{x}` des `<ins lignes="n">x</ins>` (seuls dans leur paragraphe), les `tcolorbox` des alertes, l'environnement `terminal` un bloc de code ```` ```terminal ```` (un `\trou` y devient `<ins>x</ins>`). Les schémas TikZ sont redessinés en SVG dans `slides/img/`. **Devant une macro qu'on ne sait pas transposer, s'arrêter et demander** — ne jamais laisser de syntaxe brute.
 
 - [ ] **Step 3 : Vérifier avant de publier**
 
