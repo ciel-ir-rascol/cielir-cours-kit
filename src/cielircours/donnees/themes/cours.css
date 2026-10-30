@@ -197,9 +197,9 @@ pre code { font: inherit; background: none; padding: 0; }
   border-left: 3pt solid #444;
 }
 
-/* Trou dans un bloc terminal : police à chasse fixe, un trou de N caractères occupe N caractères
+/* Trou dans un bloc de code ou de terminal : police à chasse fixe, un trou de N caractères occupe N caractères
    (--car) ; le pointillé noir se voit sur le fond gris du bloc. */
-.terminal .trou {
+.terminal .trou, pre .trou {
   width: calc(var(--car) * 1ch);
   margin: 0;
   border-bottom: 1pt dotted #000;

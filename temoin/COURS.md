@@ -29,9 +29,9 @@ using namespace std;
 
 // Le point d'entrée du programme.
 int main() {
-    int age;
-    cout << "Quel âge as-tu ? ";
-    cin >> age;
+    int <ins>age</ins>;
+    cout << "Quel <ins>âge</ins> as-tu ? ";
+    cin >> <ins>age</ins>;
     cout << "Tu as " << age << " ans." << endl;
     return 0;
 }

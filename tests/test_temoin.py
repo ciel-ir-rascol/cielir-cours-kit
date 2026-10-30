@@ -118,6 +118,14 @@ def test_le_temoin_a_un_trou_dans_un_terminal():
     assert re.search(r'<pre class="terminal"><code>[^<]*<span class="reponse"', _html(Mode.COMPLET))
 
 
+def test_le_temoin_a_des_trous_dans_un_bloc_cpp_colore():
+    trous, complet = _html(Mode.TROUS), _html(Mode.COMPLET)
+    for html, classe in ((trous, "trou"), (complet, "reponse")):
+        bloc = re.search(r'<pre class="code"><code class="language-cpp">.*?</code></pre>', html, re.DOTALL).group(0)
+        assert bloc.count(f'class="{classe}"') >= 3 and '<span class="kt">int</span>' in bloc
+        assert "CielirTrou" not in bloc
+
+
 # ---------- le schéma : un seul fichier ----------
 
 def _etiquettes(arbre: ET.Element) -> list[str]:

@@ -120,9 +120,9 @@ Les chemins d'image sont relatifs à la racine du dépôt : `slides/img/x.jpg`. 
 - **Pourquoi `<ins>` partout** : `COURS.md` se lit sur github.com. Vérifié auprès de l'API de rendu de GitHub, `:::reponse 2` s'y affichait en toutes lettres, alors que `<ins lignes="2">…</ins>` ressort comme `<ins>…</ins>` (l'attribut tombe, la réponse est soulignée, comme un trou en ligne). Rien de visible qui ressemble à du gabarit.
 - **Ce que github.com ne reproduit pas, et qu'on ne corrige pas** : GitHub retire aussi les `style=` des images. Sur github.com, les photos recadrées par `style="…object-fit:cover"` s'affichent pleine largeur et non recadrées. Ce n'est pas de la syntaxe visible, seulement une mise en page absente d'une page qui n'est pas le livrable. À traiter un jour en recadrant les fichiers image eux-mêmes.
 
-### 3.2 Un trou dans un bloc `terminal`
+### 3.2 Un trou dans un bloc de code
 
-Dans un bloc ```` ```terminal ````, et là seulement, `<ins>réponse</ins>` est un trou comme dans le texte courant : la réponse en rouge dans `cours.pdf`, un blanc pointillé dans `cours-a-trous.pdf`, de largeur égale à la réponse (police à chasse fixe : N caractères occupent N caractères, donc les commentaires alignés à la main restent alignés).
+Dans **tout** bloc de code (`terminal`, `cpp`, sans langue…), `<ins>réponse</ins>` est un trou ; la coloration du reste du bloc est conservée. Comme dans le texte courant, c'est la réponse en rouge dans `cours.pdf`, un blanc pointillé dans `cours-a-trous.pdf`, de largeur égale à la réponse (police à chasse fixe : N caractères occupent N caractères, donc les commentaires alignés à la main restent alignés).
 
 ````markdown
 ```terminal
@@ -133,7 +133,7 @@ git <ins>pull</ins>                 # 0. je récupère la dernière version
 
 Alignement des commentaires : compter la longueur **sans** les balises `<ins>` ; le source paraît décalé, le rendu est aligné.
 
-Un `<ins>` mal formé dans un terminal (non apparié, imbriqué, avec attribut, sur deux lignes) arrête la génération. Dans tout autre bloc de code, `<ins>` reste du texte littéral.
+Un `<ins>` mal formé dans un bloc (non apparié, imbriqué, avec attribut, sur deux lignes) arrête la génération. Seul le code en ligne reste littéral.
 
 Historique : les premières versions du kit n'apprenaient pas cela, et la conversion de `git-c01-decouverte` avait dû écrire ses trois sessions en code en ligne. Elles sont redevenues de vrais blocs `terminal`.
 

@@ -51,15 +51,19 @@ Les cinq alertes GitHub deviennent des encadrés : `> [!NOTE]`, `> [!TIP]`, `> [
 
 Un bloc dont le langage est `terminal` est rendu comme une session de terminal ; les autres langages sont colorés.
 
-Dans un bloc `terminal`, et là seulement, `<ins>` est un trou comme dans le texte courant :
+Dans **tout** bloc de code, quelle que soit sa langue, `<ins>` est un trou comme dans le texte courant ; le reste du bloc garde sa coloration :
 
 ````markdown
+```cpp
+float notes[<ins>5</ins>];
+```
+
 ```terminal
 $ g++ -Wall -o <ins>age</ins> age.cpp
 ```
 ````
 
-Le blanc occupe autant de caractères que la réponse. Dans tout autre bloc, `<ins>` reste du texte.
+Le blanc occupe autant de caractères que la réponse. Seul le code en ligne (`` `…` ``) reste littéral : un `<ins>` écrit dedans n'est pas un trou. Une balise mal formée dans un bloc (non appariée, imbriquée, avec attribut, sur deux lignes) arrête la génération ; il en va de même si la coloration ne laisse pas retrouver un trou intact (le trou est alors à déplacer).
 
 Un paragraphe immédiatement suivi d'un tableau, d'une figure ou d'un bloc de code reste avec lui d'une page à l'autre : la consigne n'est jamais séparée de son exercice.
 

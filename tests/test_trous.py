@@ -106,6 +106,7 @@ def test_erreur_attribut_montre_le_fragment_fautif():
 
 
 @pytest.mark.parametrize("mode", list(Mode))
-def test_ins_litteral_dans_code_span_et_bloc_de_code_passe(mode):
+def test_ins_litteral_dans_code_span_mais_trou_dans_un_bloc_de_code(mode):
     html = rendre_corps("`<ins>x</ins>`\n\n```\n<ins>y</ins>\n```\n", mode)
-    assert "&lt;ins&gt;x" in html and "&lt;ins&gt;y" in html
+    assert "&lt;ins&gt;x" in html  # le code en ligne reste littéral
+    assert "&lt;ins&gt;y" not in html and ("reponse" in html) == (mode is Mode.COMPLET)  # le bloc, lui, a un trou
