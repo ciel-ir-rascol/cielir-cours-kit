@@ -6,13 +6,8 @@ lang: fr
 title: Du code source au programme
 description: Deck du dépôt témoin du kit, qui reprend le plan et le schéma du cours.
 header: 'Du code source au programme'
-footer: 'BTS CIEL-IR · Informatique · 1CIELIR'
+footer: 'Informatique · Témoin du kit · 1CIELIR'
 ---
-
-<style>
-.schema { display: block; margin: 8px auto 0; width: 100%; }
-.credit { display: block; font-size: 12px; color: #52606d; line-height: 1.25; }
-</style>
 
 <!-- _class: lead -->
 <!-- _paginate: false -->

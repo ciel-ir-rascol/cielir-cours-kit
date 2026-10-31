@@ -43,6 +43,19 @@ Informatique - Prog Procédurale
 
 Les trois premières lignes s'écrivent dans le deck, d'après `cours.yml` ; **si elles divergent de `cours.yml`, la publication s'arrête** avec un message qui dit ce qui est attendu. La release, le lien du dépôt et le logo sont injectés à la génération : ne rien en écrire dans le deck. Pas d'adresse de courriel : ces dépôts sont publics.
 
+Le **pied de page** (`footer:` de l'en-tête) se déduit aussi de `cours.yml` : `<discipline> · <sequence_libelle> · <classe>` (`Informatique · Prog Procédurale · 1CIELIR`). Le garde-fou le vérifie comme la page de titre. Le **lien du dépôt** est celui du dépôt réel : `GITHUB_REPOSITORY` sur GitHub Actions, sinon le `remote` git, sinon, en dernier recours, le nom déduit de `cours.yml`.
+
+Un deck ne porte **aucun bloc `<style>`** : la mise en page se fait avec les classes du thème, utilisables en HTML dans le markdown :
+
+| Classe | Usage |
+| --- | --- |
+| `<div class="cols">` | deux colonnes égales |
+| `<div class="cols-3">` | trois colonnes égales |
+| `<div class="photo">` | une figure et son texte côte à côte |
+| `<figure>`, `<figcaption>`, `<span class="credit">` | une image légendée, avec sa mention de licence en petit |
+| `<img class="schema">` | un schéma SVG pleine largeur |
+| `<span class="petit">` | texte secondaire, plus petit et atténué |
+
 Le **thème** apporte la pagination « 2 / 13 » et, quand `logo` est renseigné, le logo en haut à droite de chaque slide, sur la ligne du titre sans jamais toucher le filet orange ni sortir de la page. Sans `logo`, la mise en page est celle d'avant : rien n'est ajouté.
 
 ## Écrire un cours

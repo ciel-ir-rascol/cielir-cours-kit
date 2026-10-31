@@ -51,7 +51,7 @@ Notes de l'enseignant pour la première slide.
 ## Fin
 """
 
-DECK = ENTETE.format(pied="footer: 'BTS CIEL-IR · Réseaux · 1re année'\n") + CORPS
+DECK = ENTETE.format(pied="footer: 'Informatique · Prog Procédurale · 1CIELIR'\n") + CORPS
 DECK_SANS_PIED = ENTETE.format(pied="") + CORPS
 
 
@@ -61,7 +61,7 @@ def deck_avec_pied(ligne):
 
 def test_le_pied_recoit_la_version():
     sortie = _prep(DECK, PUB)
-    assert "footer: 'BTS CIEL-IR · Réseaux · 1re année · v1.02 du 29.10.26'" in sortie
+    assert "footer: 'Informatique · Prog Procédurale · 1CIELIR · v1.02 du 29.10.26'" in sortie
 
 
 def test_la_premiere_slide_recoit_la_version():
@@ -75,26 +75,34 @@ def test_la_source_n_est_pas_modifiee():
     assert DECK == avant
 
 
-def test_un_deck_sans_pied_en_recoit_un():
-    sortie = _prep(DECK_SANS_PIED, PUB)
-    assert "footer: 'v1.02 du 29.10.26'" in sortie
-    assert sortie.split("\n---\n")[0].count("footer:") == 1
+def test_un_deck_sans_pied_est_refuse():
+    with pytest.raises(ValueError, match="pas de pied de page") as e:
+        _prep(DECK_SANS_PIED, PUB)
+    assert "Informatique · Prog Procédurale · 1CIELIR" in str(e.value)
 
 
 @pytest.mark.parametrize("ligne", [
-    "footer: 'BTS CIEL-IR · Réseaux'",
-    'footer: "BTS CIEL-IR · Réseaux"',
-    "footer: BTS CIEL-IR · Réseaux",
+    "footer: 'Informatique · Prog Procédurale · 1CIELIR'",
+    'footer: "Informatique · Prog Procédurale · 1CIELIR"',
+    "footer: Informatique · Prog Procédurale · 1CIELIR",
 ])
 def test_les_trois_ecritures_du_pied(ligne):
     sortie = _prep(deck_avec_pied(ligne), PUB)
-    assert "footer: 'BTS CIEL-IR · Réseaux · v1.02 du 29.10.26'" in sortie
+    assert "footer: 'Informatique · Prog Procédurale · 1CIELIR · v1.02 du 29.10.26'" in sortie
     assert sortie.count("footer:") == 1
 
 
-def test_apostrophe_du_pied_conservee():
-    sortie = _prep(deck_avec_pied('footer: "Cours d\'accueil"'), PUB)
-    assert "footer: 'Cours d''accueil · v1.02 du 29.10.26'" in sortie
+@pytest.mark.parametrize("pied", [
+    "BTS CIEL-IR · Prog Procédurale · 1CIELIR",
+    "Informatique · Prog Procédurale · 1re année",
+    "Informatique · Réseaux · 1CIELIR",
+    "Informatique · Prog Procédurale",
+    "",
+])
+def test_un_pied_qui_diverge_de_cours_yml_arrete_la_publication(pied):
+    with pytest.raises(ValueError, match="pied de page.*cours.yml") as e:
+        _prep(deck_avec_pied(f"footer: '{pied}'"), PUB)
+    assert "Informatique · Prog Procédurale · 1CIELIR" in str(e.value)
 
 
 def test_le_reste_du_deck_est_intact():
@@ -109,6 +117,7 @@ def test_la_ligne_est_dans_la_premiere_slide_avant_le_separateur():
     assert premiere.rstrip().endswith("</div>") and "Release : v1.02 (29.10.26)" in premiere
 
 
+PIED_ATTENDU = "Informatique · Prog Procédurale · 1CIELIR"
 TITRE = "# C04 - Tableaux et vecteurs\n\n## Informatique - Prog Procédurale\n\n1CIELIR - Lycée Louis Rascol, Albi\n"
 RELEASE = "Release : v1.02 (29.10.26)"
 
@@ -116,7 +125,7 @@ RELEASE = "Release : v1.02 (29.10.26)"
 def _deck_une_slide(contenu, suite=True):
     """Deck dont la première slide est la page de titre puis `contenu`, suivie d'une seconde slide."""
     corps = TITRE + "\n" + contenu + ("\n\n---\n\n## Deux\n" if suite else "\n")
-    return ENTETE.format(pied="footer: 'X'\n") + "\n" + corps
+    return ENTETE.format(pied="footer: '%s'\n" % PIED_ATTENDU) + "\n" + corps
 
 
 def _dans_la_premiere_slide(sortie):
@@ -136,7 +145,7 @@ def test_un_tiret_triple_dans_un_bloc_de_code_n_est_pas_un_separateur():
 def test_un_deck_a_une_seule_slide():
     sortie = _prep(_deck_une_slide("", suite=False), PUB)
     assert RELEASE in sortie and sortie.rstrip().endswith("</div>")
-    assert "footer: 'X · v1.02 du 29.10.26'" in sortie
+    assert f"footer: '{PIED_ATTENDU} · v1.02 du 29.10.26'" in sortie
 
 
 def test_la_page_de_titre_porte_la_release_et_le_lien_du_depot_et_rien_d_autre_d_injecte():
@@ -246,6 +255,7 @@ def test_le_gabarit_de_deck_passe_le_garde_fou_une_fois_rempli():
     gabarit = (Path(__file__).resolve().parents[1] / "gabarits" / "deck.md").read_text(encoding="utf-8")
     gabarit = re.sub(r"<!--\nGabarit.*?-->\n\n", "", gabarit, count=1, flags=re.S)
     remplace = [
+        ("«Discipline» · «Libellé de la séquence» · «1CIELIR»", PIED_ATTENDU),
         ("C«NN» - «Titre de la séance»", COURS.titre_page),
         ("«Discipline» - «Libellé de la séquence»", f"{COURS.discipline} - {COURS.sequence_libelle}"),
         ("«1CIELIR» - «Établissement»", f"{COURS.classe} - {COURS.etablissement}"),

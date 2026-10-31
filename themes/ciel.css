@@ -10,6 +10,13 @@
  *   chapitre  intercalaire de partie
  *   piege     les citations (>) deviennent des encadres d'avertissement orange
  *   dense     texte et tableaux plus petits, pour une slide chargee
+ *
+ * Classes de mise en page (balises HTML dans le deck, jamais de <style> dans un deck) :
+ *   .cols  .cols-3  deux ou trois colonnes egales (<div class="cols"> … </div>)
+ *   .photo          figure et texte cote a cote (<div class="photo"><figure>…</figure><div>…</div></div>)
+ *   figure, figcaption, .credit   une image legendee, avec sa mention de licence en petit
+ *   .schema         un schema SVG pleine largeur (<img class="schema" src="img/x.svg">)
+ *   .petit          texte secondaire, plus petit et attenue
  */
 
 @import 'default';
@@ -233,3 +240,16 @@ section.chapitre h1 + p {
 section.dense { font-size: 22px; }
 section.dense table { font-size: 0.85em; }
 section.dense pre { font-size: 0.75em; }
+
+/* --- Classes de mise en page, communes a tous les decks ---------------------------- */
+
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 36px; align-items: start; }
+.cols-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 28px; align-items: start; }
+.cols-3 + p { margin-top: 28px; }
+.photo { display: flex; gap: 36px; align-items: flex-start; }
+figure { margin: 0; text-align: center; }
+figure img { border-radius: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, .18); object-fit: cover; }
+figcaption { font-size: 18px; margin-top: 6px; }
+.credit { display: block; font-size: 12px; color: var(--c-attenue); line-height: 1.25; }
+.schema { display: block; margin: 8px auto 0; width: 100%; }
+.petit { font-size: 0.8em; color: var(--c-attenue); }

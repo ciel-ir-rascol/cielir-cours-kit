@@ -192,7 +192,7 @@ def test_le_deck_du_temoin_recoit_la_version(tmp_path):
                  "--date", DATE, "-o", str(sortie)]) == 0
     texte = sortie.read_text(encoding="utf-8")
     assert "v1.01 du 29.10.26" in texte and "Release : v1.01 (29.10.26)" in texte
-    assert "BTS CIEL-IR" in texte  # le pied d'origine est conservé
+    assert "footer: 'Informatique · Témoin du kit · 1CIELIR · v1.01 du 29.10.26'" in texte  # pied déduit de cours.yml
 
 
 # ---------- le Makefile ----------

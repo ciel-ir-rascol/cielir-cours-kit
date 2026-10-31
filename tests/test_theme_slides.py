@@ -34,3 +34,15 @@ def test_le_logo_tient_au_dessus_du_filet_et_dans_les_marges():
 
 def test_la_page_de_titre_a_son_logo_et_son_pied():
     assert "section.lead .logo-titre" in CSS and "section.lead .pied-titre" in CSS
+
+
+def test_les_classes_de_mise_en_page_vivent_dans_le_theme():
+    for selecteur in (".cols", ".cols-3", ".photo", "figure", "figure img", "figcaption", ".credit", ".schema", ".petit"):
+        assert regle(CSS, selecteur), selecteur
+    assert "grid-template-columns: 1fr 1fr 1fr" in regle(CSS, ".cols-3")
+
+
+def test_aucun_deck_ne_porte_de_bloc_style():
+    racine = Path(__file__).resolve().parents[1]
+    for deck in (racine / "temoin" / "slides").glob("[0-9][0-9]-*.md"):
+        assert "<style" not in deck.read_text(encoding="utf-8"), deck

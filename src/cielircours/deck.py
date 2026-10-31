@@ -8,8 +8,8 @@ de `cours.yml` ou de la publication, jamais d'une saisie dans le deck :
   le lien du dépôt ;
 - si `logo` est renseigné, la page de titre porte l'image et le thème l'affiche en haut à droite
   des slides suivantes (variable CSS injectée par la directive `style` de l'en-tête) ;
-- garde-fou : le titre, la discipline et la classe de la page de titre doivent dire ce que dit
-  `cours.yml`. Un deck et sa configuration qui divergent, c'est la coquille qu'on ne voit jamais :
+- garde-fou : le titre, la discipline et la classe de la page de titre, et le pied de page
+  (`<discipline> · <séquence> · <classe>`), doivent dire ce que dit `cours.yml`. Un deck et sa configuration qui divergent, c'est la coquille qu'on ne voit jamais :
   la publication s'arrête avec un message explicite.
 """
 
@@ -138,15 +138,40 @@ def _style_logo(logo: str) -> list[str]:
     return ["style: |", f"  section {{ --logo: url('img/{logo}'); --logo-reserve: {RESERVE_LOGO}; }}"]
 
 
-def preparer_deck(source: str, pub: Publication, cours: Cours) -> str:
+def pied_attendu(cours: Cours) -> str:
+    """Le pied de page d'un deck, déduit de `cours.yml` : « Informatique · Prog Procédurale · 1CIELIR »."""
+    return f"{cours.discipline} · {cours.sequence_libelle} · {cours.classe}"
+
+
+def _controler_pied(entete: list[str], cours: Cours) -> None:
+    attendu = pied_attendu(cours)
+    for ligne in entete:
+        m = _PIED.fullmatch(ligne.rstrip("\r"))
+        if m:
+            trouve = _valeur_yaml(m.group(1))
+            if trouve != attendu:
+                raise ValueError(
+                    f"le pied de page du deck ne correspond pas à cours.yml, publication arrêtée. "
+                    f"Attendu : footer: '{attendu}'. Trouvé : footer: '{trouve}'"
+                )
+            return
+    raise ValueError(
+        "le deck n'a pas de pied de page, publication arrêtée. "
+        f"Attendu, dans l'en-tête : footer: '{attendu}' (déduit de cours.yml)"
+    )
+
+
+def preparer_deck(source: str, pub: Publication, cours: Cours, url_depot: str | None = None) -> str:
     """Renvoie une copie du deck : pied, page de titre (logo, release, lien du dépôt) et style du logo.
 
-    Lève `ValueError` si la page de titre ne correspond pas à `cours`.
+    `url_depot` : le lien du dépôt réel (voir `depot.py`) ; à défaut, celui déduit du nom.
+    Lève `ValueError` si la page de titre ou le pied de page ne correspondent pas à `cours`.
     """
     lignes = source.split("\n")
     fin_entete = _fin_entete(lignes)
 
     entete = lignes[1:fin_entete]
+    _controler_pied(entete, cours)
     for i, ligne in enumerate(entete):
         correspondance = _PIED.fullmatch(ligne.rstrip("\r"))
         if correspondance:
@@ -177,7 +202,7 @@ def preparer_deck(source: str, pub: Publication, cours: Cours) -> str:
         '<div class="pied-titre">',
         "",
         f"{pub.release}\\",
-        f"🐙 <{cours.url_depot}>",
+        f"🐙 <{url_depot or cours.url_depot}>",
         "",
         "</div>",
     ]

@@ -160,7 +160,7 @@ def test_pdf_source_absente(cours_dir, capsys):
 # ---------- deck ----------
 
 DECK = (
-    "---\nmarp: true\nfooter: 'BTS CIEL-IR'\n---\n\n# C04 - Tableaux et vecteurs\n\n"
+    "---\nmarp: true\nfooter: 'Informatique · Prog Procédurale · 1CIELIR'\n---\n\n# C04 - Tableaux et vecteurs\n\n"
     "## Informatique - Prog Procédurale\n\n1CIELIR - Lycée Louis Rascol, Albi\n\n---\n\n## Deux\n"
 )
 
@@ -203,3 +203,13 @@ def test_deck_refuse_une_version_mal_formee(tmp_path, capsys):
     with pytest.raises(SystemExit) as e:
         main(["deck", str(source), "--version", "v1", "--date", "2026-10-29", "-o", str(tmp_path / "d.md")])
     assert e.value.code == 2 and not (tmp_path / "d.md").exists()
+
+
+def test_deck_porte_le_lien_du_depot_reel_quand_github_repository_existe(tmp_path, monkeypatch):
+    source = _deck(tmp_path)
+    monkeypatch.setenv("GITHUB_REPOSITORY", "ciel-ir-rascol/cielir-cours-temoin")
+    sortie = tmp_path / "d.md"
+    assert main(["deck", str(source), "--version", "v1.02", "--date", "2026-10-29", "-o", str(sortie)]) == 0
+    texte = sortie.read_text(encoding="utf-8")
+    assert "https://github.com/ciel-ir-rascol/cielir-cours-temoin" in texte
+    assert "cpp-c04-tableauxVecteurs" not in texte

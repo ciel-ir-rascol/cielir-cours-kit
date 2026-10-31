@@ -6,6 +6,7 @@ fichier absent, configuration invalide, ressource introuvable, trou mal formÃ©â€
 
 import argparse
 import datetime
+import os
 import re
 import sys
 from importlib.resources import files
@@ -14,6 +15,7 @@ from pathlib import Path
 from cielircours.confidentialite import controler
 from cielircours.config import ConfigInvalide, lire_config
 from cielircours.deck import preparer_deck
+from cielircours.depot import url_du_depot
 from cielircours.mdtext import Mode
 from cielircours.rendu import Publication, SchemeInterdit, SourceIntrouvable, ecrire_pdf, rendre_html
 
@@ -75,9 +77,11 @@ def _pdf(args: argparse.Namespace) -> int:
 
 def _deck(args: argparse.Namespace) -> int:
     # lecture en octets : les fins de ligne du deck ne sont pas traduites
-    cours = lire_config(args.config or args.source.resolve().parent.parent / "cours.yml")
+    config = args.config or args.source.resolve().parent.parent / "cours.yml"
+    cours = lire_config(config)
     source = args.source.read_bytes().decode("utf-8")
-    copie = preparer_deck(source, Publication(args.version, args.date), cours)
+    url = url_du_depot(config.resolve().parent, cours, os.environ)
+    copie = preparer_deck(source, Publication(args.version, args.date), cours, url)
     args.sortie.write_bytes(copie.encode("utf-8"))
     print(f"{args.sortie} ({args.version})")
     return 0
