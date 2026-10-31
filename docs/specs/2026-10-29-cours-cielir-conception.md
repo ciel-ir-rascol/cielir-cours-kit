@@ -43,7 +43,7 @@ Le dépôt `git-cours01-decouverte` est l'ébauche de ce standard : il a déjà 
 - **`sysadmin-linux-slides` n'est pas repris.** C'est un essai antérieur dont l'organisation agrégée contredit le principe d'un dépôt par bloc. Seul son thème `ciel.css` est conservé, tel quel.
 - **Pas de migration en masse du site mkdocs.** La conversion d'un article est déclenchée article par article, à la demande.
 - **Pas de dépôt `-CORR` pour les cours.** La version remplie est un PDF de la release.
-- **Pas de refonte du thème des slides.** `ciel.css` est figé ; le travail de conception visuelle porte sur le papier.
+- **~~Pas de refonte du thème des slides.~~ Contrainte levée (tâche 15, par l'enseignant).** `ciel.css` n'est plus figé : il porte désormais les conventions communes à tous les diaporamas — pagination « 2 / 13 », page de titre uniforme, logo en haut à droite des slides. Le principe qui les guide : ce qui se déduit de `cours.yml` n'est jamais saisi dans un deck, car trente dépôts qui recopient la même information divergent toujours.
 
 ---
 
@@ -118,13 +118,15 @@ linux-c06-scriptsBash/
 
 Pas de `themes/`, pas de `build.sh`, pas de `scripts/`, pas de `output/`, pas de `workspace_LaTex/`. Un `.vscode/settings.json` déclare le thème `ciel` par son URL dans le kit, pour l'aperçu Marp dans VS Code.
 
-`cours.yml` porte ce que le cartouche et les en-têtes affichent : séquence, numéro de bloc, titre, durée, TP associé, capacités attendues, année. Sa structure exacte est laissée au constructeur.
+`cours.yml` porte ce que le cartouche, les en-têtes et la page de titre des slides affichent : séquence et son libellé lisible (`sequence_libelle`), numéro de bloc, titre, discipline, classe (`1CIELIR` ou `2CIELIR`), établissement, durée, TP associé, capacités attendues, et, facultatif, un logo (`logo`, image de `slides/img/`). Son implémentation : la dataclasse `Cours` de `src/cielircours/config.py`.
+
+Le titre `C<NN> - <titre>` (NN sur deux chiffres) et le lien du dépôt s'en déduisent ; la version, la date et le logo sont injectés à la génération. Le deck ne les porte pas, et si sa page de titre ne dit pas ce que dit `cours.yml`, la publication s'arrête.
 
 ### 6.3 Le kit central
 
 `cielir-cours-kit`, internal, contient :
 
-- `themes/ciel.css` — le thème Marp, repris **tel quel** de `git-cours01-decouverte` ;
+- `themes/ciel.css` — le thème Marp, repris de `git-cours01-decouverte` puis étendu (pagination avec total, page de titre, logo) ;
 - `themes/cours.css` — la feuille du document papier, à écrire ;
 - le convertisseur markdown → HTML et son extension pour les alertes GitHub et les trous ;
 - l'**action composite** que les dépôts de cours appellent ;
@@ -279,7 +281,7 @@ Trois jalons, dans cet ordre. Chacun valide un mode du skill.
 | Chemin | Ce qu'on y trouve |
 | --- | --- |
 | `cielir/git-cours01-decouverte/` | l'ébauche du standard : slides, workflow, README |
-| `.../slides/themes/ciel.css` | le thème Marp, à reprendre tel quel |
+| `.../slides/themes/ciel.css` | le thème Marp, point de départ du thème du kit |
 | `.../workspace_LaTex/macros.sty` | le vocabulaire typographique à transposer en CSS |
 | `.../workspace_LaTex/output/Cours01_Git_Decouverte.pdf` | le format aéré, **écarté** |
 | `~/transfert/C01_introCpp_fiche_a_trous.pdf` | le format compact, **retenu** |

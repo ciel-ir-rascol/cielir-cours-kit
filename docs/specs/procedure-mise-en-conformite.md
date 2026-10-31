@@ -63,14 +63,16 @@ Champs exacts de la dataclasse `Cours` (`src/cielircours/config.py`) : `sequence
 
 ```yaml
 sequence: git
+sequence_libelle: Git et GitHub      # intitulé lisible, affiché sur la page de titre du deck
 bloc: 1
 slug: decouverte
 titre: Découverte de Git et GitHub
 discipline: Informatique
-classe: BTS CIEL-IR 1ère année
+classe: 1CIELIR                      # 1CIELIR ou 2CIELIR, partout
 etablissement: Lycée Louis Rascol, Albi
 duree: 1 h
 tp: git-tp01-decouverte
+logo: git-logo.svg                   # facultatif : image de slides/img/, à laisser vide si la licence n'est pas vérifiée
 capacites:
   - …            # reprises de \capacites{} du .tex, sans le LaTeX
 ```
@@ -84,6 +86,16 @@ La version et la date (`\version{}`, `\dateversion{}`) **ne vont nulle part** : 
 Copier `gabarits/README.md`, remplacer tout ce qui est entre « … », supprimer le commentaire d'en-tête. Reprendre de l'ancien README : déroulé, capacités, crédits d'images (tableau complet, avec la mention de marque déposée le cas échéant). Retirer : la phrase sur le dépôt `-CORR`, la section sur la compilation LaTeX et Docker, la table des macros, la mention de `build.sh`, tout nom d'enseignant ou courriel, toute version et toute date.
 
 Ligne « Schémas » du tableau des crédits : garder « hors logos » si `slides/img/` contient des logos, ceux-ci ayant leur propre ligne.
+
+### 2.1 Le deck
+
+Une mise en conformité touche aussi le deck (`slides/NN-*.md`), pour le rendre conforme à `gabarits/deck.md` :
+
+- la **page de titre** : `# C<NN> - <titre>`, `## <discipline> - <sequence_libelle>`, `<classe> - <établissement>`, et rien d'autre (ni logos, ni crédits, ni « Cours 01 », ni courriel). Elle doit dire **exactement** ce que dit `cours.yml` : sinon la génération du deck s'arrête, avec ce qui est attendu et ce qui est trouvé ;
+- ni version, ni date, ni lien du dépôt, ni style de logo dans le deck : tout cela est injecté ;
+- `1re année` devient `1CIELIR` dans le pied de page (`footer:`) : il se saisit encore à la main, à tenir d'équerre avec `classe` ;
+- un logo n'est affiché que si `logo:` est renseigné **et** que l'image a une provenance et une licence établies : sinon le champ reste vide, tout se rend sans logo ;
+- une image qui n'est plus affichée nulle part (ici le logo GitHub, jadis sur la page de titre) peut rester dans `slides/img/` et dans les crédits : à trancher avec l'enseignant.
 
 ## 3. Convertir le `.tex` en `COURS.md`
 

@@ -17,6 +17,34 @@ Un dépôt de cours ne contient que son contenu : le cours en Markdown, son diap
 
 Les deux fiches sortent du **même** `COURS.md` : une seule source, deux rendus. Un corrigé ne peut donc pas diverger de l'exemplaire des étudiants.
 
+## `cours.yml` : ce qui se saisit une fois
+
+| Champ | Rôle |
+| --- | --- |
+| `sequence`, `bloc`, `slug` | le nom du dépôt : `{sequence}-c{bloc:02d}-{slug}` |
+| `sequence_libelle` | l'intitulé lisible de la séquence (`cpp` : « Prog Procédurale »), affiché sur la page de titre |
+| `titre`, `discipline`, `classe`, `etablissement`, `duree`, `tp`, `capacites` | cartouche de la fiche, page de titre, README |
+| `logo` | facultatif : nom d'une image de `slides/img/` (`git-logo.svg`) ; laissé vide, tout se rend sans logo |
+
+`classe` vaut `1CIELIR` ou `2CIELIR`, partout. De ce fichier se déduisent, sans jamais les saisir ailleurs : le titre `C<NN> - <titre>` (le cartouche de la fiche et la page de titre du deck disent la même chose) et le lien du dépôt.
+
+## Écrire le diaporama
+
+Copier `gabarits/deck.md` en `slides/NN-<séance>.md`. La **page de titre** est la même partout :
+
+```
+C04 - Tableaux et vecteurs
+Informatique - Prog Procédurale
+1CIELIR - Lycée Louis Rascol, Albi
+
+(en bas)  Release : v1.01 (31.10.26)
+          🐙 https://github.com/ciel-ir-rascol/cpp-c04-tableauxVecteurs
+```
+
+Les trois premières lignes s'écrivent dans le deck, d'après `cours.yml` ; **si elles divergent de `cours.yml`, la publication s'arrête** avec un message qui dit ce qui est attendu. La release, le lien du dépôt et le logo sont injectés à la génération : ne rien en écrire dans le deck. Pas d'adresse de courriel : ces dépôts sont publics.
+
+Le **thème** apporte la pagination « 2 / 13 » et, quand `logo` est renseigné, le logo en haut à droite de chaque slide, sur la ligne du titre sans jamais toucher le filet orange ni sortir de la page. Sans `logo`, la mise en page est celle d'avant : rien n'est ajouté.
+
 ## Écrire un cours
 
 ### Les trous
