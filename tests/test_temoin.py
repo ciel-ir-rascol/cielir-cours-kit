@@ -191,7 +191,7 @@ def test_le_deck_du_temoin_recoit_la_version(tmp_path):
     assert main(["deck", str(TEMOIN / "slides" / "01-temoin.md"), "--version", VERSION,
                  "--date", DATE, "-o", str(sortie)]) == 0
     texte = sortie.read_text(encoding="utf-8")
-    assert "v1.01 du 29.10.26" in texte and "**v1.01** — 29 octobre 2026" in texte
+    assert "v1.01 du 29.10.26" in texte and "Release : v1.01 (29.10.26)" in texte
     assert "BTS CIEL-IR" in texte  # le pied d'origine est conservé
 
 

@@ -145,6 +145,32 @@ section::after {
   right: 72px;
   bottom: 20px;
 }
+/* Pagination « 2 / 13 » : Marp expose le rang et le total sur chaque section.
+   La page de titre (_paginate: false) n'a pas ces attributs : rien n'y est affiché. */
+section[data-marpit-pagination]::after {
+  content: attr(data-marpit-pagination) " / " attr(data-marpit-pagination-total);
+}
+
+/* --- Logo en haut à droite des slides ------------------------------------------------
+   `cielir-cours deck` injecte --logo (url de l'image) et --logo-reserve depuis cours.yml, dans la
+   directive `style` du deck. Sans logo, ni l'une ni l'autre n'existe : aucune de ces règles ne
+   change quoi que ce soit (le pseudo-élément n'a pas de fond, le remplissage vaut 0).
+   Le logo tient sur la ligne du titre, au-dessus du filet orange du h2 (hauteur 46 px pour une
+   ligne de 49 px) ; le titre réserve sa place à droite, un titre long passe à la ligne au lieu
+   de passer dessous. */
+section:not(.lead):not(.chapitre)::before {
+  content: "";
+  position: absolute;
+  top: 64px;
+  right: 72px;
+  width: 120px;
+  height: 46px;
+  background-image: var(--logo, none);
+  background-repeat: no-repeat;
+  background-position: right center;
+  background-size: contain;
+}
+section:not(.lead):not(.chapitre) h2 { padding-right: var(--logo-reserve, 0px); }
 
 /* --- Page de titre --------------------------------------------------------------- */
 
@@ -165,6 +191,24 @@ section.lead h2 {
   font-size: 1.2em;
 }
 section.lead p { color: #d9e8ef; }
+/* Logo de la page de titre : sur une plaque blanche, pour rester lisible sur le fond coloré */
+section.lead .logo-titre {
+  align-self: flex-start;
+  height: 96px;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 18px 40px;
+  margin: 0 0 28px;
+}
+/* Pied de la page de titre : release et lien du dépôt, injectés à la génération */
+section.lead .pied-titre {
+  position: absolute;
+  left: 72px;
+  bottom: 56px;
+  font-size: 0.7em;
+  line-height: 1.5;
+}
+section.lead .pied-titre p { margin: 0; }
 section.lead strong { color: #ffd2b0; }
 section.lead a { color: #ffd2b0; }
 section.lead header, section.lead footer, section.lead::after { color: #d9e8ef; }

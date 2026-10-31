@@ -51,6 +51,7 @@ def _parser() -> argparse.ArgumentParser:
 
     deck = sous.add_parser("deck", help="copie d'un deck Marp portant la version")
     deck.add_argument("source", type=Path, help="le deck Marp (jamais modifié)")
+    deck.add_argument("--config", type=Path, help="cours.yml (défaut : celui du dossier qui contient slides/)")
     deck.add_argument("--version", required=True, type=_version, help="par exemple v1.02")
     deck.add_argument("--date", required=True, type=_date, help="AAAA-MM-JJ")
     deck.add_argument("-o", "--sortie", required=True, type=Path)
@@ -74,8 +75,9 @@ def _pdf(args: argparse.Namespace) -> int:
 
 def _deck(args: argparse.Namespace) -> int:
     # lecture en octets : les fins de ligne du deck ne sont pas traduites
+    cours = lire_config(args.config or args.source.resolve().parent.parent / "cours.yml")
     source = args.source.read_bytes().decode("utf-8")
-    copie = preparer_deck(source, Publication(args.version, args.date))
+    copie = preparer_deck(source, Publication(args.version, args.date), cours)
     args.sortie.write_bytes(copie.encode("utf-8"))
     print(f"{args.sortie} ({args.version})")
     return 0

@@ -6,6 +6,8 @@ Trois règles qui ne se négocient pas :
   1. aucune information personnelle — ni nom d'enseignant, ni courriel, ni téléphone ;
   2. aucune version ni date ici — elles ne vivent que dans les documents de la release ;
   3. les crédits d'images sont obligatoires, avec auteur, licence et source.
+
+La classe s'écrit 1CIELIR ou 2CIELIR, comme dans cours.yml. Le diaporama part de gabarits/deck.md.
 -->
 
 # «Séquence» — c«NN» : «Titre de la séance»
@@ -45,7 +47,7 @@ Les deux fiches — complète et à trous — sortent du même `COURS.md` et son
 ├── cours.yml                        métadonnées du bloc
 ├── COURS.md                         le cours — source unique des deux fiches
 ├── slides/
-│   ├── «NN»-«séance».md             source des slides (Marp)
+│   ├── «NN»-«séance».md             source des slides (Marp), d'après gabarits/deck.md
 │   └── img/                         schémas SVG et images
 ├── .vscode/settings.json            thème Marp pour l'aperçu dans VS Code
 ├── .vscode/extensions.json          recommande l'extension Marp for VS Code

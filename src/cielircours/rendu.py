@@ -35,6 +35,11 @@ class Publication:
     def libelle(self) -> str:
         return f"{self.version} du {self.date:%d.%m.%y}"
 
+    @property
+    def release(self) -> str:
+        """Ligne de la page de titre du deck : « Release : v1.01 (31.10.26) »."""
+        return f"Release : {self.version} ({self.date:%d.%m.%y})"
+
 
 def _environnement() -> Environment:
     return Environment(autoescape=True, undefined=StrictUndefined, trim_blocks=True, lstrip_blocks=True)

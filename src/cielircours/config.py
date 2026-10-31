@@ -8,7 +8,10 @@ import yaml
 
 _SEQUENCE = re.compile(r"[a-z0-9]+")
 _SLUG = re.compile(r"[a-z][A-Za-z0-9]*")
-_CHAMPS_TEXTE = ("titre", "discipline", "classe", "etablissement", "duree")
+_CHAMPS_TEXTE = ("sequence_libelle", "titre", "discipline", "classe", "etablissement", "duree")
+# un chemin sous slides/img/ : lettres, chiffres, point, tiret, souligné, barre ; jamais « .. »
+_LOGO = re.compile(r"[A-Za-z0-9_-][A-Za-z0-9._/-]*\.(?:svg|png|jpe?g|webp)")
+ORGANISATION = "ciel-ir-rascol"
 
 
 class ConfigInvalide(ValueError):
@@ -18,6 +21,7 @@ class ConfigInvalide(ValueError):
 @dataclass(frozen=True)
 class Cours:
     sequence: str
+    sequence_libelle: str
     bloc: int
     slug: str
     titre: str
@@ -27,6 +31,16 @@ class Cours:
     duree: str
     tp: str | None
     capacites: list[str]
+    logo: str | None = None
+
+    @property
+    def titre_page(self) -> str:
+        """Titre affiché en tête de la page de titre du deck et du cartouche de la fiche : « C04 - Titre »."""
+        return f"C{self.bloc:02d} - {self.titre}"
+
+    @property
+    def url_depot(self) -> str:
+        return f"https://github.com/{ORGANISATION}/{self.depot}"
 
     @property
     def depot(self) -> str:
@@ -63,8 +77,19 @@ def lire_config(chemin: Path) -> Cours:
     if not isinstance(capacites, list) or not all(isinstance(c, str) for c in capacites):
         raise ConfigInvalide(f"{chemin} : capacites doit être une liste de textes")
 
+    logo = brut.get("logo") or None  # « logo: » vide : pas de logo
+    if logo is not None:
+        if not isinstance(logo, str) or not _LOGO.fullmatch(logo) or ".." in logo:
+            raise ConfigInvalide(
+                f"{chemin} : logo doit être un chemin sous slides/img/ vers une image "
+                f"(svg, png, jpg, webp), sans « .. » : {logo!r}"
+            )
+        if not (Path(chemin).parent / "slides" / "img" / logo).is_file():
+            raise ConfigInvalide(f"{chemin} : logo introuvable : slides/img/{logo}")
+
     return Cours(
         sequence=sequence,
+        sequence_libelle=brut["sequence_libelle"],
         bloc=bloc,
         slug=slug,
         titre=brut["titre"],
@@ -74,4 +99,5 @@ def lire_config(chemin: Path) -> Cours:
         duree=brut["duree"],
         tp=tp,
         capacites=capacites,
+        logo=logo,
     )

@@ -22,9 +22,9 @@ def test_le_cartouche_porte_les_metadonnees(cours, pub):
     html = rendre_html("# T", cours, pub, Mode.COMPLET)
     for attendu in (
         "Informatique",
-        "BTS CIEL-IR 1ère année",
+        "1CIELIR",
         "cpp",
-        "Tableaux et vecteurs",
+        "C04 - Tableaux et vecteurs",
         "Lycée Louis Rascol, Albi",
         "2 h",
         "Capacités attendues",

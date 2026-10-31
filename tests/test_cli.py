@@ -159,31 +159,47 @@ def test_pdf_source_absente(cours_dir, capsys):
 
 # ---------- deck ----------
 
-DECK = "---\nmarp: true\nfooter: 'BTS CIEL-IR'\n---\n\n# Titre\n\n---\n\n## Deux\n"
+DECK = (
+    "---\nmarp: true\nfooter: 'BTS CIEL-IR'\n---\n\n# C04 - Tableaux et vecteurs\n\n"
+    "## Informatique - Prog Procédurale\n\n1CIELIR - Lycée Louis Rascol, Albi\n\n---\n\n## Deux\n"
+)
+
+
+def _deck(tmp_path, texte=DECK):
+    """Un dépôt minimal : cours.yml à la racine, deck dans slides/."""
+    (tmp_path / "slides").mkdir(exist_ok=True)
+    shutil.copy(DONNEES / "cours-cpp.yml", tmp_path / "cours.yml")
+    source = tmp_path / "slides" / "04-x.md"
+    source.write_text(texte, encoding="utf-8")
+    return source
 
 
 def test_deck_injecte_la_version_dans_une_copie(tmp_path):
-    source = tmp_path / "01.md"
-    source.write_text(DECK, encoding="utf-8")
+    source = _deck(tmp_path)
     sortie = tmp_path / "out" / "deck.md"
     sortie.parent.mkdir()
     assert main(["deck", str(source), "--version", "v1.02", "--date", "2026-10-29", "-o", str(sortie)]) == 0
     texte = sortie.read_text(encoding="utf-8")
-    assert "v1.02 du 29.10.26" in texte and "**v1.02** — 29 octobre 2026" in texte
+    assert "v1.02 du 29.10.26" in texte and "Release : v1.02 (29.10.26)" in texte
+    assert "https://github.com/ciel-ir-rascol/cpp-c04-tableauxVecteurs" in texte
     assert source.read_text(encoding="utf-8") == DECK  # la source n'est jamais modifiée
 
 
 def test_deck_sans_entete_echoue(tmp_path, capsys):
-    source = tmp_path / "01.md"
-    source.write_text("# Pas d'en-tête\n")
+    source = _deck(tmp_path, "# Pas d'en-tête\n")
     assert main(["deck", str(source), "--version", "v1.02", "--date", "2026-10-29", "-o", str(tmp_path / "d.md")]) == 2
     assert "en-tête" in capsys.readouterr().err
     assert not (tmp_path / "d.md").exists()
 
 
+def test_deck_dont_le_titre_diverge_arrete_la_publication(tmp_path, capsys):
+    source = _deck(tmp_path, DECK.replace("# C04 - Tableaux et vecteurs", "# Tableaux"))
+    assert main(["deck", str(source), "--version", "v1.02", "--date", "2026-10-29", "-o", str(tmp_path / "d.md")]) == 2
+    assert "cours.yml" in capsys.readouterr().err and not (tmp_path / "d.md").exists()
+
+
 def test_deck_refuse_une_version_mal_formee(tmp_path, capsys):
-    source = tmp_path / "01.md"
-    source.write_text(DECK)
+    source = _deck(tmp_path)
     with pytest.raises(SystemExit) as e:
         main(["deck", str(source), "--version", "v1", "--date", "2026-10-29", "-o", str(tmp_path / "d.md")])
     assert e.value.code == 2 and not (tmp_path / "d.md").exists()

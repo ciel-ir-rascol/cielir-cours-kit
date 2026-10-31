@@ -107,7 +107,7 @@ runs:
         fi
         tmp=.cielir-deck
         rm -rf "$tmp" && mkdir -p "$tmp" dist/slides
-        cielir-cours deck "$deck" --version "$VERSION" --date "$date" -o "$tmp/$(basename "$deck")"
+        cielir-cours deck "$deck" --config cours.yml --version "$VERSION" --date "$date" -o "$tmp/$(basename "$deck")"
         [ -d slides/img ] && cp -R slides/img "$tmp/img"
         cp "$GITHUB_ACTION_PATH/themes/ciel.css" "$tmp/ciel.css"
         marp() {

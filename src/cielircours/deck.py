@@ -1,26 +1,30 @@
-"""Injection de la version de publication dans une copie d'un deck Marp.
+"""Préparation d'une copie d'un deck Marp pour la publication.
 
 Marp ne permet pas de surcharger `footer` en ligne de commande : on réécrit
-une copie du texte du deck. La source n'est jamais modifiée.
+une copie du texte du deck. La source n'est jamais modifiée. Ce qui s'y ajoute vient
+de `cours.yml` ou de la publication, jamais d'une saisie dans le deck :
+
+- le pied de page et la page de titre portent la version (`Release : v1.01 (31.10.26)`) et
+  le lien du dépôt ;
+- si `logo` est renseigné, la page de titre porte l'image et le thème l'affiche en haut à droite
+  des slides suivantes (variable CSS injectée par la directive `style` de l'en-tête) ;
+- garde-fou : le titre, la discipline et la classe de la page de titre doivent dire ce que dit
+  `cours.yml`. Un deck et sa configuration qui divergent, c'est la coquille qu'on ne voit jamais :
+  la publication s'arrête avec un message explicite.
 """
 
 import re
 
+from cielircours.config import Cours
 from cielircours.rendu import Publication
 
-_MOIS = (
-    "janvier", "février", "mars", "avril", "mai", "juin",
-    "juillet", "août", "septembre", "octobre", "novembre", "décembre",
-)
 _SEPARATEUR = re.compile(r"---[ \t]*")
 _FENCE = re.compile(r"\s{0,3}(`{3,}|~{3,})")
 _AUTRE_BLOC = re.compile(r"\s{0,3}(#{1,6}(\s|$)|[>|<]|[-*+]\s|\d+[.)]\s|---)")
 _PIED = re.compile(r"footer:[ \t]*(.*?)[ \t]*")
-
-
-def _date_en_lettres(pub: Publication) -> str:
-    jour = "1er" if pub.date.day == 1 else str(pub.date.day)
-    return f"{jour} {_MOIS[pub.date.month - 1]} {pub.date.year}"
+_STYLE = re.compile(r"style[ \t]*:")
+# largeur réservée au logo (120 px) et marge avant le titre : voir themes/ciel.css
+RESERVE_LOGO = "144px"
 
 
 def _valeur_yaml(brut: str) -> str:
@@ -85,8 +89,60 @@ def _fin_premiere_slide(lignes: list[str], debut: int) -> int:
     return len(lignes)
 
 
-def preparer_deck(source: str, pub: Publication) -> str:
-    """Renvoie une copie du deck dont le pied de page et la première slide portent la version."""
+def _lignes_visibles(lignes: list[str]) -> list[str]:
+    """Les lignes d'une slide hors commentaires HTML (directives, notes du présentateur)."""
+    visibles, en_commentaire = [], False
+    for ligne in lignes:
+        ligne = ligne.rstrip("\r")
+        if en_commentaire:
+            en_commentaire = "-->" not in ligne
+            continue
+        if ligne.lstrip().startswith("<!--"):
+            en_commentaire = "-->" not in ligne
+            continue
+        visibles.append(ligne)
+    return visibles
+
+
+def _texte(ligne: str) -> str:
+    return re.sub(r"^#+\s*", "", ligne.strip()).strip("*_ ")
+
+
+def _controler_page_de_titre(slide: list[str], cours: Cours) -> None:
+    """Refuse un deck dont la page de titre ne dit pas ce que dit `cours.yml`."""
+    visibles = [l for l in _lignes_visibles(slide) if l.strip()]
+    attendu = [
+        ("titre", "# " + cours.titre_page, lambda l: l.startswith("# ") and _texte(l) == cours.titre_page),
+        (
+            "discipline et séquence",
+            f"## {cours.discipline} - {cours.sequence_libelle}",
+            lambda l: l.startswith("## ") and _texte(l) == f"{cours.discipline} - {cours.sequence_libelle}",
+        ),
+        (
+            "classe et établissement",
+            f"{cours.classe} - {cours.etablissement}",
+            lambda l: not l.startswith("#") and _texte(l) == f"{cours.classe} - {cours.etablissement}",
+        ),
+    ]
+    manques = [(nom, ligne) for nom, ligne, ok in attendu if not any(ok(l) for l in visibles)]
+    if manques:
+        trouve = " | ".join(l.strip() for l in visibles[:4]) or "(rien)"
+        details = " ; ".join(f"{nom} : « {ligne} »" for nom, ligne in manques)
+        raise ValueError(
+            "la page de titre du deck ne correspond pas à cours.yml, publication arrêtée. "
+            f"Attendu, absent de la première slide : {details}. Première slide : {trouve}"
+        )
+
+
+def _style_logo(logo: str) -> list[str]:
+    return ["style: |", f"  section {{ --logo: url('img/{logo}'); --logo-reserve: {RESERVE_LOGO}; }}"]
+
+
+def preparer_deck(source: str, pub: Publication, cours: Cours) -> str:
+    """Renvoie une copie du deck : pied, page de titre (logo, release, lien du dépôt) et style du logo.
+
+    Lève `ValueError` si la page de titre ne correspond pas à `cours`.
+    """
     lignes = source.split("\n")
     fin_entete = _fin_entete(lignes)
 
@@ -98,14 +154,33 @@ def preparer_deck(source: str, pub: Publication) -> str:
             break
     else:
         entete.append(_pied(None, pub.libelle))
+    if cours.logo:
+        if any(_STYLE.match(l) for l in entete):
+            raise ValueError("l'en-tête du deck porte déjà une directive `style` : le style du logo vient de cours.yml")
+        entete += _style_logo(cours.logo)
 
     fin = _fin_premiere_slide(lignes, fin_entete + 1)
-    dernier = fin
-    while dernier > fin_entete + 1 and not lignes[dernier - 1].strip():
-        dernier -= 1
-    mention = f"**{pub.version}** — {_date_en_lettres(pub)}"
-    insertion = [mention] if dernier == fin_entete + 1 else ["", mention]
+    slide = lignes[fin_entete + 1 : fin]
+    _controler_page_de_titre(slide, cours)
 
-    return "\n".join(
-        [lignes[0], *entete, *lignes[fin_entete:dernier], *insertion, *lignes[dernier:]]
-    )
+    corps = list(lignes[fin_entete:fin])
+    if cours.logo:
+        # le logo de la page de titre précède le titre ; `corps[0]` est le séparateur d'en-tête
+        for k, ligne in enumerate(corps):
+            if k and ligne.startswith("# "):
+                corps[k:k] = [f'<img class="logo-titre" src="img/{cours.logo}" alt="Logo">', ""]
+                break
+    dernier = len(corps)
+    while dernier > 1 and not corps[dernier - 1].strip():
+        dernier -= 1
+    pied = [
+        '<div class="pied-titre">',
+        "",
+        f"{pub.release}\\",
+        f"🐙 <{cours.url_depot}>",
+        "",
+        "</div>",
+    ]
+    insertion = pied if dernier == 1 else ["", *pied]
+
+    return "\n".join([lignes[0], *entete, *corps[:dernier], *insertion, *corps[dernier:], *lignes[fin:]])

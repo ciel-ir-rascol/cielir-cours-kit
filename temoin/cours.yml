@@ -2,11 +2,12 @@
 # Il est régénéré à chaque modification du kit ; le tag v1 ne bouge que s'il se régénère
 # sans régression. Aucune donnée personnelle ici (le contrôle du kit le vérifie).
 sequence: kit
+sequence_libelle: Témoin du kit
 bloc: 1
 slug: temoin
 titre: Du code source au programme
 discipline: Informatique
-classe: BTS CIEL-IR 1ère année
+classe: 1CIELIR
 etablissement: Lycée Louis Rascol, Albi
 duree: 1 h
 tp: tp01-temoin

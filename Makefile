@@ -44,7 +44,7 @@ pdf:
 # images relatives se résolvent ; Marp est lancé en tant qu'utilisateur courant.
 slides:
 	mkdir -p $(BUILD)/deck
-	$(CLI) deck $(DECK) --version $(VERSION) --date $(DATE) -o $(BUILD)/deck/$(notdir $(DECK))
+	$(CLI) deck $(DECK) --config $(DEPOT)/cours.yml --version $(VERSION) --date $(DATE) -o $(BUILD)/deck/$(notdir $(DECK))
 	rm -rf $(BUILD)/deck/img && cp -R $(DEPOT)/slides/img $(BUILD)/deck/img
 	docker run --rm --init \
 	    -e MARP_USER="$$(id -u):$$(id -g)" -e CHROME_NO_SANDBOX=1 \

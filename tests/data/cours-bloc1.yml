@@ -1,9 +1,10 @@
 sequence: git
+sequence_libelle: Prog Procédurale
 bloc: 1
 slug: versions
 titre: Gestion de versions
 discipline: Informatique
-classe: BTS CIEL-IR 1ère année
+classe: 1CIELIR
 etablissement: Lycée Louis Rascol, Albi
 duree: 2 h
 tp: tp04-tableaux

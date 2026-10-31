@@ -6,7 +6,7 @@ lang: fr
 title: Du code source au programme
 description: Deck du dépôt témoin du kit, qui reprend le plan et le schéma du cours.
 header: 'Du code source au programme'
-footer: 'BTS CIEL-IR · Informatique · 1re année'
+footer: 'BTS CIEL-IR · Informatique · 1CIELIR'
 ---
 
 <style>
@@ -17,12 +17,13 @@ footer: 'BTS CIEL-IR · Informatique · 1re année'
 <!-- _class: lead -->
 <!-- _paginate: false -->
 <!-- _header: '' -->
+<!-- _footer: '' -->
 
-# Du code source au programme
+# C01 - Du code source au programme
 
-## Dépôt témoin du kit de cours
+## Informatique - Témoin du kit
 
-**1re année — Bloc 01**
+1CIELIR - Lycée Louis Rascol, Albi
 
 <!--
 Ce deck est le pendant du COURS.md du témoin : même plan, même schéma (le même fichier).
