@@ -20,6 +20,34 @@ Lire la source LaTeX en entier **avant** de convertir, pour dresser deux listes 
 
 Se donner une référence de comparaison : le PDF LaTeX d'origine (`workspace_LaTex/output/*.pdf`) et le PDF des slides d'origine, à garder hors du dépôt (dans un dossier temporaire).
 
+### 0.1 Lire le cours qui précède et celui qui suit
+
+**Étape obligatoire, et la plus rentable de toute la procédure.** Un cours ne se juge pas seul :
+ses défauts les plus coûteux ne sont visibles que depuis ses voisins dans la progression. Les
+cours de la séquence vivent dans `ciel-ir-rascol.github.io/docs/<séquence>/NN-<séance>/`, et
+c'est le **diaporama** qui porte le contenu, le `.md` n'étant qu'un lien vers lui.
+
+Quatre questions à poser, dans cet ordre :
+
+1. **Les capacités sont-elles tenables à ce point de la progression ?** Une capacité qui
+   suppose une notion enseignée plus tard est une promesse que le cours ne peut pas tenir, et
+   le cartouche l'imprime en haut de la première page de la fiche. Vérifier le numéro des
+   cours où vivent les notions supposées, pas leur ordre intuitif.
+2. **Qu'a-t-on enseigné juste avant, qui servirait ici et qu'on n'utilise pas ?** Un outil déjà
+   connu des étudiants et jamais réemployé est un chaînon manquant gratuit à combler.
+3. **Un mot change-t-il de sens d'un cours à l'autre ?** Le même terme employé pour deux
+   notions à un cours d'écart est une confusion garantie, surtout si c'est un mot qu'on troue.
+4. **Le cours contredit-il une règle enseignée avant ?** Une syntaxe que le cours précédent
+   apprend à préférer et que celui-ci n'emploie pas sape les deux.
+
+Exemple vécu, sur `cpp-c04-tableauxVecteurs` : la capacité promettait de « parcourir » un
+tableau alors que les boucles sont deux cours plus loin ; `sizeof()`, enseigné au cours
+précédent, n'était jamais réemployé dans la partie sur la mémoire, qui est pourtant l'objet
+d'une capacité ; « dépassement » désignait au C03 une valeur trop grande pour son type et ici
+un indice hors bornes ; et une initialisation en `=` contredisait le `{}` que le C03 apprend à
+préférer. Quatre défauts, aucun visible en relisant le cours seul — il avait été relu trois
+fois.
+
 ## 1. Renommer et réorganiser
 
 ### 1.1 Le nom
