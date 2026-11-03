@@ -13,7 +13,7 @@ Un dépôt de cours ne contient que son contenu : le cours en Markdown, son diap
 | `cours.pdf` | la fiche de cours complète, réponses comprises |
 | `cours-a-trous.pdf` | la même fiche, trous vides — l'exemplaire imprimé et distribué |
 | `slides.pdf` | le diaporama |
-| les slides en HTML | mises en ligne sur GitHub Pages |
+| le site | mis en ligne sur GitHub Pages : l'accueil à la racine (`/`, la seule adresse donnée aux étudiants), la fiche complète à l'écran (`/fiche/`) et les slides en HTML (`/slides/`) |
 
 Les deux fiches sortent du **même** `COURS.md` : une seule source, deux rendus. Un corrigé ne peut donc pas diverger de l'exemplaire des étudiants.
 
@@ -81,7 +81,9 @@ Pour une réponse rédigée, sur plusieurs lignes, la même balise porte le nomb
 
 Document complet : la réponse, dans un encadré. Document à trous : deux lignes réglées. La réponse est du texte en ligne (gras, code…), sur une ou plusieurs lignes de source ; elle ne peut pas contenir de bloc (liste, bloc de code).
 
-Une seule balise, donc : `<ins>` court dans une phrase, `<ins lignes="n">` long dans son paragraphe. C'est voulu : `COURS.md` se lit aussi sur github.com, où la balise s'affiche comme un trou souligné, sans rien qui ressemble à du gabarit.
+Une seule balise, donc : `<ins>` court dans une phrase, `<ins lignes="n">` long dans son paragraphe. C'est voulu : aucun gabarit à apprendre. `COURS.md` reste pourtant une source, pas un document de lecture : GitHub n'interprète aucun HTML dans un bloc de code ni dans un code en ligne, et y laisserait voir les balises. L'étudiant lit la fiche sur le site (`/fiche/`), rendue en mode complet.
+
+`COURS.md` peut s'ouvrir sur un titre de niveau 1, `# C04 - Tableaux et vecteurs`. Le kit le retire avant rendu (le cartouche porte déjà le titre) et refuse un titre qui ne dit pas ce que dit `cours.yml` (`C<bloc> - <titre>`).
 
 Une balise mal formée (non appariée, imbriquée, à cheval sur deux paragraphes, nombre de lignes qui n'est pas un entier positif) arrête la génération avec un message : jamais une réponse ne passe en clair dans le document à trous.
 
@@ -121,7 +123,7 @@ Copier `gabarits/publier.yml` dans `.github/workflows/publier.yml`, régler une 
 git tag v1.01 && git push origin v1.01
 ```
 
-Le workflow contrôle qu'aucune information personnelle ne traîne, fabrique les trois PDF, met les slides en ligne et crée la release avec les PDF attachés. Rien de généré n'entre jamais dans le dépôt.
+Le workflow contrôle qu'aucune information personnelle ne traîne, fabrique les trois PDF, met le site en ligne (accueil, fiche, slides) et crée la release avec les PDF attachés. Rien de généré n'entre jamais dans le dépôt.
 
 ## Les versions
 
@@ -166,6 +168,8 @@ Ni Node ni LaTeX ne sont nécessaires : le rendu papier est en Python, Marp tour
 make test       # les tests du kit
 make temoin     # régénère le dépôt témoin : les trois PDF dans build/temoin/
 make slides     # le diaporama seul
+make site       # le site complet dans build/temoin/site/ (accueil, fiche, slides)
+make servir     # le sert sur 0.0.0.0:8000, pour le regarder depuis un poste distant
 make clean
 ```
 

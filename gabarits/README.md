@@ -9,6 +9,9 @@ Quatre règles qui ne se négocient pas :
   4. le nom de l'auteur vient de cours.yml (`auteur`) : il paraît sur les supports par les soins
      du kit et ne se saisit jamais dans le README.
 
+COURS.md peut s'ouvrir sur un titre de niveau 1, `# C«NN» - «Titre»`, identique à `titre_page` de cours.yml (le kit le retire
+avant rendu et refuse un titre divergent). Les liens de tête sont ceux du site publié : accueil, fiche, slides.
+
 La classe s'écrit 1CIELIR ou 2CIELIR, comme dans cours.yml. Le diaporama part de gabarits/deck.md.
 Le TP se nomme par le nom de son dépôt (`cpp-tp03-tableauxVecteurs`), jamais par le titre de son README.
 -->
@@ -17,7 +20,9 @@ Le TP se nomme par le nom de son dépôt (`cpp-tp03-tableauxVecteurs`), jamais p
 
 **«Discipline» — «Classe»** · «Établissement»
 
-📽️ **Les slides : <https://ciel-ir-rascol.github.io/«nom-du-depot»/>**
+🏠 **Le cours en ligne : <https://ciel-ir-rascol.github.io/«nom-du-depot»/>**
+📖 **La fiche de cours : <https://ciel-ir-rascol.github.io/«nom-du-depot»/fiche/>**
+📽️ **Les slides : <https://ciel-ir-rascol.github.io/«nom-du-depot»/slides/>**
 📄 **Les fiches en PDF : [dernière release](https://github.com/ciel-ir-rascol/«nom-du-depot»/releases/latest)**
 
 Cours d'environ **«durée»** qui introduit le TP «nom-du-depot-du-tp». Public : «ce que les étudiants savent déjà, ou pas».
