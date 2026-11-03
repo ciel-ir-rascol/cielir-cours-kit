@@ -31,6 +31,17 @@
 </section>
 {% endif %}
 
+{% if sommaire %}
+<nav class="sommaire" aria-label="Sommaire">
+  <h2>Sommaire</h2>
+  <ol>
+  {% for ancre, intitule in sommaire %}
+    <li><a href="#{{ ancre }}">{{ intitule }}</a></li>
+  {% endfor %}
+  </ol>
+</nav>
+{% endif %}
+
 <main class="corps">
 {{ corps | safe }}
 </main>

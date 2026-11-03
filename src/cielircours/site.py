@@ -18,6 +18,7 @@ from pathlib import Path
 from cielircours.config import Cours
 from cielircours.mdtext import Mode, rendre_corps
 from cielircours.rendu import Publication, _environnement
+from cielircours.sommaire import poser_sommaire
 from cielircours.titre import retirer_titre
 
 # polices réellement employées par site.css
@@ -32,7 +33,11 @@ def _gabarit(nom: str) -> str:
 
 
 def rendre_fiche(source: str, cours: Cours, pub: Publication, url_depot: str) -> str:
-    """La fiche de cours, mode complet, pour `fiche/index.html`."""
+    """La fiche de cours, mode complet, pour `fiche/index.html`.
+
+    Le corps reçoit une ancre par titre de partie, et le sommaire en tête y mène.
+    """
+    corps, parties = poser_sommaire(rendre_corps(retirer_titre(source, cours), Mode.COMPLET))
     return _environnement().from_string(_gabarit("fiche.html.j2")).render(
         feuille="../assets/site.css",
         accueil="../",
@@ -40,7 +45,8 @@ def rendre_fiche(source: str, cours: Cours, pub: Publication, url_depot: str) ->
         cours=cours,
         pub=pub,
         url_depot=url_depot,
-        corps=rendre_corps(retirer_titre(source, cours), Mode.COMPLET),
+        corps=corps,
+        sommaire=parties,
     )
 
 
