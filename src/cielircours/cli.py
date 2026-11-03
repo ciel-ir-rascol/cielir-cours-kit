@@ -1,4 +1,4 @@
-"""Ligne de commande : `cielir-cours pdf | deck | verifier`.
+"""Ligne de commande : `cielir-cours pdf | deck | site | verifier`.
 
 Codes de sortie : 0 succès ; 1 infractions trouvées par `verifier` ; 2 erreur (usage,
 fichier absent, configuration invalide, ressource introuvable, trou mal formé…).
@@ -18,6 +18,7 @@ from cielircours.deck import preparer_deck
 from cielircours.depot import url_du_depot
 from cielircours.mdtext import Mode
 from cielircours.rendu import Publication, SchemeInterdit, SourceIntrouvable, ecrire_pdf, rendre_html
+from cielircours.site import ecrire_site
 
 # Un tag de dépôt de cours : v, un numéro de séquence, un point, deux chiffres (v1.02, v12.03).
 # Exporté : l'action GitHub du kit le reprend pour refuser un tag malformé avant toute génération.
@@ -58,6 +59,13 @@ def _parser() -> argparse.ArgumentParser:
     deck.add_argument("--date", required=True, type=_date, help="AAAA-MM-JJ")
     deck.add_argument("-o", "--sortie", required=True, type=Path)
 
+    site = sous.add_parser("site", help="l'accueil et la fiche de cours à l'écran (HTML)")
+    site.add_argument("source", type=Path, help="le COURS.md")
+    site.add_argument("--config", type=Path, help="cours.yml (défaut : celui du dossier de COURS.md)")
+    site.add_argument("--version", required=True, type=_version, help="par exemple v1.02")
+    site.add_argument("--date", required=True, type=_date, help="AAAA-MM-JJ")
+    site.add_argument("-o", "--sortie", required=True, type=Path, help="dossier du site (créé au besoin)")
+
     verifier = sous.add_parser("verifier", help="cherche des informations personnelles dans un dépôt")
     verifier.add_argument("racine", type=Path, nargs="?", default=Path("."))
     verifier.add_argument("--motifs", type=Path, help="fichier de motifs (défaut : celui du kit)")
@@ -87,6 +95,17 @@ def _deck(args: argparse.Namespace) -> int:
     return 0
 
 
+def _site(args: argparse.Namespace) -> int:
+    config = args.config or args.source.parent / "cours.yml"
+    cours = lire_config(config)
+    source = args.source.read_text(encoding="utf-8")
+    # le lien du dépôt se résout comme pour le deck : on ne le redemande pas
+    url = url_du_depot(config.resolve().parent, cours, os.environ)
+    ecrire_site(source, args.source.resolve().parent, cours, Publication(args.version, args.date), url, args.sortie)
+    print(f"{args.sortie} (site, {args.version})")
+    return 0
+
+
 def _verifier(args: argparse.Namespace) -> int:
     if not args.racine.is_dir():
         raise FileNotFoundError(f"{args.racine} : dossier introuvable")
@@ -101,7 +120,7 @@ def _verifier(args: argparse.Namespace) -> int:
     return 0
 
 
-_COMMANDES = {"pdf": _pdf, "deck": _deck, "verifier": _verifier}
+_COMMANDES = {"pdf": _pdf, "deck": _deck, "site": _site, "verifier": _verifier}
 
 
 def main(argv: list[str] | None = None) -> int:

@@ -223,3 +223,11 @@ def test_le_makefile_epingle_marp_et_desactive_le_bac_a_sable():
     assert ":latest" not in makefile
     for cible in ("temoin:", "test:", "slides:"):
         assert re.search(rf"^{cible}", makefile, re.MULTILINE), cible
+
+
+def test_le_makefile_produit_le_site_et_le_temoin_porte_son_titre():
+    makefile = (RACINE / "Makefile").read_text(encoding="utf-8")
+    assert re.search(r"^temoin:.*\bsite\b", makefile, re.MULTILINE)
+    assert re.search(r"^site:", makefile, re.MULTILINE)
+    cours = lire_config(TEMOIN / "cours.yml")
+    assert (TEMOIN / "COURS.md").read_text(encoding="utf-8").startswith(f"# {cours.titre_page}\n")

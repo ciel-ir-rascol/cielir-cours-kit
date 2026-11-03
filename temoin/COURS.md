@@ -1,3 +1,5 @@
+# C01 - Du code source au programme
+
 ## Pourquoi apprendre le C++ ?
 
 Le C++ est un langage <ins>rapide</ins>, <ins>flexible</ins> et <ins>portable</ins>. Il permet deux paradigmes de programmation : <ins>procédural</ins> et <ins>orienté objet</ins>. Son principal inconvénient : <ins>sa complexité, qui impose de la rigueur et de la méthode</ins>.

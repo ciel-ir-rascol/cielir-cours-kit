@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ cours.titre_page }}</title>
+<link rel="stylesheet" href="{{ feuille }}">
+</head>
+<body class="accueil">
+<div class="page">
+
+<header class="entete-page">
+  {% if logo %}
+  <img class="logo" src="{{ logo }}" alt="">
+  {% endif %}
+  <h1>{{ cours.titre_page }}</h1>
+  <p class="sous-titre">{{ cours.discipline }} — {{ cours.classe }}</p>
+  <p class="etablissement">{{ cours.etablissement }}</p>
+</header>
+
+{% if cours.duree or cours.tp %}
+<p class="tp">
+  {%- if cours.duree %}Durée : <strong>{{ cours.duree }}</strong>{% endif %}
+  {%- if cours.duree and cours.tp %} · {% endif %}
+  {%- if cours.tp %}TP associé : <code>{{ cours.tp }}</code>{% endif -%}
+</p>
+{% endif %}
+
+{% if cours.capacites %}
+<section class="capacites">
+  <h2>Capacités visées</h2>
+  <ul>
+  {% for c in cours.capacites %}
+    <li>{{ c }}</li>
+  {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+<nav aria-label="Supports du cours">
+  <ul class="liens">
+    <li><a href="fiche/"><strong>La fiche de cours</strong><span class="detail">Le cours complet, à lire et à chercher.</span></a></li>
+    <li><a href="slides/"><strong>Le diaporama</strong><span class="detail">Les slides projetées en cours.</span></a></li>
+    <li><a href="{{ url_depot }}/releases/latest"><strong>Les PDF à imprimer</strong><span class="detail">La fiche à trous à compléter en cours, et sa version remplie.</span></a></li>
+  </ul>
+</nav>
+
+<footer class="pied-page">
+  <p>{{ cours.auteur }}</p>
+  <p class="release">{{ pub.release }}</p>
+</footer>
+
+</div>
+</body>
+</html>
