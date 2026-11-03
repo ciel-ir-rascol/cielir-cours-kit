@@ -1,0 +1,249 @@
+/*
+ * site.css — la fiche de cours et la page d'accueil, à l'écran (site privé du dépôt)
+ *
+ * Ce n'est pas cours.css : celle-là est de la mise en page paginée (A4, corps compact, interligne
+ * large pour écrire à la main). Ici, un texte suivi, une largeur de lecture d'environ 70 caractères,
+ * et une mise en page qui tient sur un téléphone. L'identité reste celle du kit : palette de
+ * themes/ciel.css (mêmes noms de variables) et filet orange sous les titres de partie.
+ * Servie avec la fiche : aucune ressource chargée depuis le réseau.
+ *
+ * Les réponses (mode complet) se lisent sans crier : un fond teinté, ni souligné, ni gras, ni rouge.
+ * La couleur d'accent reste aux titres. `.trou` et `.lignes` n'existent qu'en mode à trous, que le
+ * site n'utilise pas : leurs règles ne servent qu'à ne rien casser s'il s'en glissait.
+ */
+
+/* ---------- Polices (servies avec le site) ---------- */
+@font-face { font-family: "Liberation Sans"; font-weight: 400; font-display: swap; src: url("polices/LiberationSans-Regular.woff2") format("woff2"); }
+@font-face { font-family: "Liberation Sans"; font-weight: 700; font-display: swap; src: url("polices/LiberationSans-Bold.woff2") format("woff2"); }
+@font-face { font-family: "Inconsolata"; font-weight: 400; font-display: swap; src: url("polices/Inconsolata-Regular.woff2") format("woff2"); }
+@font-face { font-family: "Inconsolata"; font-weight: 700; font-display: swap; src: url("polices/Inconsolata-Bold.woff2") format("woff2"); }
+
+/* ---------- Palette ---------- */
+:root {
+  --c-primaire: #0b4f6c;
+  --c-primaire-clair: #e6f0f4;
+  --c-accent: #d9661f;
+  --c-accent-clair: #fdf0e6;
+  --c-texte: #1f2933;
+  --c-attenue: #52606d;
+  --c-bordure: #cbd2d9;
+  --c-code-fond: #1e2430;
+  --c-code-texte: #e6edf3;
+  --c-code-clair: #f5f7fa;
+  /* réponses : un vert pâle, loin du rouge « corrigé » du papier et du bleu du code en ligne */
+  --c-reponse-fond: #e4f2df;
+  --c-reponse-fond-code: #d2e8cb;
+  --c-reponse-trait: #7aa86b;
+  --police: "Liberation Sans", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --police-code: "Inconsolata", "DejaVu Sans Mono", Consolas, monospace;
+}
+
+/* ---------- Page ---------- */
+* { box-sizing: border-box; }
+html { font-size: 106.25%; -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: #fff;
+  color: var(--c-texte);
+  font-family: var(--police);
+  line-height: 1.6;
+}
+/* largeur de lecture : environ 70 caractères */
+.page { max-width: 70ch; margin: 0 auto; padding: 1.2rem 1rem 3rem; }
+
+p { margin: 0 0 0.9em; }
+em { color: var(--c-attenue); }
+strong { color: var(--c-primaire); }
+a { color: var(--c-primaire); text-decoration-color: var(--c-accent); text-underline-offset: 0.15em; }
+a:hover { color: var(--c-accent); }
+ul, ol { margin: 0.3em 0 0.9em; padding-left: 1.4em; }
+li { margin: 0.2em 0; }
+li::marker { color: var(--c-accent); }
+img, svg { max-width: 100%; height: auto; }
+figure { margin: 1em 0; }
+
+h1, h2, h3, h4 { color: var(--c-primaire); line-height: 1.25; font-weight: 700; }
+h1 { font-size: 1.8rem; margin: 0.2em 0 0.3em; }
+h2 {
+  font-size: 1.35rem;
+  margin: 2em 0 0.7em;
+  padding-bottom: 0.15em;
+  border-bottom: 3px solid var(--c-accent);
+}
+h3 { font-size: 1.1rem; margin: 1.5em 0 0.4em; }
+h4 { font-size: 1rem; margin: 1.2em 0 0.3em; }
+
+/* ---------- En-tête de la fiche, pied de page ---------- */
+.entete-page { margin-bottom: 1.6rem; padding-bottom: 1rem; border-bottom: 1px solid var(--c-bordure); }
+.navigation { display: flex; flex-wrap: wrap; gap: 0.4rem 1.2rem; font-size: 0.9rem; margin: 0 0 1rem; }
+.sous-titre { margin: 0; color: var(--c-attenue); }
+.etablissement { margin: 0; color: var(--c-attenue); }
+.release { margin: 0.6rem 0 0; font-family: var(--police-code); font-size: 0.95rem; color: var(--c-attenue); }
+.logo { display: block; max-height: 4.5rem; max-width: 60%; width: auto; margin: 0 0 1rem; }
+.pied-page {
+  margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--c-bordure);
+  font-size: 0.9rem; color: var(--c-attenue);
+}
+.pied-page p { margin: 0 0 0.3em; }
+.pied-page .release { margin: 0.6rem 0 0; }
+
+/* ---------- Capacités attendues ---------- */
+.capacites {
+  background: var(--c-primaire-clair);
+  border-radius: 0 6px 6px 0;
+  border-left: 5px solid var(--c-primaire);
+  padding: 0.7rem 1rem 0.3rem;
+  margin: 0 0 1.5rem;
+}
+.capacites h2 { font-size: 1rem; margin: 0 0 0.2em; padding: 0; border: none; }
+.capacites ul { font-style: italic; }
+
+/* ---------- Réponses (mode complet) : visibles, sans crier ---------- */
+.reponse {
+  background: var(--c-reponse-fond);
+  border-radius: 3px;
+  padding: 0.04em 0.28em;
+  /* une réponse longue peut passer à la ligne sans que le fond ne s'étire d'un bloc */
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+.reponse-bloc {
+  background: var(--c-reponse-fond);
+  border-left: 4px solid var(--c-reponse-trait);
+  border-radius: 0 6px 6px 0;
+  padding: 0.6rem 1rem 0.1rem;
+  margin: 0.4em 0 1.1em;
+}
+.reponse-bloc > :last-child { margin-bottom: 0.5em; }
+/* dans un tableau ou un code, la teinte est un peu plus soutenue pour ressortir du fond */
+td .reponse { background: var(--c-reponse-fond-code); }
+
+/* ---------- Trous et lignes : absents du mode complet, inoffensifs s'ils s'y glissent ---------- */
+.trou {
+  display: inline-block;
+  width: calc(var(--car, 6) * 0.6em + 1em);
+  max-width: 100%;
+  border-bottom: 1px dotted var(--c-attenue);
+  vertical-align: baseline;
+}
+.lignes {
+  display: block;
+  height: calc(var(--n, 1) * 1.8em);
+  margin: 0 0 0.9em;
+  background-image: repeating-linear-gradient(
+    to bottom, transparent 0, transparent calc(1.8em - 1px), var(--c-bordure) calc(1.8em - 1px), var(--c-bordure) 1.8em);
+}
+
+/* ---------- Étiquettes de schéma à compléter : visibles ---------- */
+.remplissable { visibility: visible; }
+
+/* ---------- Encadrés : un filet et un fond par gravité, le titre dit le reste ---------- */
+.alerte {
+  margin: 1.1em 0;
+  padding: 0.7rem 1rem 0.2rem;
+  border-left: 5px solid var(--c-primaire);
+  background: var(--c-primaire-clair);
+  border-radius: 0 6px 6px 0;
+}
+.alerte > :last-child { margin-bottom: 0.5em; }
+.alerte p { margin: 0 0 0.5em; }
+.alerte__titre { font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--c-primaire); }
+.alerte--note { background: #eef7fb; border-left-color: #4a90b0; }
+.alerte--astuce { background: #e8f5e9; border-left-color: #4f9a55; }
+.alerte--important { background: #f6efd6; border-left-color: #b09322; }
+.alerte--attention { background: var(--c-accent-clair); border-left-color: var(--c-accent); }
+.alerte--danger { background: #f9e4e3; border-left-color: #b8403c; }
+
+/* ---------- Code en ligne, blocs de code et de terminal ---------- */
+code, pre, kbd, samp { font-family: var(--police-code); }
+:not(pre) > code {
+  background: var(--c-primaire-clair);
+  color: var(--c-primaire);
+  border-radius: 4px;
+  padding: 0.05em 0.3em;
+  font-size: 1.05em;
+  overflow-wrap: anywhere;
+}
+:not(pre) > code .reponse, .reponse > code { background: none; }
+pre {
+  margin: 0.8em 0 1.2em;
+  padding: 0.8rem 1rem;
+  font-size: 1rem;
+  line-height: 1.4;
+  background: var(--c-code-clair);
+  border: 1px solid var(--c-bordure);
+  border-radius: 6px;
+  /* sur téléphone, on fait défiler plutôt que de casser une ligne de code */
+  overflow-x: auto;
+  white-space: pre;
+  tab-size: 4;
+}
+pre code { font: inherit; background: none; padding: 0; color: inherit; }
+.terminal {
+  background: var(--c-code-fond);
+  color: var(--c-code-texte);
+  border-color: var(--c-code-fond);
+}
+pre .reponse { background: var(--c-reponse-fond-code); color: var(--c-texte); border-radius: 3px; padding: 0 0.15em; }
+/* sur le fond sombre du terminal, la teinte devient un voile clair, texte lisible */
+.terminal .reponse { background: rgba(165, 214, 167, 0.22); color: inherit; }
+.terminal .trou { border-bottom-color: var(--c-code-texte); }
+pre .trou { width: calc(var(--car, 6) * 1ch); }
+
+/* Code coloré (classes courtes de Pygments), sur fond clair */
+pre.code .k, pre.code .kd, pre.code .kn, pre.code .kr, pre.code .kc, pre.code .kp,
+pre.code .kt, pre.code .ow { color: #0b3d91; font-weight: 700; }
+pre.code .cp, pre.code .cpf { color: #6b3a00; }
+pre.code .c, pre.code .c1, pre.code .cm, pre.code .cs, pre.code .sd { color: #4a4a4a; font-style: italic; }
+pre.code .s, pre.code .s1, pre.code .s2, pre.code .sc, pre.code .se, pre.code .sa,
+pre.code .sb, pre.code .sh, pre.code .si, pre.code .sx { color: #0b5b2a; }
+pre.code .m, pre.code .mi, pre.code .mf, pre.code .mh, pre.code .mo, pre.code .il { color: #7a1f5c; }
+pre.code .nf, pre.code .fm, pre.code .nc, pre.code .nn { font-weight: 700; }
+pre.code .err { color: inherit; }
+
+/* ---------- Tableaux : défilent sur téléphone au lieu de déborder de la page ---------- */
+table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+  line-height: 1.45;
+  margin: 1em 0 1.3em;
+}
+th, td { border: 1px solid var(--c-bordure); padding: 0.4em 0.7em; text-align: left; vertical-align: top; }
+th { background: var(--c-primaire); border-color: var(--c-primaire); color: #fff; font-weight: 700; }
+tr:nth-child(even) td { background: var(--c-code-clair); }
+tr:nth-child(even) td .reponse { background: var(--c-reponse-fond-code); }
+
+/* ---------- Page d'accueil ---------- */
+.accueil .entete-page { border-bottom: none; padding-bottom: 0; margin-bottom: 1.2rem; }
+.accueil h1 { font-size: 2rem; border-bottom: 3px solid var(--c-accent); padding-bottom: 0.2em; }
+.accueil .tp { margin: 1.2rem 0; }
+.accueil .tp code { font-size: 1rem; }
+.accueil .capacites { margin-top: 1.2rem; }
+.liens { list-style: none; margin: 1.6rem 0; padding: 0; display: grid; gap: 0.8rem; }
+.liens li { margin: 0; }
+.liens a {
+  display: block;
+  padding: 0.9rem 1.1rem;
+  border: 1px solid var(--c-bordure);
+  border-left: 6px solid var(--c-accent);
+  border-radius: 0 8px 8px 0;
+  background: #fff;
+  color: var(--c-primaire);
+  text-decoration: none;
+}
+.liens a:hover, .liens a:focus-visible { background: var(--c-accent-clair); color: var(--c-primaire); }
+.liens strong { display: block; font-size: 1.15rem; color: var(--c-primaire); }
+.liens .detail { display: block; color: var(--c-attenue); font-size: 0.95rem; }
+
+/* ---------- Téléphone ---------- */
+@media (max-width: 36rem) {
+  html { font-size: 100%; }
+  .page { padding: 1rem 0.9rem 2.5rem; }
+  h1 { font-size: 1.5rem; }
+  .accueil h1 { font-size: 1.65rem; }
+  pre { font-size: 0.92rem; padding: 0.7rem 0.8rem; margin-left: -0.3rem; margin-right: -0.3rem; }
+  table { font-size: 0.9rem; }
+}
