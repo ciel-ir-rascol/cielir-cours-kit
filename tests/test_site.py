@@ -109,8 +109,8 @@ def test_l_accueil_porte_le_logo_s_il_est_renseigne(depot, tmp_path):
     assert main(["site", str(depot / "COURS.md"), "--version", "v1.02", "--date", "2026-11-03",
                  "-o", str(sortie)]) == 0
     html = (sortie / "index.html").read_text(encoding="utf-8")
-    assert 'src="fiche/slides/img/logo.svg"' in html
-    assert (sortie / "fiche" / "slides" / "img" / "logo.svg").is_file()
+    assert 'src="assets/logo/logo.svg"' in html
+    assert (sortie / "assets" / "logo" / "logo.svg").is_file()
 
 
 def test_un_titre_divergent_n_ecrit_aucun_site(depot, tmp_path, capsys):
@@ -180,3 +180,11 @@ def test_code_et_tableaux_defilent_au_lieu_de_deborder():
 def test_les_cinq_encadres_sont_stylés():
     for t in ("note", "astuce", "important", "attention", "danger"):
         assert "background" in regle(CSS, f".alerte--{t}"), t
+
+
+def test_le_code_et_les_tableaux_debordent_de_la_mesure_du_texte_sans_passer_a_la_ligne():
+    corps = regle(CSS, ".corps > pre")
+    assert "max-content" in corps and "translateX(-50%)" in corps
+    assert "min(64rem" in corps  # assez large pour 96 caractères à 1100 px
+    assert "white-space: pre;" in regle(CSS, "pre") and "overflow-x: auto" in regle(CSS, "pre")
+    assert regle(CSS, ".corps > pre") == regle(CSS, ".corps > table")

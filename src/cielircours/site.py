@@ -3,7 +3,7 @@
     <sortie>/index.html              l'accueil, seule adresse que les étudiants reçoivent
     <sortie>/fiche/index.html        COURS.md rendu en mode complet (réponses visibles)
     <sortie>/fiche/slides/img/       copie de slides/img/, pour que les chemins relatifs de COURS.md résolvent
-    <sortie>/assets/                 site.css et les polices, servies avec le site (rien ne vient du réseau)
+    <sortie>/assets/                 site.css, les polices et le logo, servis avec le site (rien ne vient du réseau)
 
 Les slides n'en font pas partie : Marp les écrit à part, sous <sortie>/slides/.
 
@@ -51,7 +51,7 @@ def rendre_accueil(cours: Cours, pub: Publication, url_depot: str) -> str:
         cours=cours,
         pub=pub,
         url_depot=url_depot,
-        logo=f"fiche/slides/img/{cours.logo}" if cours.logo else None,
+        logo=f"assets/logo/{cours.logo}" if cours.logo else None,
     )
 
 
@@ -71,6 +71,11 @@ def ecrire_site(source: str, racine: Path, cours: Cours, pub: Publication, url_d
     (assets / "site.css").write_bytes((donnees / "site.css").read_bytes())
     for police in _POLICES:
         (assets / "polices" / police).write_bytes((donnees / "polices" / police).read_bytes())
+
+    if cours.logo:  # l'accueil ne dépend pas de la fiche : le logo vit à côté de site.css
+        logo = sortie / "assets" / "logo" / cours.logo
+        logo.parent.mkdir(parents=True, exist_ok=True)
+        logo.write_bytes((racine / "slides" / "img" / cours.logo).read_bytes())
 
     images = racine / "slides" / "img"
     if images.is_dir():
