@@ -19,6 +19,7 @@ from cielircours.config import Cours
 from cielircours.mdtext import Mode, rendre_corps
 from cielircours.rendu import Publication, _environnement
 from cielircours.sommaire import poser_sommaire
+from cielircours.supports import Support, filtrer
 from cielircours.titre import retirer_titre
 
 # polices réellement employées par site.css
@@ -37,7 +38,8 @@ def rendre_fiche(source: str, cours: Cours, pub: Publication, url_depot: str) ->
 
     Le corps reçoit une ancre par titre de partie, et le sommaire en tête y mène.
     """
-    corps, parties = poser_sommaire(rendre_corps(retirer_titre(source, cours), Mode.COMPLET))
+    ecran = filtrer(retirer_titre(source, cours), Support.ECRAN)
+    corps, parties = poser_sommaire(rendre_corps(ecran, Mode.COMPLET))
     return _environnement().from_string(_gabarit("fiche.html.j2")).render(
         feuille="../assets/site.css",
         accueil="../",

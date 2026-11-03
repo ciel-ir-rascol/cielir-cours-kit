@@ -115,6 +115,36 @@ Un paragraphe immédiatement suivi d'un tableau, d'une figure ou d'un bloc de co
 
 Dans un SVG, tout élément portant la classe `remplissable` est **retiré** du document à trous. Un seul schéma sert donc aux deux versions : les étiquettes à compléter disparaissent de l'exemplaire des étudiants.
 
+### Les passages réservés à un support
+
+Un cours s'écrit une fois mais sort sur deux supports qui n'ont pas les mêmes contraintes : la fiche imprimée est compacte et porte des consignes de geste, la page web peut dérouler un développement que quatre pages ne tiendraient pas.
+
+```markdown
+<div class="ecran">
+
+Ce développement n'apparaît que sur la fiche en ligne.
+
+</div>
+
+<div class="papier">
+
+*Écrivez maintenant, à la main, le code qui correspond à chaque demande :*
+
+</div>
+```
+
+| | `cours.pdf` | `cours-a-trous.pdf` | la fiche en ligne |
+| --- | :---: | :---: | :---: |
+| non marqué | ✓ | ✓ | ✓ |
+| `class="ecran"` | — | — | ✓ |
+| `class="papier"` | ✓ | ✓ | — |
+
+La balise ouvrante est **seule sur sa ligne**, et son `</div>` la referme ; les `<div>` imbriqués sont comptés, donc un bloc de colonnes à l'intérieur ne l'interrompt pas. Pour une incise au milieu d'une phrase, `<span class="ecran">…</span>` sur une seule ligne.
+
+Le passage de l'autre support est **retiré**, jamais masqué : du CSS laisserait le texte dans le document, et le kit a déjà tranché ainsi pour les étiquettes des schémas. Une marque non refermée, ou que le filtre ne sait pas lire, **arrête la génération** — sinon un bloc entier disparaîtrait d'un document sans que rien ne le signale.
+
+Le `<div>` a été préféré à une syntaxe `:::` parce qu'il se dégrade bien : sur GitHub, dans VS Code, dans n'importe quel rendu markdown, le contenu s'affiche et la marque reste invisible.
+
 ## Publier un cours
 
 Copier `gabarits/publier.yml` dans `.github/workflows/publier.yml`, régler une fois *Settings > Pages > Source* sur « GitHub Actions », puis pousser un tag :
