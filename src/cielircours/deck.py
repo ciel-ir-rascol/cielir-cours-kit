@@ -175,7 +175,7 @@ def _marque_github() -> str:
     version blanche est celle que GitHub fournit pour les fonds sombres, et la page de titre
     en est un.
     """
-    octets = (files("cielircours.donnees") / "images" / "github-mark.svg").read_bytes()
+    octets = (files("cielircours.donnees") / "images" / "github-mark-blanc.svg").read_bytes()
     return "data:image/svg+xml;base64," + base64.b64encode(octets).decode("ascii")
 
 

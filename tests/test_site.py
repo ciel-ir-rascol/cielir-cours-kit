@@ -219,3 +219,19 @@ def test_une_reponse_sur_fond_sombre_reste_lisible():
         for sombre in ((0x0B, 0x4F, 0x6C), (0x1E, 0x24, 0x30)):  # --c-primaire, --c-code-fond
             melange = tuple(round(v * alpha + s * (1 - alpha)) for v, s in zip(voile, sombre))
             assert _contraste((255, 255, 255), melange) >= 4.5, (sel, melange)
+
+def test_le_pied_de_la_fiche_porte_la_marque_github_devant_le_lien(site):
+    fiche = (site / "fiche" / "index.html").read_text(encoding="utf-8")
+    pied = re.search(r'<footer class="pied-page">.*?</footer>', fiche, re.DOTALL).group(0)
+    assert '<img class="marque-github" src="../assets/github-mark.svg"' in pied
+    assert pied.index("marque-github") < pied.index("github.com/ciel-ir-rascol")
+    # la marque est servie avec le site : rien ne vient du réseau
+    assert (site / "assets" / "github-mark.svg").exists()
+
+
+def test_la_marque_du_pied_est_la_variante_noire_le_fond_de_la_fiche_etant_clair(site):
+    """Le diaporama prend la blanche, sa page de titre étant sombre : les deux coexistent."""
+    servie = (site / "assets" / "github-mark.svg").read_bytes()
+    donnees = files("cielircours.donnees") / "images"
+    assert servie == (donnees / "github-mark-noir.svg").read_bytes()
+    assert servie != (donnees / "github-mark-blanc.svg").read_bytes()

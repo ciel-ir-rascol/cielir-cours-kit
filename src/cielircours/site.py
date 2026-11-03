@@ -77,6 +77,9 @@ def ecrire_site(source: str, racine: Path, cours: Cours, pub: Publication, url_d
     assets = sortie / "assets"
     (assets / "polices").mkdir(parents=True, exist_ok=True)
     (assets / "site.css").write_bytes((donnees / "site.css").read_bytes())
+    # la marque GitHub du pied de la fiche : variante noire, le fond de la page est clair
+    marque = files("cielircours.donnees") / "images" / "github-mark-noir.svg"
+    (assets / "github-mark.svg").write_bytes(marque.read_bytes())
     for police in _POLICES:
         (assets / "polices" / police).write_bytes((donnees / "polices" / police).read_bytes())
 
