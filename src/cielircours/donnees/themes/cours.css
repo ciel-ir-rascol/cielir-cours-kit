@@ -66,7 +66,9 @@ strong { font-weight: 700; }
 a { color: inherit; text-decoration: none; }
 ul, ol { margin: 2pt 0 4pt; padding-left: 14pt; }
 li { margin: 0; }
-h3 { font-size: 10.5pt; margin: 7pt 0 2pt; break-after: avoid; }
+h3 { font-size: 10.5pt; margin: 9pt 0 2pt; break-after: avoid; }
+/* le numéro de sous-partie, en couleur d'accent : il la détache du texte sur une page dense */
+h3::before { content: counter(partie) "." counter(souspartie) "\00a0\00a0"; color: #d9661f; }
 /* phrase d'amorce : posée à la génération (plugins/amorces.py) sur le paragraphe qui annonce un
    tableau, une figure ou un bloc de code ; elle reste avec lui */
 p.amorce { break-after: avoid; }
@@ -118,6 +120,8 @@ h2, .bande {
   break-after: avoid;
 }
 h2::before, .bande::before { content: counter(partie) ". "; }
+h2, .bande { counter-reset: souspartie; }
+h3 { counter-increment: souspartie; }
 .capacites h2 { counter-increment: none; }
 
 /* ---------- Trous et lignes de réponse ---------- */
@@ -173,6 +177,16 @@ body.mode-trous .remplissable { visibility: hidden; }
 .alerte > :last-child { margin-bottom: 0; }
 .alerte p { margin: 0 0 2pt; }
 .alerte__titre { font-weight: 700; font-size: 8.5pt; text-transform: uppercase; letter-spacing: 0.06em; }
+/* Un signe avant le mot : il se repère avant d'être lu, et distingue les cinq niveaux d'un
+   coup d'œil là où la seule teinte de fond demandait de comparer. Les cinq caractères sont
+   choisis dans la couverture de DejaVu Sans, la police de secours de WeasyPrint : ni 💡, ni ❗,
+   ni ⛔ n'y sont, et ils sortiraient en carré vide sur le PDF. Même jeu à l'écran, pour que le
+   même encadré porte le même signe en cours et à la maison. */
+.alerte--note .alerte__titre::before { content: "ℹ\00a0\00a0"; color: inherit; }
+.alerte--astuce .alerte__titre::before { content: "✔\00a0\00a0"; color: inherit; }
+.alerte--important .alerte__titre::before { content: "‼\00a0\00a0"; color: inherit; }
+.alerte--attention .alerte__titre::before { content: "⚠\00a0\00a0"; color: inherit; }
+.alerte--danger .alerte__titre::before { content: "⊘\00a0\00a0"; color: inherit; }
 .alerte--note { background: #f1fbff; }
 .alerte--astuce { background: #c6eac8; }
 .alerte--important { background: #dcc982; }

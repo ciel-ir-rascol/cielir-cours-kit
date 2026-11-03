@@ -35,8 +35,16 @@
 <nav class="sommaire" aria-label="Sommaire">
   <h2>Sommaire</h2>
   <ol>
-  {% for ancre, intitule in sommaire %}
-    <li><a href="#{{ ancre }}">{{ intitule }}</a></li>
+  {% for ancre, intitule, sous_parties in sommaire %}
+    <li><a href="#{{ ancre }}">{{ intitule }}</a>
+    {% if sous_parties %}
+      <ol>
+      {% for sous_ancre, sous_intitule in sous_parties %}
+        <li><a href="#{{ sous_ancre }}">{{ sous_intitule }}</a></li>
+      {% endfor %}
+      </ol>
+    {% endif %}
+    </li>
   {% endfor %}
   </ol>
 </nav>

@@ -19,28 +19,28 @@ URL = "https://github.com/ciel-ir-rascol/cpp-c04-tableauxVecteurs"
 
 def test_chaque_titre_de_partie_recoit_son_ancre():
     corps, parties = poser_sommaire("<h2>Les tableaux statiques</h2><p>x</p><h2>Les vecteurs</h2>")
-    assert parties == [("les-tableaux-statiques", "Les tableaux statiques"),
-                       ("les-vecteurs", "Les vecteurs")]
+    assert parties == [("les-tableaux-statiques", "Les tableaux statiques", []),
+                       ("les-vecteurs", "Les vecteurs", [])]
     assert '<h2 id="les-tableaux-statiques">Les tableaux statiques</h2>' in corps
     assert '<h2 id="les-vecteurs">Les vecteurs</h2>' in corps
 
 
 def test_l_ancre_est_en_ascii_malgre_accents_et_ponctuation():
     _, parties = poser_sommaire("<h2>À vous de jouer : les tableaux !</h2>")
-    ancre, intitule = parties[0]
+    ancre, intitule, _sous = parties[0]
     assert ancre == "a-vous-de-jouer-les-tableaux"
     assert intitule == "À vous de jouer : les tableaux !"  # l'intitulé, lui, garde ses accents
 
 
 def test_deux_titres_identiques_recoivent_des_ancres_distinctes():
     corps, parties = poser_sommaire("<h2>À vous de jouer</h2><h2>À vous de jouer</h2>")
-    assert [a for a, _ in parties] == ["a-vous-de-jouer", "a-vous-de-jouer-2"]
+    assert [a for a, _, _ in parties] == ["a-vous-de-jouer", "a-vous-de-jouer-2"]
     assert corps.count('id="a-vous-de-jouer"') == 1
 
 
 def test_les_balises_d_un_titre_ne_passent_pas_dans_l_intitule():
     corps, parties = poser_sommaire("<h2>Le mot <code>const</code></h2>")
-    assert parties == [("le-mot-const", "Le mot const")]
+    assert parties == [("le-mot-const", "Le mot const", [])]
     assert "<code>const</code></h2>" in corps  # le titre affiché garde sa mise en forme
 
 
@@ -55,10 +55,27 @@ def test_un_titre_portant_deja_un_id_arrete_la_generation():
         poser_sommaire('<h2 id="deja">Partie</h2>')
 
 
-def test_les_titres_de_niveau_3_ne_sont_pas_au_sommaire():
-    # le sommaire donne le plan du cours, pas sa table complète
-    _, parties = poser_sommaire("<h2>Partie</h2><h3>Sous-partie</h3>")
-    assert [i for _, i in parties] == ["Partie"]
+def test_les_sous_parties_se_rattachent_a_leur_partie():
+    corps, parties = poser_sommaire(
+        "<h2>Les vecteurs</h2><h3>Définition</h3><h3>Les méthodes</h3><h2>L'essentiel</h2>")
+    assert parties == [
+        ("les-vecteurs", "Les vecteurs", [("definition", "Définition"),
+                                          ("les-methodes", "Les méthodes")]),
+        ("l-essentiel", "L'essentiel", []),
+    ]
+    assert '<h3 id="definition">Définition</h3>' in corps
+
+
+def test_un_titre_de_niveau_4_ne_figure_pas_au_plan():
+    # le sommaire s'arrête aux sous-parties
+    corps, parties = poser_sommaire("<h2>Partie</h2><h4>Détail</h4>")
+    assert parties == [("partie", "Partie", [])]
+    assert "<h4>Détail</h4>" in corps  # laissé tel quel, sans ancre
+
+
+def test_une_sous_partie_avant_toute_partie_tient_son_rang_seule():
+    _, parties = poser_sommaire("<h3>Orpheline</h3><h2>Partie</h2>")
+    assert [i for _, i, _ in parties] == ["Orpheline", "Partie"]
 
 
 def _fiche(source):

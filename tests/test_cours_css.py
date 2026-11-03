@@ -1,4 +1,5 @@
 import re
+from importlib.resources import files
 from itertools import combinations
 from pathlib import Path
 
@@ -228,3 +229,21 @@ def test_la_phrase_d_amorce_reste_avec_son_tableau_a_tous_les_sauts_de_page(tmp_
         if _page_de(pages, classe="amorce") != _page_de(pages, balise="table"):
             separees += 1
     assert separees == 0
+
+# Caractères que DejaVu Sans — la police de secours de WeasyPrint — sait rendre. Un signe hors
+# de cette liste sort en carré vide sur le PDF : 💡, ❗ et ⛔ en font partie, et c'est ainsi
+# qu'on s'en est aperçu. Élargir la liste demande de vérifier la couverture, pas de deviner.
+SIGNES_SURS = set("ℹ✔✓‼⚠⊘⊗✖✗★✎☞➤●◆☠☢⚡")
+
+
+def test_les_signes_des_encadres_sont_rendus_par_la_police_de_secours():
+    """Les deux feuilles, parce qu'un même encadré doit porter le même signe sur les deux supports."""
+    site = (Path(str(files("cielircours.donnees") / "themes" / "site.css"))).read_text(encoding="utf-8")
+    jeux = {}
+    for nom, feuille in (("cours.css", COURS_CSS.read_text(encoding="utf-8")), ("site.css", site)):
+        trouves = dict(re.findall(r'\.alerte--(\w+) \.alerte__titre::before \{ content: "(.)', feuille))
+        assert set(trouves) == {"note", "astuce", "important", "attention", "danger"}, nom
+        for classe, signe in trouves.items():
+            assert signe in SIGNES_SURS, f"{nom} : {classe} emploie « {signe} », hors couverture DejaVu"
+        jeux[nom] = trouves
+    assert jeux["cours.css"] == jeux["site.css"], "les deux supports doivent porter les mêmes signes"

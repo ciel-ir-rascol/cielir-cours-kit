@@ -4,13 +4,15 @@ Seule la fiche à l'écran en reçoit un. Sur le papier, les bandeaux de partie 
 coup d'œil en feuilletant quatre pages, et un sommaire coûterait de la place à une fiche qu'on
 veut compacte ; une page web, elle, se parcourt au clic. Le chemin du PDF n'est pas touché.
 
-Le sommaire s'arrête aux titres de niveau 2 : il donne le plan du cours, pas sa table complète.
+Le sommaire porte les parties (`##`) et leurs sous-parties (`###`), et s'arrête là : un `####`
+n'y figure pas. La numérotation, elle, est faite par la feuille de style avec des compteurs CSS,
+des deux côtés — le plan et les titres ne peuvent donc pas diverger.
 """
 
 import re
 import unicodedata
 
-_H2 = re.compile(r"<h2(?P<attributs>[^>]*)>(?P<contenu>.*?)</h2>", re.DOTALL)
+_TITRE = re.compile(r"<h(?P<niveau>[23])(?P<attributs>[^>]*)>(?P<contenu>.*?)</h(?P=niveau)>", re.DOTALL)
 _BALISE = re.compile(r"<[^>]+>")
 
 
@@ -29,30 +31,44 @@ def _ancre(intitule: str, prises: set[str]) -> str:
     return ancre
 
 
-def poser_sommaire(corps: str) -> tuple[str, list[tuple[str, str]]]:
-    """Renvoie `(corps ancré, [(ancre, intitulé), …])` pour les titres de niveau 2 du corps.
+Partie = tuple[str, str, list[tuple[str, str]]]
 
-    Lève `ValueError` si une balise `<h2` du corps n'a pas été reconnue : mieux vaut arrêter la
-    génération qu'un sommaire incomplet, qui mènerait l'étudiant vers une ancre inexistante.
+
+def poser_sommaire(corps: str) -> tuple[str, list[Partie]]:
+    """Renvoie `(corps ancré, [(ancre, intitulé, sous-parties), …])`.
+
+    Les titres de niveau 2 sont les parties, ceux de niveau 3 les sous-parties, rattachées à la
+    partie qui les précède. Le sommaire s'arrête là : un `####` ne figure pas au plan.
+
+    Lève `ValueError` si une balise `<h2` ou `<h3` du corps n'a pas été reconnue : mieux vaut
+    arrêter la génération qu'un sommaire incomplet, qui mènerait vers une ancre inexistante.
     """
-    trouves = list(_H2.finditer(corps))
-    if len(trouves) != corps.count("<h2"):
+    trouves = list(_TITRE.finditer(corps))
+    attendus = corps.count("<h2") + corps.count("<h3")
+    if len(trouves) != attendus:
         raise ValueError(
-            f"sommaire : {corps.count('<h2')} balises <h2 dans le corps mais {len(trouves)} "
+            f"sommaire : {attendus} balises <h2 ou <h3 dans le corps mais {len(trouves)} "
             "reconnues (titre mal formé ou à cheval sur plusieurs balises)"
         )
-    if any(m.group("attributs").find("id=") != -1 for m in trouves):
-        raise ValueError("sommaire : un titre de partie porte déjà un attribut id")
+    if any("id=" in m.group("attributs") for m in trouves):
+        raise ValueError("sommaire : un titre porte déjà un attribut id")
 
     prises: set[str] = set()
-    parties: list[tuple[str, str]] = []
+    parties: list[Partie] = []
     morceaux: list[str] = []
     fin = 0
     for m in trouves:
-        intitule = _texte(m.group("contenu"))
+        niveau, intitule = m.group("niveau"), _texte(m.group("contenu"))
         ancre = _ancre(intitule, prises)
-        parties.append((ancre, intitule))
-        morceaux += [corps[fin:m.start()], f'<h2 id="{ancre}"{m.group("attributs")}>{m.group("contenu")}</h2>']
+        if niveau == "2" or not parties:
+            # un `###` qui précède tout `##` n'a pas de parent : il tient son rang seul
+            parties.append((ancre, intitule, []))
+        else:
+            parties[-1][2].append((ancre, intitule))
+        morceaux += [
+            corps[fin:m.start()],
+            f'<h{niveau} id="{ancre}"{m.group("attributs")}>{m.group("contenu")}</h{niveau}>',
+        ]
         fin = m.end()
     morceaux.append(corps[fin:])
     return "".join(morceaux), parties

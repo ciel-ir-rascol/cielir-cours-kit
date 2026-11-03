@@ -74,7 +74,20 @@ h2 {
   padding-bottom: 0.15em;
   border-bottom: 3px solid var(--c-accent);
 }
-h3 { font-size: 1.1rem; margin: 1.5em 0 0.4em; }
+h3 { font-size: 1.22rem; margin: 2.2em 0 0.5em; }
+
+/* ---------- Numérotation des titres ----------
+   Les compteurs vivent dans `.corps`, donc ni les capacités ni le sommaire — qui ont eux
+   aussi un `h2` — ne les font avancer. Le numéro d'une sous-partie est en couleur d'accent :
+   il la détache du texte, ce que sa seule taille ne suffisait pas à faire. */
+.corps { counter-reset: partie; }
+.corps h2 { counter-increment: partie; counter-reset: souspartie; }
+.corps h2::before { content: counter(partie) ". "; }
+.corps h3 { counter-increment: souspartie; }
+.corps h3::before {
+  content: counter(partie) "." counter(souspartie) "\00a0\00a0";
+  color: var(--c-accent);
+}
 h4 { font-size: 1rem; margin: 1.2em 0 0.3em; }
 
 /* ---------- En-tête de la fiche, pied de page ---------- */
@@ -116,8 +129,18 @@ h4 { font-size: 1rem; margin: 1.2em 0 0.3em; }
   background: var(--c-code-clair);
 }
 .sommaire h2 { font-size: 1rem; margin: 0 0 0.3em; padding: 0; border: none; }
-.sommaire ol { margin: 0; padding-left: 1.4em; }
-.sommaire li { margin: 0.15em 0; }
+/* Numéroté par compteurs plutôt que par la puce native : le niveau 2 doit s'écrire « 2.1 »,
+   et les deux compteurs suivent l'ordre des titres, donc le plan ne peut pas diverger d'eux. */
+.sommaire ol { margin: 0; padding-left: 0; list-style: none; }
+.sommaire > ol { counter-reset: s-partie; }
+.sommaire > ol > li { counter-increment: s-partie; margin: 0.25em 0; }
+.sommaire > ol > li::before { content: counter(s-partie) ". "; color: var(--c-attenue); }
+.sommaire ol ol { counter-reset: s-souspartie; padding-left: 1.6em; margin: 0.1em 0 0.4em; }
+.sommaire ol ol li { counter-increment: s-souspartie; margin: 0.1em 0; font-size: 0.95rem; }
+.sommaire ol ol li::before {
+  content: counter(s-partie) "." counter(s-souspartie) "\00a0";
+  color: var(--c-attenue);
+}
 .sommaire a { text-decoration: none; }
 .sommaire a:hover { text-decoration: underline; }
 /* une ancre ne colle pas au bord haut de la fenêtre quand on y saute */
@@ -185,6 +208,16 @@ td .reponse { background: var(--c-reponse-fond-code); }
 .alerte--important { background: #f6efd6; border-left-color: #b09322; }
 .alerte--attention { background: var(--c-accent-clair); border-left-color: var(--c-accent); }
 .alerte--danger { background: #f9e4e3; border-left-color: #b8403c; }
+/* Un signe avant le mot : il se repère avant d'être lu, et distingue les cinq niveaux d'un
+   coup d'œil là où la seule teinte de fond demandait de comparer. Les cinq caractères sont
+   choisis dans la couverture de DejaVu Sans, la police de secours de WeasyPrint : ni 💡, ni ❗,
+   ni ⛔ n'y sont, et ils sortiraient en carré vide sur le PDF. Même jeu à l'écran, pour que le
+   même encadré porte le même signe en cours et à la maison. */
+.alerte--note .alerte__titre::before { content: "ℹ\00a0\00a0"; color: inherit; }
+.alerte--astuce .alerte__titre::before { content: "✔\00a0\00a0"; color: inherit; }
+.alerte--important .alerte__titre::before { content: "‼\00a0\00a0"; color: inherit; }
+.alerte--attention .alerte__titre::before { content: "⚠\00a0\00a0"; color: inherit; }
+.alerte--danger .alerte__titre::before { content: "⊘\00a0\00a0"; color: inherit; }
 
 /* ---------- Code en ligne, blocs de code et de terminal ---------- */
 code, pre, kbd, samp { font-family: var(--police-code); }
