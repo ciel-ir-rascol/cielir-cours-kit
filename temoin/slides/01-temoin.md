@@ -78,3 +78,10 @@ Tu as 17 ans.
 
 > `cin` laisse le retour à la ligne dans le tampon : une lecture de texte qui suit peut échouer.
 
+---
+
+## Crédits des images
+
+| Image | Auteur | Licence | Source |
+| --- | --- | --- | --- |
+| Schéma de la chaîne de construction | Création originale du kit | — | ce dépôt |
