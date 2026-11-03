@@ -1,7 +1,7 @@
 name: Publier un cours CIEL-IR
 description: >-
   Contrôle l'absence d'information personnelle, puis produit slides.pdf, cours.pdf,
-  cours-a-trous.pdf et le HTML des slides dans dist/. Licence CC BY-NC-SA 4.0.
+  cours-a-trous.pdf et le HTML des slides dans dist/.
 
 inputs:
   version:

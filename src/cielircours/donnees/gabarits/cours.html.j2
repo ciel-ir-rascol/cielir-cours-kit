@@ -9,7 +9,7 @@
 
 <div class="entete"><span class="entete-gauche">{{ cours.sequence }}</span><span class="entete-droit">{{ cours.titre }}</span></div>
 <div class="pied-gauche">{{ cours.discipline }} – {{ cours.classe }}</div>
-<div class="pied-droit">{{ cours.etablissement }} · {{ licence }}</div>
+<div class="pied-droit">{{ cours.etablissement }} · {{ cours.auteur }}</div>
 
 <header class="cartouche">
   <div class="cartouche-ligne">
@@ -41,10 +41,6 @@
 <main class="corps">
 {{ corps | safe }}
 </main>
-
-<footer class="licence">
-  Ce document est publié sous licence {{ licence }}.
-</footer>
 
 </body>
 </html>

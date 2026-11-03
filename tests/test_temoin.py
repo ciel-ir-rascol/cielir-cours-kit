@@ -195,6 +195,25 @@ def test_le_deck_du_temoin_recoit_la_version(tmp_path):
     assert "footer: 'Informatique · Témoin du kit · 1CIELIR · v1.01 du 29.10.26'" in texte  # pied déduit de cours.yml
 
 
+def test_aucune_sortie_du_temoin_ne_porte_la_licence_de_l_auteur(pdfs, tmp_path):
+    sortie = tmp_path / "deck.md"
+    assert main(["deck", str(TEMOIN / "slides" / "01-temoin.md"), "--version", VERSION,
+                 "--date", DATE, "-o", str(sortie)]) == 0
+    sorties = [_html(Mode.COMPLET), _html(Mode.TROUS), sortie.read_text(encoding="utf-8"),
+               _texte(pdfs / "complet.pdf"), _texte(pdfs / "trous.pdf")]
+    for texte in sorties:
+        assert "CC BY-NC-SA" not in texte and "creativecommons" not in texte
+
+
+def test_les_deux_fiches_et_le_deck_du_temoin_sont_signes(pdfs, tmp_path):
+    for mode in ("complet", "trous"):
+        assert "Lycée Louis Rascol, Albi · J.Serrand" in _norme(_texte(pdfs / f"{mode}.pdf"))
+    sortie = tmp_path / "deck.md"
+    assert main(["deck", str(TEMOIN / "slides" / "01-temoin.md"), "--version", VERSION,
+                 "--date", DATE, "-o", str(sortie)]) == 0
+    assert "J.Serrand\\\n" in sortie.read_text(encoding="utf-8")
+
+
 # ---------- le Makefile ----------
 
 def test_le_makefile_epingle_marp_et_desactive_le_bac_a_sable():

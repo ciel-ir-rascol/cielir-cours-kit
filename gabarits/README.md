@@ -2,12 +2,15 @@
 Gabarit du README d'un dépôt de cours. À copier en README.md, puis remplacer tout ce qui
 est entre guillemets «…» et supprimer ce commentaire.
 
-Trois règles qui ne se négocient pas :
+Quatre règles qui ne se négocient pas :
   1. aucune information personnelle — ni nom d'enseignant, ni courriel, ni téléphone ;
   2. aucune version ni date ici — elles ne vivent que dans les documents de la release ;
-  3. les crédits d'images sont obligatoires, avec auteur, licence et source.
+  3. les crédits d'images sont obligatoires, avec auteur, licence et source ;
+  4. le nom de l'auteur vient de cours.yml (`auteur`) : il paraît sur les supports par les soins
+     du kit et ne se saisit jamais dans le README.
 
 La classe s'écrit 1CIELIR ou 2CIELIR, comme dans cours.yml. Le diaporama part de gabarits/deck.md.
+Le TP se nomme par le nom de son dépôt (`cpp-tp03-tableauxVecteurs`), jamais par le titre de son README.
 -->
 
 # «Séquence» — c«NN» : «Titre de la séance»
@@ -17,7 +20,7 @@ La classe s'écrit 1CIELIR ou 2CIELIR, comme dans cours.yml. Le diaporama part d
 📽️ **Les slides : <https://ciel-ir-rascol.github.io/«nom-du-depot»/>**
 📄 **Les fiches en PDF : [dernière release](https://github.com/ciel-ir-rascol/«nom-du-depot»/releases/latest)**
 
-Cours d'environ **«durée»** qui introduit le TP «dépôt du TP». Public : «ce que les étudiants savent déjà, ou pas».
+Cours d'environ **«durée»** qui introduit le TP «nom-du-depot-du-tp». Public : «ce que les étudiants savent déjà, ou pas».
 
 Le dépôt contient :
 
@@ -81,10 +84,5 @@ L'outillage vit dans [`cielir-cours-kit`](https://github.com/ciel-ir-rascol/ciel
 | Image | Auteur | Licence | Source |
 | --- | --- | --- | --- |
 | «image» | «auteur» | «licence» | [«où»](«URL») |
-| Schémas (`slides/img/*.svg`) | auteur du cours | CC BY-NC-SA 4.0 | ce dépôt |
 
-«Les licences propres des images s'appliquent indépendamment de celle du cours.»
-
-## Licence
-
-[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr)
+«Chaque image reste soumise à sa licence propre, indiquée ci-dessus.»

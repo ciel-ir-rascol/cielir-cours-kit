@@ -86,4 +86,4 @@ jobs:
             dist/slides.pdf dist/cours.pdf dist/cours-a-trous.pdf \
             --repo "$GITHUB_REPOSITORY" \
             --title "$TAG" \
-            --notes "Version $TAG du cours. Générée avec le kit $KIT (CC BY-NC-SA 4.0)."
+            --notes "Version $TAG du cours. Générée avec le kit $KIT."

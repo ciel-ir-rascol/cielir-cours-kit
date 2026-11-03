@@ -30,7 +30,7 @@ def test_le_cartouche_porte_les_metadonnees(cours, pub):
         "Capacités attendues",
         "Manipuler un tableau",
         "Utiliser un vecteur",
-        "CC BY-NC-SA 4.0",
+        "J.Serrand",
     ):
         assert attendu in html
 
@@ -105,3 +105,21 @@ def test_image_distante_est_refusee(cours, pub, tmp_path, url):
     with pytest.raises(SchemeInterdit, match="exemple.invalid"):
         ecrire_pdf(html, tmp_path, tmp_path / "x.pdf", Mode.COMPLET)
     assert not (tmp_path / "x.pdf").exists()
+
+
+@pytest.mark.parametrize("mode", [Mode.COMPLET, Mode.TROUS])
+def test_le_pied_de_page_porte_la_signature_de_l_auteur(cours, pub, mode):
+    html = rendre_html("# T", cours, pub, mode)
+    assert '<div class="pied-droit">Lycée Louis Rascol, Albi · J.Serrand</div>' in html
+
+
+@pytest.mark.parametrize("mode", [Mode.COMPLET, Mode.TROUS])
+def test_aucune_licence_de_l_auteur_sur_la_fiche(cours, pub, mode):
+    html = rendre_html("# T", cours, pub, mode)
+    assert "CC BY-NC-SA" not in html and "creativecommons" not in html
+    assert 'class="licence"' not in html
+
+
+def test_un_credit_d_image_d_autrui_garde_sa_licence(cours, pub):
+    source = "<span class=\"credit\">Jason Long, CC BY 3.0</span>"
+    assert "CC BY 3.0" in rendre_html(source, cours, pub, Mode.COMPLET)

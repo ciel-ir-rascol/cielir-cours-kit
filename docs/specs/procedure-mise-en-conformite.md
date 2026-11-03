@@ -10,7 +10,7 @@ Prérequis : le kit à jour (`/home/joris/repos/cielir/cielir-cours-kit`), `gh` 
 
 Décisions déjà prises, à ne pas rediscuter :
 
-- pas de fichier `LICENSE` dans un dépôt de cours ; la licence est nommée dans le README ;
+- pas de fichier `LICENSE` dans un dépôt de cours ; les supports ne portent aucune licence de l'auteur (ni README, ni fiches, ni slides) ; seuls les crédits d'images d'autrui gardent leur licence ;
 - le README vient de `gabarits/README.md`, rempli à la main ;
 - plus de dépôt `-CORR` pour un cours : la version remplie est `cours.pdf` dans la release ;
 - publication sur tag uniquement ; l'ancien workflow de publication sur `main` disparaît ;
@@ -59,11 +59,12 @@ Ce qu'on garde : le deck Marp (`slides/NN-*.md`) et `slides/img/`. Le thème n'e
 
 ### 1.3 `cours.yml`
 
-Champs exacts de la dataclasse `Cours` (`src/cielircours/config.py`) : `sequence`, `bloc`, `slug`, `titre`, `discipline`, `classe`, `etablissement`, `duree`, `tp`, `capacites`.
+Champs exacts de la dataclasse `Cours` (`src/cielircours/config.py`) : `sequence`, `sequence_libelle`, `auteur`, `bloc`, `slug`, `titre`, `discipline`, `classe`, `etablissement`, `duree`, `tp`, `capacites`.
 
 ```yaml
 sequence: git
 sequence_libelle: Git et GitHub      # intitulé lisible, affiché sur la page de titre du deck
+auteur: J.Serrand                    # obligatoire : signature du support (pied des fiches, page de titre du deck)
 bloc: 1
 slug: decouverte
 titre: Découverte de Git et GitHub
@@ -114,7 +115,7 @@ Table de conversion, telle qu'appliquée :
 | `\includegraphics` + `\credit` | `<img … style="…">` + ligne de crédit en italique |
 | `\begin{tikzpicture}` | SVG redessiné, voir §3.3 |
 | `\begin{terminal}` | bloc ```` ```terminal ```` ; un `\trou` y devient `<ins>x</ins>`, voir §3.2 |
-| `\capacites`, `\licence`, `\maketitle`, `\introduction` | `cours.yml` / pied de page du kit / cartouche du kit / premier paragraphe |
+| `\capacites`, `\licence`, `\maketitle`, `\introduction` | `cours.yml` / supprimé (plus de licence de l'auteur ; le pied du kit porte la signature `auteur`) / cartouche du kit / premier paragraphe |
 
 Exemples de transcription littérale : `$\neq$` → `≠`, `$=$` → `=`, `\dots` → `…`, `\textasciitilde` → `~`, `\_` → `_`, `\#` → `#`.
 
@@ -213,7 +214,7 @@ Contrôles, dans cet ordre :
 2. **Fuite de réponses** dans le PDF à trous, par script : extraire les textes des `<ins>` du `COURS.md`, chercher dans le texte du PDF à trous ceux de 5 caractères et plus qui n'existent pas dans le texte fixe ; chercher aussi les étiquettes des SVG (qui doivent être à 0 occurrence si elles ne figurent pas ailleurs dans le texte).
 3. **Niveaux de gris** (`csGRAY`) : les encadrés et les réponses se distinguent-ils sans couleur ?
 4. **Slides** : même nombre de pages que l'original ; comparer le texte page à page avec le PDF d'origine en ignorant le pied de page (la version y est injectée). Seules les modifications voulues doivent ressortir.
-5. **Pagination** : pas de dernière page ne contenant que le pied de licence. Ici la fiche fait 4 pages (complet) et 5 (à trous) : un cours d'une heure bien fourni, bien au-delà de la fiche compacte de deux pages visée par le modèle de densité de la spec (§6.5). C'est le volume du cours, une décision de l'enseignant, pas un défaut du kit. La version à trous est plus longue que la complète (interligne 1,7) : une dernière page orpheline apparaît dans l'une et pas dans l'autre.
+5. **Pagination** : pas de dernière page orpheline (la fiche ne porte plus de pied de licence). Ici la fiche fait 4 pages (complet) et 5 (à trous) : un cours d'une heure bien fourni, bien au-delà de la fiche compacte de deux pages visée par le modèle de densité de la spec (§6.5). C'est le volume du cours, une décision de l'enseignant, pas un défaut du kit. La version à trous est plus longue que la complète (interligne 1,7) : une dernière page orpheline apparaît dans l'une et pas dans l'autre.
 6. **Consignes et exercices** : une phrase qui annonce un tableau, une figure ou un bloc de code reste avec lui (le kit pose `break-after: avoid` sur ce paragraphe). Conséquence à attendre : un blanc plus grand en bas de la page précédente, quand le tableau est haut. Vérifier qu'il reste raisonnable.
 
 

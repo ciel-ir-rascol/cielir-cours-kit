@@ -81,9 +81,9 @@ hyperion est headless, piloté en SSH. Il dispose de **Docker** et de **uv**. Il
 - **WeasyPrint** pour le PDF du cours. Python, installable par pip, sans LaTeX. Il gère la pagination CSS : en-tête et pied de page récurrents, numérotation, sauts de page contrôlés, sommaire.
 - Le convertisseur markdown doit gérer les **alertes GitHub** (`> [!NOTE]`, `> [!WARNING]`, `> [!TIP]`, `> [!IMPORTANT]`), qu'aucune bibliothèque ne connaît nativement.
 
-### Licence
+### Licence et signature
 
-CC BY-NC-SA 4.0, mentionnée dans le `README.md` et dans le pied de page du document papier.
+*Décision révisée (tâche 16, par l'enseignant) :* les supports ne portent plus aucune licence de l'auteur (ni dans le `README.md`, ni dans le pied de page du document papier, ni dans les slides). Ils sont signés du nom de l'auteur, champ `auteur` de `cours.yml`, obligatoire : pied de page de chaque page des deux fiches (`<établissement> · <auteur>`) et page de titre du diaporama, entre la release et le lien du dépôt. Les crédits d'images d'autrui, avec leur licence, restent obligatoires : c'est la condition d'usage de ces images. Le nom de l'auteur n'est pas une donnée de contact ; il ne doit pas figurer dans la liste `noms` de `motifs.yml`.
 
 ---
 
@@ -105,7 +105,7 @@ Exemples : `linux-c06-scriptsBash`, `git-c01-decouverte`, `cpp-c03-tableauxVecte
 
 ```text
 linux-c06-scriptsBash/
-├── README.md              présentation, déroulé, liens, licence
+├── README.md              présentation, déroulé, liens, crédits
 ├── cours.yml              métadonnées du bloc
 ├── COURS.md               le cours — source unique du document papier
 ├── slides/
@@ -118,7 +118,7 @@ linux-c06-scriptsBash/
 
 Pas de `themes/`, pas de `build.sh`, pas de `scripts/`, pas de `output/`, pas de `workspace_LaTex/`. Un `.vscode/settings.json` déclare le thème `ciel` par son URL dans le kit, pour l'aperçu Marp dans VS Code.
 
-`cours.yml` porte ce que le cartouche, les en-têtes et la page de titre des slides affichent : séquence et son libellé lisible (`sequence_libelle`), numéro de bloc, titre, discipline, classe (`1CIELIR` ou `2CIELIR`), établissement, durée, TP associé, capacités attendues, et, facultatif, un logo (`logo`, image de `slides/img/`). Son implémentation : la dataclasse `Cours` de `src/cielircours/config.py`.
+`cours.yml` porte ce que le cartouche, les en-têtes et la page de titre des slides affichent : séquence et son libellé lisible (`sequence_libelle`), numéro de bloc, titre, discipline, auteur (`auteur`, obligatoire : la signature des supports), classe (`1CIELIR` ou `2CIELIR`), établissement, durée, TP associé, capacités attendues, et, facultatif, un logo (`logo`, image de `slides/img/`). Son implémentation : la dataclasse `Cours` de `src/cielircours/config.py`.
 
 Le titre `C<NN> - <titre>` (NN sur deux chiffres) et le lien du dépôt s'en déduisent ; la version, la date et le logo sont injectés à la génération. Le deck ne les porte pas, et si sa page de titre ne dit pas ce que dit `cours.yml`, la publication s'arrête.
 

@@ -62,6 +62,5 @@ Notes du présentateur : ce qu'on dit, ce qu'on demande aux étudiants.
 | Image | Auteur | Licence | Source |
 | --- | --- | --- | --- |
 | «image» | «auteur» | «licence» | [«où»](«URL») |
-| Schémas | Auteur du cours | CC BY-NC-SA 4.0 | ce dépôt |
 
-«Les licences propres des images s'appliquent indépendamment de celle du cours.» Ce support est diffusé sous licence **CC BY-NC-SA 4.0**.
+«Chaque image reste soumise à sa licence propre, indiquée ci-dessus.»

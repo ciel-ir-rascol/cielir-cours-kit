@@ -23,6 +23,7 @@ Les deux fiches sortent du **même** `COURS.md` : une seule source, deux rendus.
 | --- | --- |
 | `sequence`, `bloc`, `slug` | le nom du dépôt : `{sequence}-c{bloc:02d}-{slug}` |
 | `sequence_libelle` | l'intitulé lisible de la séquence (`cpp` : « Prog Procédurale »), affiché sur la page de titre |
+| `auteur` | **obligatoire** : le nom de l'auteur du cours (`J.Serrand`), signature du support : pied de chaque page des deux fiches et page de titre du diaporama. Un `cours.yml` sans `auteur` arrête la publication. Les supports ne portent aucune licence de l'auteur ; seuls les crédits d'images d'autrui, avec leur licence, sont conservés |
 | `titre`, `discipline`, `classe`, `etablissement`, `duree`, `tp`, `capacites` | cartouche de la fiche, page de titre, README |
 | `logo` | facultatif : nom d'une image de `slides/img/` (`git-logo.svg`) ; laissé vide, tout se rend sans logo |
 
