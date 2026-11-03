@@ -1,7 +1,8 @@
 name: Publier un cours CIEL-IR
 description: >-
-  Contrôle l'absence d'information personnelle, puis produit slides.pdf, cours.pdf,
-  cours-a-trous.pdf et le HTML des slides dans dist/.
+  Contrôle l'absence d'information personnelle, puis produit dans dist/ les trois PDF
+  (slides.pdf, cours.pdf, cours-a-trous.pdf) et, dans dist/site/, le site du cours :
+  l'accueil (index.html), la fiche de cours en ligne (fiche/) et le HTML des slides (slides/).
 
 inputs:
   version:
@@ -92,9 +93,18 @@ runs:
         cielir-cours pdf COURS.md --config cours.yml --mode trous \
           --version "$VERSION" --date "$date" -o dist/cours-a-trous.pdf
 
-    # 7. Le deck : copie portant la version, images à côté, thème du kit, puis Marp (image
+    # 7. Le site : l'accueil et la fiche complète à l'écran. Les slides y sont ajoutées à l'étape 8.
+    - name: Produire l'accueil et la fiche en ligne
+      shell: bash
+      env:
+        VERSION: ${{ inputs.version }}
+      run: |
+        date=$(git log -1 --format=%cs)
+        cielir-cours site COURS.md --config cours.yml --version "$VERSION" --date "$date" -o dist/site
+
+    # 8. Le deck : copie portant la version, images à côté, thème du kit, puis Marp (image
     #    épinglée) pour le PDF et pour le HTML. Même démarche que `make slides` du kit.
-    - name: Produire slides.pdf et le HTML des slides
+    - name: Produire slides.pdf et le HTML des slides (sous dist/site/slides/)
       shell: bash
       env:
         VERSION: ${{ inputs.version }}
@@ -106,7 +116,7 @@ runs:
           exit 1
         fi
         tmp=.cielir-deck
-        rm -rf "$tmp" && mkdir -p "$tmp" dist/slides
+        rm -rf "$tmp" && mkdir -p "$tmp" dist/site/slides
         cielir-cours deck "$deck" --config cours.yml --version "$VERSION" --date "$date" -o "$tmp/$(basename "$deck")"
         [ -d slides/img ] && cp -R slides/img "$tmp/img"
         cp "$GITHUB_ACTION_PATH/themes/ciel.css" "$tmp/ciel.css"
@@ -118,7 +128,7 @@ runs:
             --theme-set "$tmp/ciel.css" --allow-local-files --html "$@"
         }
         marp --pdf  "$tmp/$(basename "$deck")" -o dist/slides.pdf
-        marp        "$tmp/$(basename "$deck")" -o dist/slides/index.html
-        [ -d "$tmp/img" ] && cp -R "$tmp/img" dist/slides/img
+        marp        "$tmp/$(basename "$deck")" -o dist/site/slides/index.html
+        [ -d "$tmp/img" ] && cp -R "$tmp/img" dist/site/slides/img
         rm -rf "$tmp"
-        ls -l dist dist/slides
+        ls -l dist dist/site dist/site/slides
