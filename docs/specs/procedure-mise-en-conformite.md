@@ -75,10 +75,13 @@ duree: 1 h
 tp: git-tp01-decouverte
 logo: git-logo.svg                   # facultatif : image de slides/img/, à laisser vide si la licence n'est pas vérifiée
 capacites:
-  - …            # reprises de \capacites{} du .tex, sans le LaTeX
+  - …            # reprises de \capacites{} du .tex, sans le LaTeX,
+                 # et sans épeler une réponse que la fiche troue (voir plus bas)
 ```
 
-Les capacités du `.tex` (`\capacites{\item …}`) deviennent cette liste : le gabarit HTML du kit les affiche en tête de fiche, **ne pas les recopier dans `COURS.md`**. Sans le LaTeX : `$\rightarrow$` devient `→`, `\texttt{git add}` devient `git add`.
+Les capacités du `.tex` (`\capacites{\item …}`) deviennent cette liste : le gabarit HTML du kit les affiche en tête de fiche, **ne pas les recopier dans `COURS.md`**.
+
+**Une capacité ne doit jamais épeler une réponse que la fiche troue.** Le cartouche les imprime en haut de la première page, y compris celle de la fiche à trous : une capacité qui énumère « ses méthodes `at()`, `size()`, `back()` et `push_back()` » donne cinq trous avant que l'étudiant ait commencé. Une capacité dit ce que l'étudiant doit savoir faire ; elle n'a pas à lister les réponses. Écrire « et ses principales méthodes ». Le piège s'est présenté sur `cpp-c04` et il se présentera à chaque cours. Sans le LaTeX : `$\rightarrow$` devient `→`, `\texttt{git add}` devient `git add`.
 
 La version et la date (`\version{}`, `\dateversion{}`) **ne vont nulle part** : elles sont injectées à la génération.
 
@@ -212,6 +215,10 @@ Contrôles, dans cet ordre :
 
 1. **Chaque page de `cours.pdf` et de `cours-a-trous.pdf`, à 75 dpi**, comparées à celles du PDF LaTeX d'origine : chaque trou, chaque tableau, chaque encadré, chaque photo, chaque exercice y est-il ?
 2. **Fuite de réponses** dans le PDF à trous, par script : extraire les textes des `<ins>` du `COURS.md`, chercher dans le texte du PDF à trous ceux de 5 caractères et plus qui n'existent pas dans le texte fixe ; chercher aussi les étiquettes des SVG (qui doivent être à 0 occurrence si elles ne figurent pas ailleurs dans le texte).
+   Le script ne suffit pas, et un comptage d'occurrences ne distingue pas une redite voulue d'une réponse donnée. Deux contrôles qu'il faut faire à la lecture :
+   - **le cartouche** (capacités, titre, séquence, discipline, durée) n'épelle aucune réponse trouée ;
+   - **la fiche entière**, lue d'un bout à l'autre comme un étudiant la lit. « Après le trou » n'existe pas sur une feuille imprimée : toute la page est sous les yeux. Si une réponse doit forcément paraître en clair ailleurs — par exemple un nom de méthode qu'un exercice est obligé d'écrire pour poser sa question — ce n'est pas l'exercice qu'on change, c'est le trou qu'on déplace. Sur `cpp-c04`, le tableau des méthodes a fini par trouer la colonne *Rôle* plutôt que les noms : meilleur exercice, et plus de fuite.
+   Vérifier aussi qu'une demande d'exercice est satisfaisable : si la réponse attendue nomme une variable, la demande doit la nommer aussi, sinon l'étudiant ne peut pas la produire.
 3. **Niveaux de gris** (`csGRAY`) : les encadrés et les réponses se distinguent-ils sans couleur ?
 4. **Slides** : même nombre de pages que l'original ; comparer le texte page à page avec le PDF d'origine en ignorant le pied de page (la version y est injectée). Seules les modifications voulues doivent ressortir.
 5. **Pagination** : pas de dernière page orpheline (la fiche ne porte plus de pied de licence). Ici la fiche fait 4 pages (complet) et 5 (à trous) : un cours d'une heure bien fourni, bien au-delà de la fiche compacte de deux pages visée par le modèle de densité de la spec (§6.5). C'est le volume du cours, une décision de l'enseignant, pas un défaut du kit. La version à trous est plus longue que la complète (interligne 1,7) : une dernière page orpheline apparaît dans l'une et pas dans l'autre.

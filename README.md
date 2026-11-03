@@ -24,7 +24,7 @@ Les deux fiches sortent du **même** `COURS.md` : une seule source, deux rendus.
 | `sequence`, `bloc`, `slug` | le nom du dépôt : `{sequence}-c{bloc:02d}-{slug}` |
 | `sequence_libelle` | l'intitulé lisible de la séquence (`cpp` : « Prog Procédurale »), affiché sur la page de titre |
 | `auteur` | **obligatoire** : le nom de l'auteur du cours (`J.Serrand`), signature du support : pied de chaque page des deux fiches et page de titre du diaporama. Un `cours.yml` sans `auteur` arrête la publication. Les supports ne portent aucune licence de l'auteur ; seuls les crédits d'images d'autrui, avec leur licence, sont conservés |
-| `titre`, `discipline`, `classe`, `etablissement`, `duree`, `tp`, `capacites` | cartouche de la fiche, page de titre, README |
+| `titre`, `discipline`, `classe`, `etablissement`, `duree`, `tp`, `capacites` | cartouche de la fiche, page de titre, README. `tp` se nomme par le **nom du dépôt** du TP, jamais par le titre de son README. Une capacité ne doit **jamais épeler une réponse que la fiche troue** : le cartouche les imprime en haut de la première page, y compris celle de la fiche à trous |
 | `logo` | facultatif : nom d'une image de `slides/img/` (`git-logo.svg`) ; laissé vide, tout se rend sans logo |
 
 `classe` vaut `1CIELIR` ou `2CIELIR`, partout. De ce fichier se déduisent, sans jamais les saisir ailleurs : le titre `C<NN> - <titre>` (le cartouche de la fiche et la page de titre du deck disent la même chose) et le lien du dépôt.
