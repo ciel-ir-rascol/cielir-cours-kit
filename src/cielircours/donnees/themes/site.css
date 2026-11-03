@@ -226,6 +226,10 @@ th, td { border: 1px solid var(--c-bordure); padding: 0.4em 0.7em; text-align: l
 th { background: var(--c-primaire); border-color: var(--c-primaire); color: #fff; font-weight: 700; }
 tr:nth-child(even) td { background: var(--c-code-clair); }
 tr:nth-child(even) td .reponse { background: var(--c-reponse-fond-code); }
+/* Sur le fond sombre d'un en-tête, la teinte des réponses devient un voile clair et le texte
+   reste blanc : le vert pâle sous du blanc ne se lisait pas. Même traitement que le terminal. */
+th .reponse { background: rgba(165, 214, 167, 0.22); color: inherit; }
+th .trou { border-bottom-color: #fff; }
 
 /* ---------- Page d'accueil ---------- */
 .accueil .entete-page { border-bottom: none; padding-bottom: 0; margin-bottom: 1.2rem; }

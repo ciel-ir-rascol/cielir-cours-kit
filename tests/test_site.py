@@ -192,3 +192,30 @@ def test_le_code_ne_passe_jamais_a_la_ligne_et_defile_dans_son_cadre():
     assert "overflow-x: auto" in regle(CSS, ".corps > table") + regle(CSS, "table")
     # plus de débordement hors de la page : tout partage sa largeur
     assert "translateX(-50%)" not in CSS
+
+def _luminance(rgb):
+    def canal(c):
+        c /= 255
+        return c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4
+    r, v, b = (canal(x) for x in rgb)
+    return 0.2126 * r + 0.7152 * v + 0.0722 * b
+
+
+def _contraste(a, b):
+    la, lb = sorted((_luminance(a), _luminance(b)), reverse=True)
+    return (la + 0.05) / (lb + 0.05)
+
+
+def test_une_reponse_sur_fond_sombre_reste_lisible():
+    """Sur un en-tête de tableau ou dans un terminal, le texte est clair : une réponse qui y
+    poserait son vert pâle sans changer la couleur donnerait du blanc sur vert pâle (1,16:1).
+    Les deux contextes sombres doivent donc voiler le fond au lieu de le remplacer."""
+    for sel in ("th .reponse", ".terminal .reponse"):
+        corps = regle(CSS, sel)
+        fond = re.search(r"background:\s*rgba\((\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)\)", corps)
+        assert fond, f"{sel} : un voile translucide est attendu, pas un fond opaque"
+        voile = tuple(int(fond.group(i)) for i in (1, 2, 3))
+        alpha = float(fond.group(4))
+        for sombre in ((0x0B, 0x4F, 0x6C), (0x1E, 0x24, 0x30)):  # --c-primaire, --c-code-fond
+            melange = tuple(round(v * alpha + s * (1 - alpha)) for v, s in zip(voile, sombre))
+            assert _contraste((255, 255, 255), melange) >= 4.5, (sel, melange)
