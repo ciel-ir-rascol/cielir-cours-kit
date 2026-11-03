@@ -143,8 +143,10 @@ def test_pas_de_page_paginee_ni_de_ressource_distante():
     assert "http://" not in CSS and "https://" not in CSS and "@import" not in CSS
 
 
-def test_largeur_de_lecture_limitee_et_viewport_mobile():
-    assert re.search(r"max-width:\s*70ch", regle(CSS, ".page"))
+def test_une_seule_largeur_pour_toute_la_page_et_viewport_mobile():
+    # le texte est aussi large que le plus large des tableaux : rien ne paraît étriqué à côté
+    # d'un bloc. 62rem tient le tableau le plus large des cours actuels, mesuré à 1039 px.
+    assert re.search(r"max-width:\s*min\(62rem", regle(CSS, ".page"))
     assert "@media (max-width" in CSS
 
 
@@ -182,9 +184,11 @@ def test_les_cinq_encadres_sont_stylés():
         assert "background" in regle(CSS, f".alerte--{t}"), t
 
 
-def test_le_code_et_les_tableaux_debordent_de_la_mesure_du_texte_sans_passer_a_la_ligne():
-    corps = regle(CSS, ".corps > pre")
-    assert "max-content" in corps and "translateX(-50%)" in corps
-    assert "min(64rem" in corps  # assez large pour 96 caractères à 1100 px
-    assert "white-space: pre;" in regle(CSS, "pre") and "overflow-x: auto" in regle(CSS, "pre")
-    assert regle(CSS, ".corps > pre") == regle(CSS, ".corps > table")
+def test_le_code_ne_passe_jamais_a_la_ligne_et_defile_dans_son_cadre():
+    # passer à la ligne détruirait l'alignement en colonnes des commentaires ; un bloc plus
+    # large que la page défile, il ne se replie pas et il n'est pas tronqué.
+    corps = regle(CSS, "pre")
+    assert "white-space: pre;" in corps and "overflow-x: auto" in corps
+    assert "overflow-x: auto" in regle(CSS, ".corps > table") + regle(CSS, "table")
+    # plus de débordement hors de la page : tout partage sa largeur
+    assert "translateX(-50%)" not in CSS

@@ -49,7 +49,11 @@ body {
   line-height: 1.6;
 }
 /* largeur de lecture : environ 70 caractères */
-.page { max-width: 70ch; margin: 0 auto; padding: 1.2rem 1rem 3rem; }
+/* Une seule largeur pour toute la page : le texte est aussi large que le plus large des
+   tableaux, de sorte que rien ne paraisse étriqué à côté d'un bloc. 62rem (1054 px) tient le
+   tableau le plus large des cours actuels, mesuré à 1039 px dans git-c01. Au-delà, un bloc
+   défile dans son cadre plutôt que de passer à la ligne. */
+.page { max-width: min(62rem, calc(100vw - 2rem)); margin: 0 auto; padding: 1.2rem 1rem 3rem; }
 
 p { margin: 0 0 0.9em; }
 em { color: var(--c-attenue); }
@@ -118,18 +122,12 @@ h4 { font-size: 1rem; margin: 1.2em 0 0.3em; }
 /* dans un tableau ou un code, la teinte est un peu plus soutenue pour ressortir du fond */
 td .reponse { background: var(--c-reponse-fond-code); }
 
-/* ---------- Code et tableaux larges : ils débordent de la mesure du texte ----------
-   Le texte garde ses 70 caractères ; un bloc de code, lui, prend la largeur de sa plus longue ligne
-   (les commentaires alignés en colonne ne se coupent pas, on ne passe jamais à la ligne), plafonnée à
-   la fenêtre. Au-delà, le bloc défile et sa barre reste visible. Recentré sur la page. */
-.corps > pre, .corps > table {
-  width: max-content;
-  min-width: 100%;
-  max-width: min(64rem, calc(100vw - 2rem));
-  position: relative;
-  left: 50%;
-  transform: translateX(-50%);
-}
+/* ---------- Code et tableaux ----------
+   Ils partagent la largeur de la page, donc aucun débordement à organiser. Un bloc plus large
+   qu'elle — une ligne de code très longue, un tableau à beaucoup de colonnes — défile dans son
+   cadre, sa barre restant visible (`overflow-x` plus bas) : on ne passe jamais à la ligne, ce qui
+   détruirait l'alignement en colonnes des commentaires. */
+.corps > table { min-width: 100%; }
 
 /* ---------- Trous et lignes : absents du mode complet, inoffensifs s'ils s'y glissent ---------- */
 .trou {
@@ -259,6 +257,4 @@ tr:nth-child(even) td .reponse { background: var(--c-reponse-fond-code); }
   .accueil h1 { font-size: 1.65rem; }
   pre { font-size: 0.92rem; padding: 0.7rem 0.8rem; margin-left: -0.3rem; margin-right: -0.3rem; }
   table { font-size: 0.9rem; }
-  /* un téléphone n'a pas de marge à prendre : le bloc suit la page et défile */
-  .corps > pre, .corps > table { width: auto; max-width: 100%; left: 0; transform: none; }
 }
