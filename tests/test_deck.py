@@ -148,9 +148,9 @@ def test_un_deck_a_une_seule_slide():
     assert f"footer: '{PIED_ATTENDU} · v1.02 du 29.10.26'" in sortie
 
 
-def test_la_page_de_titre_porte_la_release_et_le_lien_du_depot_et_rien_d_autre_d_injecte():
+def test_la_page_de_titre_porte_la_release_l_auteur_et_le_lien_du_depot_et_rien_d_autre_d_injecte():
     sortie = _prep(DECK, PUB)
-    assert ('<div class="pied-titre">\n\nRelease : v1.02 (29.10.26)\\\n'
+    assert ('<div class="pied-titre">\n\nRelease : v1.02 (29.10.26)\\\nJ.Serrand\\\n'
             '🐙 <https://github.com/ciel-ir-rascol/cpp-c04-tableauxVecteurs>\n\n</div>') in sortie
     assert "@" not in sortie.split("\n---\n")[1]  # jamais de courriel sur la page de titre
     assert "logo" not in sortie.lower() and "style:" not in sortie  # pas de logo : rien d'injecté
@@ -265,3 +265,12 @@ def test_le_gabarit_de_deck_passe_le_garde_fou_une_fois_rempli():
         gabarit = gabarit.replace(a, b)
     sortie = _prep(gabarit, PUB)
     assert RELEASE in sortie
+
+
+def test_l_auteur_est_entre_la_release_et_le_lien_du_depot():
+    titre = _prep(DECK, PUB).split("\n---\n")[1]
+    assert titre.index("Release : v1.02") < titre.index("J.Serrand\\") < titre.index("🐙")
+
+
+def test_l_auteur_vient_de_cours_yml():
+    assert "Ada L.\\\n" in _prep(DECK, PUB, replace(COURS, auteur="Ada L."))

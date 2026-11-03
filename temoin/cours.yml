@@ -3,6 +3,7 @@
 # sans régression. Aucune donnée personnelle ici (le contrôle du kit le vérifie).
 sequence: kit
 sequence_libelle: Témoin du kit
+auteur: J.Serrand
 bloc: 1
 slug: temoin
 titre: Du code source au programme

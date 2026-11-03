@@ -33,4 +33,6 @@ telephone:
 # écrire un nom reviendrait à le publier. Pour le remplir, copier ce fichier
 # dans le dépôt concerné ou l'adapter localement, par exemple :
 #   noms: ["Prénom Nom", "Nom"]
+# Le nom de l'auteur déclaré dans `cours.yml` (`auteur`) ne doit jamais figurer dans `noms` :
+# le contrôle refuserait alors la signature du support.
 noms: []

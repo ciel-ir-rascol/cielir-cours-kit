@@ -8,7 +8,7 @@ import yaml
 
 _SEQUENCE = re.compile(r"[a-z0-9]+")
 _SLUG = re.compile(r"[a-z][A-Za-z0-9]*")
-_CHAMPS_TEXTE = ("sequence_libelle", "titre", "discipline", "classe", "etablissement", "duree")
+_CHAMPS_TEXTE = ("sequence_libelle", "auteur", "titre", "discipline", "classe", "etablissement", "duree")
 # un chemin sous slides/img/ : lettres, chiffres, point, tiret, souligné, barre ; jamais « .. »
 _LOGO = re.compile(r"[A-Za-z0-9_-][A-Za-z0-9._/-]*\.(?:svg|png|jpe?g|webp)")
 ORGANISATION = "ciel-ir-rascol"
@@ -22,6 +22,7 @@ class ConfigInvalide(ValueError):
 class Cours:
     sequence: str
     sequence_libelle: str
+    auteur: str
     bloc: int
     slug: str
     titre: str
@@ -90,6 +91,7 @@ def lire_config(chemin: Path) -> Cours:
     return Cours(
         sequence=sequence,
         sequence_libelle=brut["sequence_libelle"],
+        auteur=brut["auteur"],
         bloc=bloc,
         slug=slug,
         titre=brut["titre"],

@@ -4,8 +4,8 @@ Marp ne permet pas de surcharger `footer` en ligne de commande : on réécrit
 une copie du texte du deck. La source n'est jamais modifiée. Ce qui s'y ajoute vient
 de `cours.yml` ou de la publication, jamais d'une saisie dans le deck :
 
-- le pied de page et la page de titre portent la version (`Release : v1.01 (31.10.26)`) et
-  le lien du dépôt ;
+- le pied de page et la page de titre portent la version (`Release : v1.01 (31.10.26)`), le nom
+  de l'auteur (`auteur` de `cours.yml`) et le lien du dépôt ;
 - si `logo` est renseigné, la page de titre porte l'image et le thème l'affiche en haut à droite
   des slides suivantes (variable CSS injectée par la directive `style` de l'en-tête) ;
 - garde-fou : le titre, la discipline et la classe de la page de titre, et le pied de page
@@ -202,6 +202,7 @@ def preparer_deck(source: str, pub: Publication, cours: Cours, url_depot: str | 
         '<div class="pied-titre">',
         "",
         f"{pub.release}\\",
+        f"{cours.auteur}\\",
         f"🐙 <{url_depot or cours.url_depot}>",
         "",
         "</div>",

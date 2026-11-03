@@ -32,6 +32,15 @@ def test_sequence_libelle_est_obligatoire(tmp_path):
         lire_config(_yml(tmp_path, retrait=("sequence_libelle",)))
 
 
+def test_auteur_est_obligatoire(tmp_path):
+    with pytest.raises(ConfigInvalide, match="auteur"):
+        lire_config(_yml(tmp_path, retrait=("auteur",)))
+
+
+def test_auteur_se_lit(tmp_path):
+    assert lire_config(_yml(tmp_path)).auteur == "J.Serrand"
+
+
 def test_titre_de_page_et_url_se_deduisent(tmp_path):
     c = lire_config(_yml(tmp_path))
     assert c.titre_page == "C04 - Tableaux et vecteurs" and c.sequence_libelle == "Prog Procédurale"
