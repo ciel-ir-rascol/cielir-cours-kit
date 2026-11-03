@@ -25,7 +25,7 @@ Cours d'environ **«durée»** qui introduit le TP «nom-du-depot-du-tp». Publi
 Le dépôt contient :
 
 - les **slides** du cours (Marp), avec les notes du présentateur ;
-- la **fiche de cours**, distribuée à trous : les étudiants la complètent pendant la projection et la gardent comme aide-mémoire.
+- la **fiche de cours**, distribuée à trous, à compléter pendant la projection.
 
 Les deux fiches — complète et à trous — sortent du même `COURS.md` et sont attachées à chaque release.
 
@@ -43,41 +43,14 @@ Les deux fiches — complète et à trous — sortent du même `COURS.md` et son
 | 2 | «contenu» | «15–24» | «15 min» |
 | — | À retenir, transition vers le TP, crédits | «25–27» | «5 min» |
 
-## Arborescence
+## Utiliser la fiche
 
-```text
-.
-├── cours.yml                        métadonnées du bloc
-├── COURS.md                         le cours — source unique des deux fiches
-├── slides/
-│   ├── «NN»-«séance».md             source des slides (Marp), d'après gabarits/deck.md
-│   └── img/                         schémas SVG et images
-├── .vscode/settings.json            thème Marp pour l'aperçu dans VS Code
-├── .vscode/extensions.json          recommande l'extension Marp for VS Code
-└── .github/workflows/publier.yml    publication sur tag
-```
+Deux PDF sont attachés à chaque release :
 
-Aucun fichier généré n'est enregistré ici : les PDF et les slides en ligne sont produits à la publication.
+- **`cours-a-trous.pdf`** — à imprimer et à apporter en cours. Vous la complétez au fil de la projection, puis vous la gardez comme aide-mémoire pendant le TP.
+- **`cours.pdf`** — la même fiche, déjà remplie : pour réviser, ou pour rattraper un trou resté en blanc.
 
-## Travailler le cours
-
-L'aperçu des slides se fait dans VS Code avec l'extension **Marp for VS Code** (recommandée dans `.vscode/extensions.json`) ; le thème `ciel` est déjà déclaré dans `.vscode/settings.json`.
-
-Pour régénérer les trois PDF en local, depuis une copie du kit :
-
-```bash
-make temoin DEPOT=../«nom-du-depot»
-```
-
-### Publier
-
-```bash
-git tag v1.01 && git push origin v1.01
-```
-
-`vX` est la mouture d'une promotion, `vX.YY` une retouche de cours d'année. Le reste est automatique : contrôle de confidentialité, trois PDF, slides en ligne, release. Réglage à faire une fois : *Settings > Pages > Source* = « GitHub Actions ».
-
-L'outillage vit dans [`cielir-cours-kit`](https://github.com/ciel-ir-rascol/cielir-cours-kit).
+Le diaporama en ligne suit le même plan que la fiche : il sert à revoir une slide précise après le cours.
 
 ## Crédits des images
 
