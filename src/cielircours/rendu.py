@@ -12,6 +12,7 @@ from weasyprint.urls import FatalURLFetchingError, URLFetcher, URLFetcherRespons
 from cielircours.config import Cours
 from cielircours.mdtext import Mode, rendre_corps
 from cielircours.schemas import filtrer_svg, retirer_remplissables
+from cielircours.titre import retirer_titre
 
 _TYPES_DOCUMENT = {Mode.COMPLET: "Cours", Mode.TROUS: "Cours à trous"}
 
@@ -52,7 +53,7 @@ def rendre_html(source: str, cours: Cours, pub: Publication, mode: Mode) -> str:
         pub=pub,
         mode=mode,
         type_document=_TYPES_DOCUMENT[mode],
-        corps=rendre_corps(source, mode),
+        corps=rendre_corps(retirer_titre(source, cours), mode),
     )
 
 

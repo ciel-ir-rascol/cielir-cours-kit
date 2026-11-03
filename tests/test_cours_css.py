@@ -78,7 +78,7 @@ def test_les_licences_des_polices_sont_documentees():
 
 
 def test_une_seule_declaration_de_page(cours, pub):
-    html = rendre_html("# T", cours, pub, Mode.TROUS)
+    html = rendre_html("## T", cours, pub, Mode.TROUS)
     assert "@page" not in html  # le gabarit ne câble plus la page : tout est dans cours.css
     assert len(re.findall(r"@page\s*{", COURS_CSS.read_text(encoding="utf-8"))) >= 1
     assert "cours.css" in html

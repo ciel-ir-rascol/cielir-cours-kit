@@ -7,7 +7,7 @@ from pypdf import PdfReader
 from cielircours.cli import main
 
 DONNEES = Path(__file__).parent / "data"
-SOURCE = "# Partie\n\nUn <ins>SECRET</ins> ici.\n"
+SOURCE = "## Partie\n\nUn <ins>SECRET</ins> ici.\n"
 
 
 @pytest.fixture
