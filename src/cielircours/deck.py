@@ -13,7 +13,10 @@ de `cours.yml` ou de la publication, jamais d'une saisie dans le deck :
   la publication s'arrête avec un message explicite.
 """
 
+import base64
+import functools
 import re
+from importlib.resources import files
 
 from cielircours.config import Cours
 from cielircours.rendu import Publication
@@ -161,6 +164,21 @@ def _controler_pied(entete: list[str], cours: Cours) -> None:
     )
 
 
+@functools.cache
+def _marque_github() -> str:
+    """Le logo GitHub officiel (Invertocat blanc), en URI de données.
+
+    Embarqué dans le deck plutôt que copié à côté : rien à transporter, et le deck produit
+    reste autonome, quel que soit l'endroit d'où Marp le lit. Le fichier est celui de
+    `brand.github.com`, jamais retouché — les conditions de GitHub permettent d'employer la
+    marque pour pointer un dépôt, mais pas d'en changer la couleur ni les proportions. La
+    version blanche est celle que GitHub fournit pour les fonds sombres, et la page de titre
+    en est un.
+    """
+    octets = (files("cielircours.donnees") / "images" / "github-mark.svg").read_bytes()
+    return "data:image/svg+xml;base64," + base64.b64encode(octets).decode("ascii")
+
+
 def preparer_deck(source: str, pub: Publication, cours: Cours, url_depot: str | None = None) -> str:
     """Renvoie une copie du deck : pied, page de titre (logo, release, lien du dépôt) et style du logo.
 
@@ -203,7 +221,7 @@ def preparer_deck(source: str, pub: Publication, cours: Cours, url_depot: str | 
         "",
         f"{pub.release}\\",
         f"{cours.auteur}\\",
-        f"🐙 <{url_depot or cours.url_depot}>",
+        f'<img class="marque-github" src="{_marque_github()}" alt="GitHub"> <{url_depot or cours.url_depot}>',
         "",
         "</div>",
     ]

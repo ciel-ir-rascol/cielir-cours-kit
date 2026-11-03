@@ -216,6 +216,8 @@ section.lead .pied-titre {
   line-height: 1.5;
 }
 section.lead .pied-titre p { margin: 0; }
+/* logo GitHub officiel, non retouché : il sert à pointer le dépôt du cours */
+section.lead .marque-github { height: 1em; width: auto; vertical-align: -0.16em; margin-right: 0.3em; }
 section.lead strong { color: #ffd2b0; }
 section.lead a { color: #ffd2b0; }
 section.lead header, section.lead footer, section.lead::after { color: #d9e8ef; }

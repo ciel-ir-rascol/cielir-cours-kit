@@ -150,10 +150,14 @@ def test_un_deck_a_une_seule_slide():
 
 def test_la_page_de_titre_porte_la_release_l_auteur_et_le_lien_du_depot_et_rien_d_autre_d_injecte():
     sortie = _prep(DECK, PUB)
-    assert ('<div class="pied-titre">\n\nRelease : v1.02 (29.10.26)\\\nJ.Serrand\\\n'
-            '🐙 <https://github.com/ciel-ir-rascol/cpp-c04-tableauxVecteurs>\n\n</div>') in sortie
+    assert '<div class="pied-titre">\n\nRelease : v1.02 (29.10.26)\\\nJ.Serrand\\\n' in sortie
+    # le lien du dépôt est précédé du logo GitHub officiel, embarqué en URI de données
+    assert '<img class="marque-github" src="data:image/svg+xml;base64,' in sortie
+    assert ' alt="GitHub"> <https://github.com/ciel-ir-rascol/cpp-c04-tableauxVecteurs>\n\n</div>' in sortie
+    assert "🐙" not in sortie
     assert "@" not in sortie.split("\n---\n")[1]  # jamais de courriel sur la page de titre
-    assert "logo" not in sortie.lower() and "style:" not in sortie  # pas de logo : rien d'injecté
+    # pas de logo de cours ici : seule la marque GitHub est injectée
+    assert "logo-titre" not in sortie and "style:" not in sortie
 
 
 def test_le_premier_du_mois_et_le_jour_a_deux_chiffres():
@@ -269,7 +273,7 @@ def test_le_gabarit_de_deck_passe_le_garde_fou_une_fois_rempli():
 
 def test_l_auteur_est_entre_la_release_et_le_lien_du_depot():
     titre = _prep(DECK, PUB).split("\n---\n")[1]
-    assert titre.index("Release : v1.02") < titre.index("J.Serrand\\") < titre.index("🐙")
+    assert titre.index("Release : v1.02") < titre.index("J.Serrand\\") < titre.index("marque-github")
 
 
 def test_l_auteur_vient_de_cours_yml():
