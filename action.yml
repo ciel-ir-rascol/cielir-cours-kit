@@ -129,6 +129,11 @@ runs:
         }
         marp --pdf  "$tmp/$(basename "$deck")" -o dist/slides.pdf
         marp        "$tmp/$(basename "$deck")" -o dist/site/slides/index.html
-        [ -d "$tmp/img" ] && cp -R "$tmp/img" dist/site/slides/img
+        # destination vidée d'abord : si elle existait, « cp -R » imbriquerait les images
+        # (slides/img/img/...) et le diaporama les perdrait sans que rien n'échoue
+        if [ -d "$tmp/img" ]; then
+          rm -rf dist/site/slides/img && mkdir -p dist/site/slides/img
+          cp -R "$tmp/img/." dist/site/slides/img/
+        fi
         rm -rf "$tmp"
         ls -l dist dist/site dist/site/slides

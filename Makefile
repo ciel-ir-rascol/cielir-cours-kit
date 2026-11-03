@@ -68,7 +68,10 @@ site: slides
 	    $(MARP_IMAGE) \
 	    --theme-set themes/ciel.css --allow-local-files --html \
 	    $(BUILD)/deck/$(notdir $(DECK)) -o $(BUILD)/site/slides/index.html
-	cp -R $(BUILD)/deck/img $(BUILD)/site/slides/img
+	# le dossier est vidé d'abord : sans cela, un second « make site » copierait les images
+	# DANS le dossier existant (slides/img/img/...) et le diaporama perdrait ses images
+	rm -rf $(BUILD)/site/slides/img && mkdir -p $(BUILD)/site/slides/img
+	cp -R $(BUILD)/deck/img/. $(BUILD)/site/slides/img/
 	@echo "Site écrit dans $(BUILD)/site/"
 
 servir: site
