@@ -3,25 +3,26 @@ from pathlib import Path
 import pytest
 
 from cielircours.config import ConfigInvalide, lire_config
+from outils import DONNEES
 
 
 def test_depot_compose_le_nom_normalise():
-    c = lire_config(Path("tests/data/cours-cpp.yml"))
+    c = lire_config(DONNEES / "cours-cpp.yml")
     assert c.depot == "cpp-c04-tableauxVecteurs"
 
 
 def test_bloc_est_sur_deux_chiffres():
-    assert lire_config(Path("tests/data/cours-bloc1.yml")).depot.startswith("git-c01-")
+    assert lire_config(DONNEES / "cours-bloc1.yml").depot.startswith("git-c01-")
 
 
 @pytest.mark.parametrize("fichier", ["slug-majuscule.yml", "bloc-zero.yml", "sans-titre.yml"])
 def test_config_invalide_leve(fichier):
     with pytest.raises(ConfigInvalide):
-        lire_config(Path("tests/data") / fichier)
+        lire_config(DONNEES / fichier)
 
 
 def _yml(tmp_path, retrait=(), ajout=""):
-    texte = (Path("tests/data") / "cours-cpp.yml").read_text(encoding="utf-8")
+    texte = (DONNEES / "cours-cpp.yml").read_text(encoding="utf-8")
     lignes = [l for l in texte.splitlines() if not any(l.startswith(r + ":") for r in retrait)]
     (tmp_path / "cours.yml").write_text("\n".join(lignes) + "\n" + ajout, encoding="utf-8")
     return tmp_path / "cours.yml"

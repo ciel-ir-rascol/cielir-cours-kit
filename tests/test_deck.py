@@ -69,12 +69,6 @@ def test_la_premiere_slide_recoit_la_version():
     assert "Release : v1.02 (29.10.26)" in premiere
 
 
-def test_la_source_n_est_pas_modifiee():
-    avant = DECK
-    _prep(DECK, PUB)
-    assert DECK == avant
-
-
 def test_un_deck_sans_pied_est_refuse():
     with pytest.raises(ValueError, match="pas de pied de page") as e:
         _prep(DECK_SANS_PIED, PUB)

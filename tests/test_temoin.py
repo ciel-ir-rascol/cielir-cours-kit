@@ -6,6 +6,7 @@ sans régression. Ces tests sont sa non-régression automatique, la relecture à
 """
 
 import re
+from collections import Counter
 import xml.etree.ElementTree as ET
 from datetime import date
 from pathlib import Path
@@ -159,21 +160,31 @@ def test_le_recuperateur_vide_les_cases_du_schema():
 
 # ---------- aucune réponse ne fuite dans le PDF à trous ----------
 
-def _reponses() -> list[str]:
+def _reponses() -> Counter[str]:
+    """Chaque réponse du témoin, et le nombre de trous qui la portent."""
     source = (TEMOIN / "COURS.md").read_text(encoding="utf-8")
     ins = re.findall(r'<ins(?: lignes="\d+")?>(.*?)</ins>', source)
-    blocs = []
     svg = _etiquettes(ET.parse(TEMOIN / "slides" / "img" / "schema.svg").getroot())
-    return [re.sub(r"[`*]", "", r) for r in ins + blocs + svg]
+    return Counter(_norme(re.sub(r"[`*]", "", r)) for r in ins + svg)
 
 
 def test_chaque_reponse_disparait_du_pdf_a_trous(pdfs):
+    """L'égalité, et non une simple diminution : une réponse qui paraît ailleurs dans le texte
+    fixe — « age » du témoin y est sept fois — laissait passer la fuite d'un trou sur plusieurs
+    avec un `complet.count(r) > trous.count(r)`. On exige donc que le mode trous en compte
+    exactement autant que le mode complet, moins le nombre de trous qui la portent."""
     complet, trous = _norme(_texte(pdfs / "complet.pdf")), _norme(_texte(pdfs / "trous.pdf"))
     reponses = _reponses()
-    assert len(reponses) >= 20
+    assert sum(reponses.values()) >= 20
     for r in reponses:
-        r = _norme(r)
-        assert complet.count(r) > trous.count(r), f"« {r} » reste en mode trous ({trous.count(r)} fois)"
+        # ce que le mode trous retire : toutes les occurrences de `r` portées par un trou,
+        # y compris celles contenues dans une réponse plus longue — « C++ » est dans « C++98 »
+        retire = sum(n * autre.count(r) for autre, n in reponses.items())
+        attendu = complet.count(r) - retire
+        assert trous.count(r) == attendu, (
+            f"« {r} » : {trous.count(r)} fois en mode trous, {attendu} attendues "
+            f"({complet.count(r)} en complet, {retire} portée(s) par un trou)"
+        )
 
 
 def test_les_reponses_longues_sont_absentes_du_pdf_a_trous(pdfs):
