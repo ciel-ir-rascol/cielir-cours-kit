@@ -8,7 +8,7 @@ from pathlib import Path
 import pytest
 
 from cielircours.cli import main
-from outils import DONNEES, regle
+from outils import DONNEES, regle, ressources_distantes
 
 SITE_CSS = Path(str(files("cielircours.donnees") / "themes" / "site.css"))
 SOURCE = (
@@ -52,8 +52,9 @@ def test_le_site_ecrit_l_accueil_la_fiche_et_les_images(site):
 
 def test_le_site_sert_ses_polices_lui_meme(site):
     css = (site / "assets" / "site.css").read_text(encoding="utf-8")
-    for police in re.findall(r'url\("([^"]+)"\)', css):
-        assert (site / "assets" / police).is_file(), police
+    for cible in re.findall(r'url\("([^"]+)"\)', css):
+        if not cible.startswith("data:"):  # les icônes sont embarquées, pas servies
+            assert (site / "assets" / cible).is_file(), cible
 
 
 def test_un_cours_sans_images_ne_fait_pas_echouer_le_site(depot, tmp_path):
@@ -140,7 +141,7 @@ CSS = SITE_CSS.read_text(encoding="utf-8")
 
 def test_pas_de_page_paginee_ni_de_ressource_distante():
     assert "@page" not in CSS
-    assert "http://" not in CSS and "https://" not in CSS and "@import" not in CSS
+    assert ressources_distantes(CSS) == [] and "@import" not in CSS
 
 
 def test_une_seule_largeur_pour_toute_la_page_et_viewport_mobile():

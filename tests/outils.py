@@ -1,3 +1,4 @@
+import re
 """Utilitaires de mesure pour les tests de la feuille de style.
 
 Ils mesurent la mise en page réelle (arbre de boîtes de WeasyPrint) ou analysent le CSS :
@@ -115,3 +116,12 @@ def debordement_horizontal(pages: list, tolerance: float = 0.5) -> list[tuple[in
             if droite > limite:
                 depassements.append((i, b.element_tag, round(droite - limite, 1)))
     return depassements
+
+def ressources_distantes(css: str) -> list[str]:
+    """Les `url(...)` d'une feuille qui iraient chercher quelque chose sur le réseau.
+
+    Une URI de données n'en est pas une, même quand le SVG qu'elle porte déclare son espace de
+    noms `http://www.w3.org/2000/svg` : c'est un identifiant, rien n'est téléchargé.
+    """
+    cibles = [c.strip("\"'") for c in re.findall(r"url\(([^)]+)\)", css)]
+    return [c for c in cibles if c.startswith(("http://", "https://", "//"))]

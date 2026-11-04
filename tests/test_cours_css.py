@@ -12,6 +12,7 @@ from cielircours.mdtext import Mode
 from cielircours.rendu import Publication, ecrire_pdf, rendre_html
 from outils import (
     COURS_CSS,
+    ressources_distantes,
     DONNEES,
     boites,
     contraste,
@@ -64,12 +65,15 @@ def test_les_etiquettes_remplissables_disparaissent_en_mode_trous():
     assert "visibility: hidden" in regle(css, "body.mode-trous .remplissable")
 
 
-def test_les_polices_sont_locales():
+def test_aucune_ressource_n_est_chargee_depuis_le_reseau():
     css = COURS_CSS.read_text(encoding="utf-8")
-    assert "https://" not in css and "http://" not in css
+    assert ressources_distantes(css) == []
+    assert "@import" not in css
     assert list(POLICES.glob("*.woff2"))
+    # tout ce qui n'est pas embarqué en URI de données doit exister à côté de la feuille
     for nom in re.findall(r'url\("?([^")]+)"?\)', css):
-        assert (COURS_CSS.parent / nom).is_file(), nom
+        if not nom.startswith("data:"):
+            assert (COURS_CSS.parent / nom).is_file(), nom
 
 
 def test_les_licences_des_polices_sont_documentees():
@@ -230,20 +234,15 @@ def test_la_phrase_d_amorce_reste_avec_son_tableau_a_tous_les_sauts_de_page(tmp_
             separees += 1
     assert separees == 0
 
-# Caractères que DejaVu Sans — la police de secours de WeasyPrint — sait rendre. Un signe hors
-# de cette liste sort en carré vide sur le PDF : 💡, ❗ et ⛔ en font partie, et c'est ainsi
-# qu'on s'en est aperçu. Élargir la liste demande de vérifier la couverture, pas de deviner.
-SIGNES_SURS = set("ℹ✔✓‼⚠⊘⊗✖✗★✎☞➤●◆☠☢⚡")
-
-
-def test_les_signes_des_encadres_sont_rendus_par_la_police_de_secours():
-    """Les deux feuilles, parce qu'un même encadré doit porter le même signe sur les deux supports."""
-    site = (Path(str(files("cielircours.donnees") / "themes" / "site.css"))).read_text(encoding="utf-8")
+def test_chaque_encadre_porte_son_icone_et_les_deux_supports_les_memes():
+    """Une image, pas un caractère : un caractère dépend de ce que la police couvre, et celle
+    de secours de WeasyPrint n'avait ni ampoule, ni exclamation grasse, ni sens interdit."""
+    site = Path(str(files("cielircours.donnees") / "themes" / "site.css")).read_text(encoding="utf-8")
     jeux = {}
     for nom, feuille in (("cours.css", COURS_CSS.read_text(encoding="utf-8")), ("site.css", site)):
-        trouves = dict(re.findall(r'\.alerte--(\w+) \.alerte__titre::before \{ content: "(.)', feuille))
+        trouves = dict(re.findall(
+            r'\.alerte--(\w+) \.alerte__titre::before \{ background-image: url\("(data:image/svg\+xml,[^"]+)"\)', feuille))
         assert set(trouves) == {"note", "astuce", "important", "attention", "danger"}, nom
-        for classe, signe in trouves.items():
-            assert signe in SIGNES_SURS, f"{nom} : {classe} emploie « {signe} », hors couverture DejaVu"
+        assert "width" in regle(feuille, ".alerte__titre::before"), f"{nom} : icône sans taille"
         jeux[nom] = trouves
-    assert jeux["cours.css"] == jeux["site.css"], "les deux supports doivent porter les mêmes signes"
+    assert jeux["cours.css"] == jeux["site.css"], "les deux supports doivent porter les mêmes icônes"
