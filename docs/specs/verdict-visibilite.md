@@ -9,6 +9,11 @@ Un dépôt **public** peut-il consommer (`uses:`) une action composite hébergé
 
 Les dépôts de cours sont publics (les étudiants les consultent) ; le kit était prévu en internal.
 
+> **Révisé le 2026-11-03.** Les dépôts de cours sont désormais **privés**, en lecture pour l'équipe
+> GitHub de la promotion, et leur site Pages l'est aussi. Le kit reste public, pour une raison
+> différente de celle qui suit : l'action y lit son propre SHA par un `git ls-remote` anonyme.
+> Le verdict ci-dessous reste le compte rendu de l'essai d'alors.
+
 ## Protocole
 
 1. Kit créé en internal, branches `main` et `construction-kit` poussées :

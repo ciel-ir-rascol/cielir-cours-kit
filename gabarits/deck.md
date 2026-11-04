@@ -22,7 +22,7 @@ qui est entre «…». Trois règles :
      logo : tout cela est injecté à la génération, depuis le tag et cours.yml.
   3. Pas de bloc <style> : la mise en page se fait avec les classes du thème (cols, cols-3, photo,
      figure/figcaption/credit, schema, petit ; voir le README du kit).
-  4. Aucune adresse de courriel ni numéro de téléphone : ces dépôts sont publics.
+  4. Aucune adresse de courriel ni numéro de téléphone : ces supports sont distribués aux étudiants.
 
 Supprimer ce commentaire avant de commencer.
 -->

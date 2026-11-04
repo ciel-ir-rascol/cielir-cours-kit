@@ -25,6 +25,9 @@ Les deux fiches sortent du **même** `COURS.md` : une seule source, deux rendus.
 | `sequence_libelle` | l'intitulé lisible de la séquence (`cpp` : « Prog Procédurale »), affiché sur la page de titre |
 | `auteur` | **obligatoire** : le nom de l'auteur du cours (`J.Serrand`), signature du support : pied de chaque page des deux fiches et page de titre du diaporama. Un `cours.yml` sans `auteur` arrête la publication. Les supports ne portent aucune licence de l'auteur ; seuls les crédits d'images d'autrui, avec leur licence, sont conservés |
 | `titre`, `discipline`, `classe`, `etablissement`, `duree`, `tp`, `capacites` | cartouche de la fiche, page de titre, README. `tp` se nomme par le **nom du dépôt** du TP, jamais par le titre de son README. Une capacité ne doit **jamais épeler une réponse que la fiche troue** : le cartouche les imprime en haut de la première page, y compris celle de la fiche à trous |
+| `sequence_libelle` vs `discipline` | `discipline` est la matière de l'emploi du temps (`Programmation C++`, `Informatique`), `sequence_libelle` la séquence à l'intérieur (`Prog Procédurale`, `Git et GitHub`). Le pied du deck les assemble : `<discipline> · <sequence_libelle> · <classe>` |
+| `duree` | tel qu'il s'écrit sur la fiche : `1 h`, `2 h` |
+| `tp` | le **nom du dépôt** du TP. S'il n'existe pas encore, laisser le champ vide plutôt que d'inventer un nom |
 | `logo` | facultatif : nom d'une image de `slides/img/` (`git-logo.svg`) ; laissé vide, tout se rend sans logo |
 
 `classe` vaut `1CIELIR` ou `2CIELIR`, partout. De ce fichier se déduisent, sans jamais les saisir ailleurs : le titre `C<NN> - <titre>` (le cartouche de la fiche et la page de titre du deck disent la même chose) et le lien du dépôt.
@@ -42,7 +45,7 @@ Informatique - Prog Procédurale
           🐙 https://github.com/ciel-ir-rascol/cpp-c04-tableauxVecteurs
 ```
 
-Les trois premières lignes s'écrivent dans le deck, d'après `cours.yml` ; **si elles divergent de `cours.yml`, la publication s'arrête** avec un message qui dit ce qui est attendu. La release, le lien du dépôt et le logo sont injectés à la génération : ne rien en écrire dans le deck. Pas d'adresse de courriel : ces dépôts sont publics.
+Les trois premières lignes s'écrivent dans le deck, d'après `cours.yml` ; **si elles divergent de `cours.yml`, la publication s'arrête** avec un message qui dit ce qui est attendu. La release, le lien du dépôt et le logo sont injectés à la génération : ne rien en écrire dans le deck. Pas d'adresse de courriel : les supports sont distribués aux étudiants.
 
 Le **pied de page** (`footer:` de l'en-tête) se déduit aussi de `cours.yml` : `<discipline> · <sequence_libelle> · <classe>` (`Informatique · Prog Procédurale · 1CIELIR`). Le garde-fou le vérifie comme la page de titre. Le **lien du dépôt** est celui du dépôt réel : `GITHUB_REPOSITORY` sur GitHub Actions, sinon le `remote` git, sinon, en dernier recours, le nom déduit de `cours.yml`.
 
@@ -209,9 +212,13 @@ Pour un autre dépôt que le témoin : `make temoin DEPOT=../cpp-c04-tableauxVec
 
 `temoin/` est un cours jouet qui exerce toute la mise en page : trous, lignes de réponse, les cinq encadrés, tableau à trous, bloc terminal, code coloré, schéma à compléter. Le tag `v1` du kit ne bouge qu'après l'avoir régénéré sans régression — et relu à l'œil, en couleur puis en niveaux de gris.
 
-## Pourquoi ce dépôt est public
+## Pourquoi ce dépôt est public, et les cours non
 
-Une action composite hébergée dans un dépôt *internal* n'est pas résolvable depuis un dépôt public : les dépôts de cours, eux, sont publics. Le kit est donc public lui aussi. Il ne contient que du thème, du CSS et des scripts — aucune donnée d'établissement, aucune donnée personnelle.
+**Les dépôts de cours sont privés**, en lecture pour l'équipe GitHub de la promotion ; leur site Pages l'est aussi. Le kit, lui, reste public.
+
+Ce n'est pas que l'action serait inutilisable autrement — le partage d'action entre dépôts privés fonctionne, essayé. C'est que l'action lit le SHA du kit par un `git ls-remote` **anonyme**, pour l'inscrire dans les notes de release : kit privé, plus de SHA, et le garde-fou refuse de publier quelque chose d'intraçable. Si le kit doit un jour devenir privé, c'est cette ligne-là qu'il faut changer, et elle seule.
+
+Le kit ne contient que du thème, du CSS et des scripts — aucune donnée d'établissement, aucune donnée personnelle.
 
 ## Licence
 

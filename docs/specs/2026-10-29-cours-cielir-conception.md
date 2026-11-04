@@ -71,6 +71,9 @@ hyperion est headless, piloté en SSH. Il dispose de **Docker** et de **uv**. Il
 
 - Organisation `ciel-ir-rascol`, plan **enterprise** : la visibilité *internal* est disponible. `members_can_create_internal_repositories` est à `false` ; la création se fait donc en tant que propriétaire.
 - Les **dépôts de cours sont publics** (les étudiants les consultent).
+  *(Révisé le 2026-11-03 : ils sont passés en privé, en lecture pour l'équipe GitHub de la
+  promotion, site Pages compris. La règle « aucune information personnelle » n'en change pas :
+  elle tient au fait que les supports sont distribués, pas à la visibilité du dépôt.)*
 - Le **kit est internal**.
 - **Première étape de l'implémentation, avant tout le reste :** vérifier qu'un dépôt public peut consommer une action composite hébergée dans un dépôt internal de la même organisation. Si ce n'est pas le cas, **le kit passe en public** : il ne contient que du thème, du CSS et des scripts, sous la même licence que les cours. On n'introduit pas de jeton d'organisation à renouveler.
 - GitHub Pages par dépôt, source **GitHub Actions**, à activer une fois par dépôt dans les réglages.
