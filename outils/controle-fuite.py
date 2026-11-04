@@ -24,6 +24,13 @@ s'y ajoutent, découvertes à répétition et chacune payée :
 Un écart signalé n'est pas forcément une fuite : une matrice qu'un exercice fait lire, une
 déclaration rappelée au-dessus d'une question sont des redites voulues. L'outil dit où
 regarder ; il ne remplace pas la lecture de la fiche.
+
+**Ce qu'il ne peut pas voir, et c'est important.** Sa référence est le HTML que le kit rend
+lui-même : une fuite *produite par le kit* y figure donc des deux côtés, et n'est jamais un
+écart. Il a annoncé « 0 écart » sur des documents où une réponse s'imprimait en clair, parce
+que le kit l'y avait mise. Il contrôle la rédaction d'un cours, pas la correction de l'outil —
+celle-ci relève de la suite de tests et de la lecture des documents. Il ignore par ailleurs
+les réponses de moins de cinq caractères, trop courtes pour qu'un comptage ait du sens.
 """
 
 from __future__ import annotations

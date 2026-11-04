@@ -1,5 +1,14 @@
 # Conception — dépôts de cours CIEL-IR, kit central et skill `cours-cielir`
 
+> **Document historique — ne pas s'y fier pour l'état actuel.**
+> Écrit le 29 octobre 2026, avant toute implémentation. Il garde la trace de ce qui avait été
+> décidé alors, et plusieurs de ses affirmations ne sont plus vraies : les dépôts de cours sont
+> devenus privés, le kit est public et non *internal*, l'arborescence des workflows a fondu en
+> un seul `publier.yml`, et la fiche fait quatre à cinq pages et non deux. Les annotations
+> « Révisé le… » ne couvrent qu'une partie du texte.
+> Pour l'état actuel : le `README.md` du kit, `procedure-mise-en-conformite.md` et
+> `exigences-du-skill.md`.
+
 **Date :** 29 octobre 2026
 **Statut :** conception validée, implémentation non commencée
 **Périmètre :** le standard des dépôts de cours, le dépôt `cielir-cours-kit` qui le met en œuvre, et le skill Claude Code qui crée et maintient ces dépôts.

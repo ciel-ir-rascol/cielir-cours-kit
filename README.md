@@ -212,7 +212,7 @@ Pour un autre dépôt que le témoin : `make temoin DEPOT=../cpp-c04-tableauxVec
 
 ## Le dépôt témoin
 
-`temoin/` est un cours jouet qui exerce toute la mise en page : trous, lignes de réponse, les cinq encadrés, tableau à trous, bloc terminal, code coloré, schéma à compléter. Le tag `v1` du kit ne bouge qu'après l'avoir régénéré sans régression — et relu à l'œil, en couleur puis en niveaux de gris.
+`temoin/` est un cours jouet qui exerce la mise en page du kit : trous, lignes de réponse, les cinq encadrés, tableau à trous, bloc terminal, code coloré, schéma à compléter, blocs et incises réservés à un support ; et, côté deck, page de titre, intercalaire de chapitre, slide piège, deux colonnes, figure légendée avec crédit, texte menu. **La liste est tenue par des tests** (`tests/test_temoin.py`) : ce que le témoin n'exerce pas n'est validé par rien, et c'est lui qui autorise à déplacer `v1`. Le tag `v1` du kit ne bouge qu'après l'avoir régénéré sans régression — et relu à l'œil, en couleur puis en niveaux de gris.
 
 ## Pourquoi ce dépôt est public, et les cours non
 

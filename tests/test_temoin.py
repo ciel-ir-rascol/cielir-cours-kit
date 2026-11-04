@@ -242,3 +242,48 @@ def test_le_makefile_produit_le_site_et_le_temoin_porte_son_titre():
     assert re.search(r"^site:", makefile, re.MULTILINE)
     cours = lire_config(TEMOIN / "cours.yml")
     assert (TEMOIN / "COURS.md").read_text(encoding="utf-8").startswith(f"# {cours.titre_page}\n")
+
+
+# ---------- le témoin doit exercer ce que le kit sait faire ----------
+
+ELEMENTS_FICHE = {
+    "les cinq encadrés": ["[!NOTE]", "[!TIP]", "[!IMPORTANT]", "[!WARNING]", "[!CAUTION]"],
+    "un trou simple": ["<ins>"],
+    "une réponse rédigée": ['<ins lignes="'],
+    "un bloc de code coloré": ["```cpp"],
+    "un bloc terminal": ["```terminal"],
+    "un tableau": ["| --- |"],
+    "un schéma à compléter": ["slides/img/schema.svg"],
+    "un bloc réservé à l'écran": ['<div class="ecran">'],
+    "un bloc réservé au papier": ['<div class="papier">'],
+    "une incise réservée": ['<span class="ecran">', '<span class="papier">'],
+}
+
+ELEMENTS_DECK = {
+    "la page de titre": ["_class: lead"],
+    "un intercalaire de chapitre": ["_class: chapitre"],
+    "une slide piège": ["_class: piege"],
+    "deux colonnes": ['class="cols"'],
+    "une figure légendée": ["<figure>", "<figcaption>"],
+    "un crédit d'image": ['class="credit"'],
+    "du texte menu": ['class="petit"'],
+    "un schéma": ['class="schema"'],
+    "un tableau": ["| --- |"],
+}
+
+
+@pytest.mark.parametrize("element,marqueurs", sorted(ELEMENTS_FICHE.items()))
+def test_la_fiche_du_temoin_exerce_chaque_element(element, marqueurs):
+    """Le témoin est ce qui autorise à déplacer `v1` : ce qu'il n'exerce pas n'est validé par
+    rien. La marque de support, la dernière arrivée, a produit quatre fuites alors que le
+    témoin ne la portait pas — d'où cette liste, qui doit grandir avec le kit."""
+    source = (TEMOIN / "COURS.md").read_text(encoding="utf-8")
+    for marqueur in marqueurs:
+        assert marqueur in source, f"{element} : « {marqueur} » absent du COURS.md du témoin"
+
+
+@pytest.mark.parametrize("element,marqueurs", sorted(ELEMENTS_DECK.items()))
+def test_le_deck_du_temoin_exerce_chaque_element(element, marqueurs):
+    deck = (TEMOIN / "slides" / "01-temoin.md").read_text(encoding="utf-8")
+    for marqueur in marqueurs:
+        assert marqueur in deck, f"{element} : « {marqueur} » absent du deck du témoin"

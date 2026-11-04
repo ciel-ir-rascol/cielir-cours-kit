@@ -22,9 +22,17 @@ runs:
       with:
         python-version: "3.12"
 
-    - name: Installer le kit
+    # `uv sync --frozen` installe EXACTEMENT les versions d'`uv.lock`, celles qu'on valide en
+    # local. Un `pip install` du paquet n'en lisait aucune : une version nouvelle de WeasyPrint
+    # ou de markdown-it pouvait changer le PDF distribué aux étudiants sans que rien ne le dise,
+    # ce qui contredit la reproductibilité que cette action promet deux étapes plus bas.
+    - name: Installer le kit, aux versions du verrou
       shell: bash
-      run: python -m pip install --quiet "$GITHUB_ACTION_PATH"
+      run: |
+        python -m pip install --quiet uv
+        uv sync --frozen --quiet --project "$GITHUB_ACTION_PATH"
+        # les étapes suivantes appellent `cielir-cours` : on met son environnement en tête du PATH
+        echo "$GITHUB_ACTION_PATH/.venv/bin" >> "$GITHUB_PATH"
 
     # 2. Refuser un tag malformé AVANT toute génération. Le motif vient du kit (TAG_VALIDE).
     - name: Contrôler le tag
@@ -72,6 +80,12 @@ runs:
           exit 1
         fi
         echo "kit=$REF_KIT (SHA $sha, $origine)" >> "$GITHUB_OUTPUT"
+
+    # ce qui a réellement rendu les documents : à lire dans le journal d'un run ancien quand
+    # on cherche pourquoi un PDF d'alors ne se régénère pas à l'identique
+    - name: Tracer les versions installées
+      shell: bash
+      run: uv pip list --project "$GITHUB_ACTION_PATH"
 
     # 5. Bibliothèques système de WeasyPrint. libharfbuzz-subset évite son avertissement de dépréciation.
     - name: Installer les bibliothèques système

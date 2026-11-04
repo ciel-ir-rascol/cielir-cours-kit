@@ -64,3 +64,32 @@ Tu as 17 ans.
 
 > [!CAUTION]
 > Ne jamais lire une variable avant de l'avoir écrite.
+
+## Ce que chaque support reçoit
+
+Cette partie n'existe que pour éprouver la marque de support : le témoin doit exercer ce que
+le kit sait faire, sinon un `v1` vert ne veut rien dire.
+
+<div class="papier">
+
+*Consigne réservée au papier : complétez à la main le nom du compilateur utilisé en TP.*
+
+<ins lignes="1">g++</ins>
+
+</div>
+
+<div class="ecran">
+
+### Développement réservé à l'écran
+
+Le compilateur n'est qu'un programme parmi d'autres : il lit un fichier texte et en écrit un
+autre. Ce qui le distingue, c'est qu'il refuse d'écrire tant qu'il n'a pas compris — et c'est
+pour cela que ses messages d'erreur méritent d'être lus en entier.
+
+```cpp
+g++ -Wall -Wextra -o programme source.cpp   // les deux options qui font le plus gagner
+```
+
+</div>
+
+Une incise <span class="ecran">que l'écran seul montre</span><span class="papier">que le papier seul montre</span>, puis la fin de la phrase.

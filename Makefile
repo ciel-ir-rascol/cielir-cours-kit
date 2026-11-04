@@ -48,7 +48,9 @@ pdf:
 slides:
 	mkdir -p $(BUILD)/deck
 	$(CLI) deck $(DECK) --config $(DEPOT)/cours.yml --version $(VERSION) --date $(DATE) -o $(BUILD)/deck/$(notdir $(DECK))
-	rm -rf $(BUILD)/deck/img && cp -R $(DEPOT)/slides/img $(BUILD)/deck/img
+	# un cours peut n'avoir aucune image ; l'action le tolère, le local doit en faire autant
+	rm -rf $(BUILD)/deck/img
+	@[ -d $(DEPOT)/slides/img ] && cp -R $(DEPOT)/slides/img $(BUILD)/deck/img || true
 	docker run --rm --init \
 	    -e MARP_USER="$$(id -u):$$(id -g)" -e CHROME_NO_SANDBOX=1 \
 	    -v "$(CURDIR):/work" -w /work \
@@ -70,8 +72,8 @@ site: slides
 	    $(BUILD)/deck/$(notdir $(DECK)) -o $(BUILD)/site/slides/index.html
 	# le dossier est vidé d'abord : sans cela, un second « make site » copierait les images
 	# DANS le dossier existant (slides/img/img/...) et le diaporama perdrait ses images
-	rm -rf $(BUILD)/site/slides/img && mkdir -p $(BUILD)/site/slides/img
-	cp -R $(BUILD)/deck/img/. $(BUILD)/site/slides/img/
+	rm -rf $(BUILD)/site/slides/img
+	@[ -d $(BUILD)/deck/img ] && mkdir -p $(BUILD)/site/slides/img && cp -R $(BUILD)/deck/img/. $(BUILD)/site/slides/img/ || true
 	@echo "Site écrit dans $(BUILD)/site/"
 
 servir: site

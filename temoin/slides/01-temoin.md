@@ -85,3 +85,40 @@ Tu as 17 ans.
 | Image | Auteur | Licence | Source |
 | --- | --- | --- | --- |
 | Schéma de la chaîne de construction | Création originale du kit | — | ce dépôt |
+
+---
+
+<!-- _class: chapitre -->
+
+# Les éléments de mise en page
+
+*Ce que le témoin doit exercer*
+
+---
+
+## Deux colonnes, une figure, du texte menu
+
+<div class="cols">
+
+<div>
+
+**À gauche** : du texte, pour vérifier que la grille tient.
+
+- une liste
+- deux éléments
+
+</div>
+
+<div>
+
+<figure>
+<img src="img/schema.svg" alt="Chaîne de construction">
+<figcaption>La chaîne de construction
+<span class="credit">Création originale du kit</span></figcaption>
+</figure>
+
+</div>
+
+</div>
+
+<p class="petit">Texte menu : il sert aux notes de bas de slide, et doit rester lisible projeté.</p>

@@ -131,11 +131,12 @@ def _refuser_span_imbrique(texte: str) -> None:
     fin de l'incise restait sur l'autre support, avec un `</span>` orphelin. Mieux vaut
     refuser que livrer la moitié d'un passage réservé.
     """
-    for ouvrante in _SPAN_OUVRANTE.finditer(_hors_code(texte)):
-        fin = texte.find("</span>", ouvrante.end())
-        corps = texte[ouvrante.end():fin if fin != -1 else len(texte)]
+    utile = _hors_code(texte)  # les positions qui suivent sont celles de `utile`, pas de `texte`
+    for ouvrante in _SPAN_OUVRANTE.finditer(utile):
+        fin = utile.find("</span>", ouvrante.end())
+        corps = utile[ouvrante.end():fin if fin != -1 else len(utile)]
         if fin == -1 or "<span" in corps:
-            extrait = texte[ouvrante.start():ouvrante.start() + 90].replace("\n", " ")
+            extrait = utile[ouvrante.start():ouvrante.start() + 90].replace("\n", " ")
             raise ValueError(
                 "incise de support non refermée ou contenant un autre <span> : "
                 f"…{extrait}…. Une incise `<span class=\"ecran\">…</span>` tient sur une ligne "
