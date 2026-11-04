@@ -58,6 +58,20 @@ alors que le TP01 a une partie entière — « Explorer l'historique et réparer
 et que l'évaluation y met 12 points sur 20. Le cours est le seul document autorisé pendant
 l'épreuve : il ne préparait pas plus de la moitié du barème.
 
+### 0.2 Compiler les exemples, pour un cours de programmation
+
+`outils/compiler-exemples.py <dépôt>` extrait chaque bloc ```cpp de `COURS.md` et des slides,
+le compile, et compare la sortie réelle à celle que le cours annonce quand il en annonce une.
+
+Sur le diaporama d'origine de `cpp-c06`, quatre fautes en une passe : un `cout >>` au lieu de
+`cout <<`, des accolades autour d'une expression, un tableau `[4][4]` initialisé en 3 × 3 dont
+la sortie imprimée était fausse, et une boucle sur un littéral de chaîne qui fait un tour de
+plus à cause du `\0`. Aucune n'avait été vue en relisant.
+
+Le script ne signale que les erreurs qu'un contexte manquant ne peut pas produire : un cours
+est plein de squelettes et d'expressions isolées qui ne compilent pas sans que rien ne soit
+faux. Il rate donc des fautes, et ne dit rien d'un programme correct qui enseigne une bêtise.
+
 ## 1. Renommer et réorganiser
 
 ### 1.1 Le nom
