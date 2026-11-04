@@ -149,6 +149,7 @@ def code_plugin(md: MarkdownIt, mode: Mode) -> None:
     if not isinstance(mode, Mode):
         raise TypeError(f"mode attendu : un Mode, reçu {mode!r}")
     defaut = md.renderer.rules["fence"]
+    defaut_indente = md.renderer.rules["code_block"]
     formateur = HtmlFormatter(nowrap=True)
 
     def fence(tokens, idx, options, env):  # type: ignore[no-untyped-def]
@@ -168,4 +169,18 @@ def code_plugin(md: MarkdownIt, mode: Mode) -> None:
         corps = _colorer(jeton.content, lexeur, formateur, langue, mode)
         return f'<pre class="code"><code class="language-{escapeHtml(langue)}">{corps}</code></pre>\n'
 
+    def code_block(tokens, idx, options, env):  # type: ignore[no-untyped-def]
+        """Bloc indenté de quatre espaces : même traitement des trous qu'un bloc clôturé.
+
+        Sans cela la réponse s'imprimait en clair sur la fiche à trous, et le garde-fou de
+        `mdtext` ne la voyait pas : le rendu par défaut échappe le `<ins>`, qui sort en
+        `&lt;ins&gt;`. Le cas arrive par accident — quatre espaces de trop, ou un bloc de code
+        dans un item de liste, qui s'indente à six.
+        """
+        jeton = tokens[idx]
+        if not _BALISE_INS.search(jeton.content):
+            return defaut_indente(tokens, idx, options, env)
+        return f"<pre><code>{_terminal(jeton.content, mode)}</code></pre>\n"
+
     md.renderer.rules["fence"] = fence
+    md.renderer.rules["code_block"] = code_block

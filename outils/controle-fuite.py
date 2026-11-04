@@ -1,11 +1,12 @@
-#!/usr/bin/env -S uv run --with pymupdf --script
-# /// script
-# requires-python = ">=3.12"
-# dependencies = ["pymupdf"]
-# ///
 """Aucune réponse ne doit être lisible dans la fiche à trous publiée.
 
-    outils/controle-fuite.py <dépôt> <cours-a-trous.pdf> [--version vX.YY]
+Depuis la racine du kit :
+
+    uv run --with pymupdf python outils/controle-fuite.py <dépôt> <cours-a-trous.pdf>
+
+Le script importe le kit — il rend le document exactement comme la publication le rend — donc
+il tourne dans l'environnement du kit. `--with pymupdf` ajoute la seule dépendance qui n'en
+fait pas partie : elle ne sert qu'aux contrôles, jamais à la génération.
 
 À lancer sur le PDF **téléchargé depuis la release**, pas sur une génération locale : c'est le
 document que les étudiants reçoivent qu'on contrôle, pas celui qu'on espère avoir produit.

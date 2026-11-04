@@ -104,3 +104,12 @@ def test_le_sommaire_ne_touche_pas_au_chemin_du_pdf():
         html = rendre_html(source, cours, PUB, mode)
         assert "<h2>Les tableaux</h2>" in html
         assert 'class="sommaire"' not in html
+
+
+def test_les_entites_html_ne_sont_pas_echappees_deux_fois():
+    """« Entrées & sorties » donnait l'intitulé `Entrées &amp; sorties`, que le gabarit
+    échappait encore : le sommaire affichait l'entité en toutes lettres, et l'ancre devenait
+    `entrees-amp-sorties`."""
+    _, parties = poser_sommaire("<h2>Entrées &amp; sorties</h2>")
+    assert parties == [("entrees-sorties", "Entrées & sorties")] or parties[0][1] == "Entrées & sorties"
+    assert "amp" not in parties[0][0]

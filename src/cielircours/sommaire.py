@@ -9,6 +9,7 @@ n'y figure pas. La numérotation, elle, est faite par la feuille de style avec d
 des deux côtés — le plan et les titres ne peuvent donc pas diverger.
 """
 
+import html
 import re
 import unicodedata
 
@@ -16,8 +17,14 @@ _TITRE = re.compile(r"<h(?P<niveau>[23])(?P<attributs>[^>]*)>(?P<contenu>.*?)</h
 _BALISE = re.compile(r"<[^>]+>")
 
 
-def _texte(html: str) -> str:
-    return re.sub(r"\s+", " ", _BALISE.sub("", html)).strip()
+def _texte(fragment: str) -> str:
+    """Le texte d'un titre : balises retirées, entités rendues à leur caractère.
+
+    Sans le `unescape`, un titre « Entrées & sorties » donnait l'intitulé `Entrées &amp;
+    sorties`, que le gabarit échappait une seconde fois — le sommaire affichait l'entité en
+    toutes lettres — et l'ancre devenait `entrees-amp-sorties`.
+    """
+    return re.sub(r"\s+", " ", html.unescape(_BALISE.sub("", fragment))).strip()
 
 
 def _ancre(intitule: str, prises: set[str]) -> str:

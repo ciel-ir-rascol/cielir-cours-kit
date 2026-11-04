@@ -241,3 +241,18 @@ def test_un_lexeur_qui_duplique_la_sentinelle_leve_une_erreur(monkeypatch):
 def test_un_bloc_sans_trou_reste_rendu_comme_avant():
     assert rendre_corps(CPP, Mode.COMPLET) == rendre_corps(CPP, Mode.TROUS)
     assert rendre_corps("```\na < b\n```\n", Mode.COMPLET).startswith("<pre><code>a &lt; b")
+
+@pytest.mark.parametrize("source,reponse,cas", [
+    ("Texte\n\n    float n[<ins>5</ins>];\n", "5", "quatre espaces"),
+    ("- a\n\n      x = <ins>SECRET</ins>\n", "SECRET", "dans un item de liste"),
+    ("\tx = <ins>SECRET</ins>\n", "SECRET", "une tabulation"),
+])
+def test_un_bloc_de_code_indente_troue_comme_un_bloc_cloture(source, reponse, cas):
+    """Le bloc indenté n'est pas un `fence` : sans règle propre, le rendu par défaut échappait
+    la balise, la réponse s'imprimait en clair, et le garde-fou ne voyait qu'un `&lt;ins&gt;`.
+    Le cas arrive par accident — quatre espaces de trop, ou un bloc dans un item de liste."""
+    trous = rendre_corps(source, Mode.TROUS)
+    assert reponse not in trous, cas
+    assert "&lt;ins" not in trous and "<ins" not in trous, cas
+    assert 'class="trou"' in trous, cas
+    assert reponse in rendre_corps(source, Mode.COMPLET), cas

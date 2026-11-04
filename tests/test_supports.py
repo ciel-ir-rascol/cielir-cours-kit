@@ -92,3 +92,23 @@ def test_le_passage_reserve_au_papier_est_absent_de_la_fiche_en_ligne():
     html = rendre_fiche(SOURCE, cours, PUB, URL)
     assert "Seulement en ligne" in html
     assert "Écrivez à la main" not in html
+
+
+@pytest.mark.parametrize("marque", [
+    "<div class='ecran'>", '<div class="ecran extra">', '<DIV CLASS="ecran">', '<div class = "ecran">',
+])
+def test_une_marque_ecrite_autrement_arrete_la_generation(marque):
+    """Ces graphies n'étaient pas reconnues comme un bloc et ne déclenchaient aucune erreur :
+    le passage finissait sur les deux supports, une consigne de geste sur le site ou un
+    développement d'écran sur le papier."""
+    with pytest.raises(ValueError, match="ne sait pas lire"):
+        filtrer(f"{marque}\n\nx\n\n</div>\n", Support.PAPIER)
+
+
+def test_un_bloc_de_code_qui_documente_la_marque_n_est_pas_filtre():
+    """Ce qu'un bloc de code cite n'est pas une marque posée : la documenter ne doit ni la
+    faire disparaître, ni fermer le bloc englobant."""
+    source = 'Avant.\n\n```markdown\n<div class="ecran">\n\ndéveloppement\n\n</div>\n```\n\nAprès.\n'
+    for support in Support:
+        sortie = filtrer(source, support)
+        assert "développement" in sortie and "Après." in sortie, support

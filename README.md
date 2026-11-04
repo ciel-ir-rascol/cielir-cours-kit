@@ -38,16 +38,17 @@ Copier `gabarits/deck.md` en `slides/NN-<séance>.md`. La **page de titre** est 
 
 ```
 C04 - Tableaux et vecteurs
-Informatique - Prog Procédurale
+Programmation C++ - Prog Procédurale
 1CIELIR - Lycée Louis Rascol, Albi
 
 (en bas)  Release : v1.01 (31.10.26)
-          🐙 https://github.com/ciel-ir-rascol/cpp-c04-tableauxVecteurs
+          J.Serrand
+          [logo GitHub] https://github.com/ciel-ir-rascol/cpp-c04-tableauxVecteurs
 ```
 
 Les trois premières lignes s'écrivent dans le deck, d'après `cours.yml` ; **si elles divergent de `cours.yml`, la publication s'arrête** avec un message qui dit ce qui est attendu. La release, le lien du dépôt et le logo sont injectés à la génération : ne rien en écrire dans le deck. Pas d'adresse de courriel : les supports sont distribués aux étudiants.
 
-Le **pied de page** (`footer:` de l'en-tête) se déduit aussi de `cours.yml` : `<discipline> · <sequence_libelle> · <classe>` (`Informatique · Prog Procédurale · 1CIELIR`). Le garde-fou le vérifie comme la page de titre. Le **lien du dépôt** est celui du dépôt réel : `GITHUB_REPOSITORY` sur GitHub Actions, sinon le `remote` git, sinon, en dernier recours, le nom déduit de `cours.yml`.
+Le **pied de page** (`footer:` de l'en-tête) se déduit aussi de `cours.yml` : `<discipline> · <sequence_libelle> · <classe>` (`Programmation C++ · Prog Procédurale · 1CIELIR`). Le garde-fou le vérifie comme la page de titre. Le **lien du dépôt** est celui du dépôt réel : `GITHUB_REPOSITORY` sur GitHub Actions, sinon le `remote` git, sinon, en dernier recours, le nom déduit de `cours.yml`.
 
 Un deck ne porte **aucun bloc `<style>`** : la mise en page se fait avec les classes du thème, utilisables en HTML dans le markdown :
 
@@ -170,9 +171,10 @@ Un dépôt par séance, nommé `<séquence>-c<NN>-<séanceCamelCase>` : `linux-c
 
 ```text
 cpp-c04-tableauxVecteurs/
-├── README.md                     présentation, déroulé, crédits, licence
+├── README.md                     présentation, déroulé, crédits des images
+├── .gitignore                    rien de généré n'entre ici
 ├── cours.yml                     métadonnées du bloc
-├── COURS.md                      le cours — source unique des deux fiches
+├── COURS.md                      le cours — source unique des trois fiches
 ├── slides/
 │   ├── 04-tableauxVecteurs.md    deck Marp
 │   └── img/                      SVG et images, partagés avec la fiche
@@ -216,7 +218,7 @@ Pour un autre dépôt que le témoin : `make temoin DEPOT=../cpp-c04-tableauxVec
 
 **Les dépôts de cours sont privés**, en lecture pour l'équipe GitHub de la promotion ; leur site Pages l'est aussi. Le kit, lui, reste public.
 
-Ce n'est pas que l'action serait inutilisable autrement — le partage d'action entre dépôts privés fonctionne, essayé. C'est que l'action lit le SHA du kit par un `git ls-remote` **anonyme**, pour l'inscrire dans les notes de release : kit privé, plus de SHA, et le garde-fou refuse de publier quelque chose d'intraçable. Si le kit doit un jour devenir privé, c'est cette ligne-là qu'il faut changer, et elle seule.
+Ce n'est pas que l'action serait inutilisable autrement — le partage d'action entre dépôts privés fonctionne, essayé. C'est que l'action lit le SHA du kit par un `git ls-remote` **anonyme**, pour l'inscrire dans les notes de release : kit privé, plus de SHA, et le garde-fou refuse de publier quelque chose d'intraçable. Si le kit doit un jour devenir privé, c'est d'abord cette ligne-là qu'il faut changer — et aussi `gabarits/settings.json`, qui fait lire le thème Marp par VS Code depuis `raw.githubusercontent.com`, en anonyme : l'aperçu local casserait dans tous les dépôts de cours.
 
 Le kit ne contient que du thème, du CSS et des scripts — aucune donnée d'établissement, aucune donnée personnelle.
 
