@@ -20,7 +20,7 @@ Lire la source LaTeX en entier **avant** de convertir, pour dresser deux listes 
 
 Se donner une référence de comparaison : le PDF LaTeX d'origine (`workspace_LaTex/output/*.pdf`) et le PDF des slides d'origine, à garder hors du dépôt (dans un dossier temporaire).
 
-### 0.1 Lire le cours qui précède et celui qui suit
+### 0.1 Lire le cours qui précède, celui qui suit, et ce qui l'évalue
 
 **Étape obligatoire, et la plus rentable de toute la procédure.** Un cours ne se juge pas seul :
 ses défauts les plus coûteux ne sont visibles que depuis ses voisins dans la progression. Les
@@ -47,6 +47,16 @@ d'une capacité ; « dépassement » désignait au C03 une valeur trop grande po
 un indice hors bornes ; et une initialisation en `=` contredisait le `{}` que le C03 apprend à
 préférer. Quatre défauts, aucun visible en relisant le cours seul — il avait été relu trois
 fois.
+
+**Quand le cours n'a pas de voisin, c'est l'aval qui le juge.** Un cours peut être seul dans sa
+séquence. Lire alors le TP qu'il outille (`<séquence>-tp<NN>-<séance>`) et l'**évaluation**
+(`<séquence>-eval<NN>`), qui a l'avantage de porter un barème : confronter leur plan à celui du
+cours, une partie sans contrepartie est un manque, et le barème en donne le prix.
+
+Exemple vécu, sur `git-c01-decouverte` : le cours s'arrêtait au cycle `add → commit → push`,
+alors que le TP01 a une partie entière — « Explorer l'historique et réparer ses erreurs » —
+et que l'évaluation y met 12 points sur 20. Le cours est le seul document autorisé pendant
+l'épreuve : il ne préparait pas plus de la moitié du barème.
 
 ## 1. Renommer et réorganiser
 
