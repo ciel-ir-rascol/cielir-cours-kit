@@ -112,3 +112,28 @@ def test_un_bloc_de_code_qui_documente_la_marque_n_est_pas_filtre():
     for support in Support:
         sortie = filtrer(source, support)
         assert "développement" in sortie and "Après." in sortie, support
+
+
+def test_un_bloc_de_code_citant_une_fermeture_ne_ferme_pas_le_bloc():
+    """Le comptage des `<div>` sautait les blocs de code au niveau supérieur mais pas à
+    l'intérieur d'un bloc réservé : celui-ci se fermait sur sa propre citation, et la fin du
+    passage — réservée à l'écran, donc susceptible de porter une solution — restait sur le
+    papier."""
+    source = ('<div class="ecran">\n\n```html\n</div>\n```\n\n'
+              "développement\n\n</div>\n\nAprès.\n")
+    papier = filtrer(source, Support.PAPIER)
+    assert "développement" not in papier
+    assert "Après." in papier
+    assert "développement" in filtrer(source, Support.ECRAN)
+
+
+def test_une_incise_contenant_un_autre_span_arrete_la_generation():
+    """Elle se fermait sur le premier `</span>` : la fin de l'incise restait sur l'autre
+    support, avec une balise orpheline."""
+    with pytest.raises(ValueError, match="autre <span>"):
+        filtrer('Début <span class="ecran">a <span>b</span> c</span> fin.\n', Support.PAPIER)
+
+
+def test_une_incise_non_refermee_arrete_la_generation():
+    with pytest.raises(ValueError, match="non refermée|autre <span>"):
+        filtrer('Début <span class="ecran">sans fin.\n', Support.PAPIER)

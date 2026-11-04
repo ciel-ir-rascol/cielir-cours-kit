@@ -181,10 +181,29 @@ def test_le_filtre_ne_touche_pas_un_svg_sans_etiquette():
 
 @pytest.mark.parametrize(
     "brut",
-    [b"\x89PNG\r\n\x1a\n\x00\x00", b"wOF2\x00\x01", b"body { color: red }", b"", b"<html><p class='remplissable'>x</p></html>", b"<svg"],
+    [b"\x89PNG\r\n\x1a\n\x00\x00", b"wOF2\x00\x01", b"body { color: red }", b"", b"<svg"],
 )
-def test_le_filtre_laisse_passer_ce_qui_n_est_pas_un_svg(brut):
+def test_le_filtre_laisse_passer_ce_qui_n_est_pas_du_xml(brut):
+    """Une image matricielle, une police, une feuille de style, du vide, du XML tronqué :
+    le même objet est renvoyé, le rendu n'en est pas touché."""
     assert filtrer_svg(brut) is brut
+
+
+@pytest.mark.parametrize("racine,brut", [
+    ("<g>", b'<g xmlns="http://www.w3.org/2000/svg"><text class="remplissable">SECRET</text></g>'),
+    ("<text>", b'<text xmlns="http://www.w3.org/2000/svg" class="remplissable">SECRET</text>'),
+    ("<wrap> autour d'un <svg>",
+     b'<wrap><svg xmlns="http://www.w3.org/2000/svg"><text class="remplissable">SECRET</text></svg></wrap>'),
+    ("<html> autour d'un <svg>",
+     b'<html xmlns="http://www.w3.org/1999/xhtml"><body><svg xmlns="http://www.w3.org/2000/svg">'
+     b'<text class="remplissable">SECRET</text></svg></body></html>'),
+    ("du HTML sans svg", b"<html><p class='remplissable'>SECRET</p></html>"),
+])
+def test_le_filtre_purge_quelle_que_soit_la_racine(racine, brut):
+    """On ne s'arrête pas à une racine `<svg>` : WeasyPrint construit une image pour n'importe
+    quelle racine XML, et l'étiquette s'imprimait alors sur la fiche à trous. Le critère n'est
+    pas la racine du fichier mais ce que le moteur de rendu en fait."""
+    assert b"SECRET" not in filtrer_svg(brut), racine
 
 
 def test_le_filtre_accepte_un_bom_utf8():

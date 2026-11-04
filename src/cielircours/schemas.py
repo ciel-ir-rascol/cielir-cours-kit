@@ -71,14 +71,19 @@ def filtrer_svg(donnees: bytes) -> bytes:
     if not debut.startswith(b"<"):
         return donnees
     try:
-        racine = ET.fromstring(donnees)  # l'analyseur même que WeasyPrint : même verdict
+        racine = ET.fromstring(donnees)
     except ET.ParseError:
         return donnees
-    if racine.tag != _BALISE_SVG and racine.tag != "svg":
-        return donnees
+    # On ne s'arrête pas à une racine `<svg>`. WeasyPrint construit une image pour n'importe
+    # quelle racine XML — un `<g>`, un `<text>`, un `<html>` qui enveloppe un `<svg>` — et
+    # l'étiquette s'imprimait alors sur la fiche à trous. `_purger` descend de toute façon
+    # chercher les `<svg>` imbriqués, et ne retire que ce qui est dedans.
     if _remplissable(racine):
         # un schéma entièrement « à compléter » : il ne reste rien à montrer
         return b'<svg xmlns="%s" width="1" height="1"/>' % ESPACE_SVG.encode()
+    # `True` : le fichier entier est traité comme un SVG, puisque WeasyPrint en fera une image
+    # quelle que soit sa racine. Le chemin du SVG en ligne dans du HTML, lui, garde sa règle —
+    # `retirer_remplissables` ne purge que ce qui est à l'intérieur d'un `<svg>`.
     if _purger(racine, True) == 0:
         return donnees
     try:

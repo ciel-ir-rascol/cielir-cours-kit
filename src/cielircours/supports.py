@@ -43,9 +43,23 @@ _FENCE = re.compile(r"^\s{0,3}(?P<cloture>`{3,}|~{3,})")
 
 
 def _fin_du_bloc(lignes: list[str], debut: int) -> int:
-    """Indice de la ligne `</div>` qui ferme le bloc ouvert en `debut`, en comptant les imbriqués."""
+    """Indice de la ligne `</div>` qui ferme le bloc ouvert en `debut`, en comptant les imbriqués.
+
+    Les blocs de code sont sautés : un `</div>` qu'ils citent ne ferme rien. Sans cela, un bloc
+    `ecran` documentant la marque se fermait sur sa propre citation, et la fin du passage —
+    réservée à l'écran, donc susceptible de porter une solution — restait sur le papier.
+    """
     profondeur = 0
+    cloture: str | None = None
     for i in range(debut, len(lignes)):
+        fence = _FENCE.match(lignes[i])
+        if cloture is not None:
+            if fence and lignes[i].strip().startswith(cloture):
+                cloture = None
+            continue
+        if fence:
+            cloture = fence.group("cloture")
+            continue
         for m in _DIV.finditer(lignes[i]):
             profondeur += -1 if m.group("fermante") else 1
             if profondeur == 0:
@@ -100,10 +114,33 @@ def filtrer(source: str, support: Support) -> str:
         i += 1
 
     sortie = "\n".join(gardees)
+    _refuser_span_imbrique(sortie)
     sortie = _SPAN.sub(lambda m: "" if m.group("support") == autre else m.group(0), sortie)
 
     _controler(sortie, support, autre)
     return sortie
+
+
+_SPAN_OUVRANTE = re.compile(r'<span\s+class="(ecran|papier)"\s*>')
+
+
+def _refuser_span_imbrique(texte: str) -> None:
+    """Une incise qui contient un autre `<span>` ne peut pas être découpée par expression.
+
+    `<span class="ecran">a <span>b</span> c</span>` se fermait sur le premier `</span>` : la
+    fin de l'incise restait sur l'autre support, avec un `</span>` orphelin. Mieux vaut
+    refuser que livrer la moitié d'un passage réservé.
+    """
+    for ouvrante in _SPAN_OUVRANTE.finditer(_hors_code(texte)):
+        fin = texte.find("</span>", ouvrante.end())
+        corps = texte[ouvrante.end():fin if fin != -1 else len(texte)]
+        if fin == -1 or "<span" in corps:
+            extrait = texte[ouvrante.start():ouvrante.start() + 90].replace("\n", " ")
+            raise ValueError(
+                "incise de support non refermée ou contenant un autre <span> : "
+                f"…{extrait}…. Une incise `<span class=\"ecran\">…</span>` tient sur une ligne "
+                "et ne contient pas d'autre <span>."
+            )
 
 
 def _hors_code(texte: str) -> str:
