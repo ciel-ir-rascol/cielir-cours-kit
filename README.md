@@ -224,4 +224,4 @@ Le kit ne contient que du thème, du CSS et des scripts — aucune donnée d'ét
 
 ## Licence
 
-[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr)
+[MIT](LICENSE) — c'est du logiciel, pas un support de cours. Les polices, les icônes et le logo GitHub embarqués gardent la leur : le fichier `LICENSE` les liste.

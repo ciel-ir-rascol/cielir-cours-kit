@@ -3,7 +3,7 @@ name = "cielircours"
 version = "0.1.0"
 description = "Outillage des dépôts de cours du BTS CIEL-IR : COURS.md vers PDF complet et PDF à trous"
 requires-python = ">=3.12"
-license = "CC-BY-NC-SA-4.0"
+license = "MIT"
 dependencies = [
     "markdown-it-py",
     "mdit-py-plugins",
