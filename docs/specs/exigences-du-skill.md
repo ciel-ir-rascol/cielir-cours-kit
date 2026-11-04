@@ -102,4 +102,36 @@ Détail et exemple vécu : `procedure-mise-en-conformite.md`, §0.1.
   variable, la demande doit la nommer aussi.
 - **Ne pas répliquer un registre d'écriture avant qu'il soit validé sur un cas.** Rédiger
   deux cours dans un style que l'enseignant n'a pas encore lu, c'est préparer deux réécritures.
+- **Le diaporama suit la fiche.** Toute partie ajoutée au cours qui doit être projetée demande
+  sa slide, et le déroulé du README se recale sur le nouveau compte. À la fin d'une passe de
+  rédaction, comparer les deux plans côte à côte : c'est ainsi qu'on s'aperçoit qu'une synthèse
+  ou un mémo n'existe que sur le papier.
 - Le fond du cours appartient à l'enseignant. On propose une passe, il corrige.
+
+## Images et icônes : la licence d'abord, le rendu ensuite
+
+- **Établir la licence sur pièces avant de poser une image**, en lisant les conditions de la
+  source, pas en se fiant à l'usage courant. Trois cas déjà tranchés :
+  - **logo C++** (`isocpp/logos`, Jeremy Kratz) : la Standard C++ Foundation autorise
+    explicitement l'emploi dans un support pédagogique sur le C++ normalisé, **sans
+    modification** et sans sous-entendre une approbation. Crédit obligatoire ;
+  - **marque GitHub** (`brand.github.com`) : utilisable **pour pointer un dépôt**, jamais
+    recolorée ni redimensionnée hors proportions. Les deux variantes sont embarquées, la
+    blanche pour les fonds sombres, la noire pour les fonds clairs ;
+  - **icônes des encadrés** : Bootstrap Icons, **MIT** — préféré au CC BY de Font Awesome,
+    qui aurait imposé une ligne de crédit visible sur chacun des cours. MIT permet la
+    modification : seule la couleur l'est, jamais le tracé.
+- **Une icône plutôt qu'un caractère.** Un caractère dépend de ce que la police couvre, et la
+  police de secours de WeasyPrint (DejaVu Sans) n'a ni 💡, ni ❗, ni ⛔ : ils sortent en carré
+  vide sur le PDF, tout en apparaissant dans la couche texte — donc invisibles à un contrôle
+  qui ne fait que chercher le caractère. Les icônes sont embarquées en URI de données dans les
+  deux feuilles, avec leurs fichiers d'origine conservés comme source traçable.
+- **Le même signe sur les deux supports.** Un encadré doit se reconnaître de la même façon en
+  cours et à la maison.
+
+## Ce que le kit produit, et qu'il ne faut pas refaire à la main
+
+- Le **numéro** des parties et des sous-parties, par compteurs CSS — jamais dans la source :
+  un `## 1. Titre` donnerait « 1. 1. Titre ».
+- Le **sommaire** de la fiche en ligne, à deux niveaux, avec ses ancres.
+- Le **cartouche**, la page de titre du deck, le pied de page, la signature et la release.
