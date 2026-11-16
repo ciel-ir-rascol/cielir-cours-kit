@@ -28,7 +28,7 @@ def test_proprietes():
 
 def test_defauts():
     td = lire_td(DONNEES / "td.yml")
-    assert td.autoevaluation is True
+    assert td.autoevaluation is False  # un TD n'est pas évalué : tableau sur demande seulement
     assert td.cours == [] and td.tp == []
     assert td.capacites == ["Lire une classe UML", "Interpréter une multiplicité"]
 
@@ -48,7 +48,7 @@ def test_listes_de_depots(tmp_path, champ, valeur):
 def test_autoevaluation_booleen(tmp_path):
     with pytest.raises(ConfigInvalide, match="autoevaluation"):
         lire_td(_ecrire(tmp_path, autoevaluation="oui"))
-    assert lire_td(_ecrire(tmp_path, autoevaluation=False)).autoevaluation is False
+    assert lire_td(_ecrire(tmp_path, autoevaluation=True)).autoevaluation is True
 
 
 def test_champ_absent(tmp_path):

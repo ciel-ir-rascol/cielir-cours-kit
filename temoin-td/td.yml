@@ -10,6 +10,7 @@ discipline: Informatique
 classe: 2CIELIR
 etablissement: Lycée Louis Rascol, Albi
 duree: 2 h
+autoevaluation: true    # facultatif (désactivé par défaut) : le témoin l'exerce
 capacites:
   - "Lire un document technique et en extraire une information"
   - "Compléter un document réponse"
