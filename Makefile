@@ -82,3 +82,18 @@ servir: site
 
 clean:
 	rm -rf build
+
+# ---------- Le TD témoin (temoin-td/) : sujet.pdf et corrige.pdf ----------
+TEMOIN_TD ?= temoin-td
+BUILD_TD  ?= build/temoin-td
+
+.PHONY: temoin-td servir-td
+
+temoin-td:
+	$(CLI) verifier $(TEMOIN_TD)
+	$(CLI) td $(TEMOIN_TD) --exemplaire corrige --version $(VERSION) --date $(DATE) -o $(BUILD_TD)
+	@echo "TD témoin régénéré dans $(BUILD_TD)/ :" && ls -1 $(BUILD_TD)/*.pdf
+
+servir-td: temoin-td
+	@echo "http://100.88.2.20:$(PORT)/  (Tailscale)"
+	cd $(BUILD_TD) && python3 -m http.server $(PORT) --bind 0.0.0.0

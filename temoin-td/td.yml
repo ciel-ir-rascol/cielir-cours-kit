@@ -1,0 +1,15 @@
+# Le TD témoin : un TD jouet qui exerce tous les éléments de mise en page d'un TD.
+# Il est régénéré à chaque modification du kit (make temoin-td) et relu à l'œil.
+sequence: kit
+sequence_libelle: Témoin
+auteur: J.Serrand
+numero: 1
+slug: temoin
+titre: TD témoin
+discipline: Informatique
+classe: 2CIELIR
+etablissement: Lycée Louis Rascol, Albi
+duree: 2 h
+capacites:
+  - "Lire un document technique et en extraire une information"
+  - "Compléter un document réponse"

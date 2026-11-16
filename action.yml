@@ -1,8 +1,9 @@
 name: Publier un cours CIEL-IR
 description: >-
-  Contrôle l'absence d'information personnelle, puis produit dans dist/ les trois PDF
+  Cours : contrôle l'absence d'information personnelle, puis produit dans dist/ les trois PDF
   (slides.pdf, cours.pdf, cours-a-trous.pdf) et, dans dist/site/, le site du cours :
   l'accueil (index.html), la fiche de cours en ligne (fiche/) et le HTML des slides (slides/).
+  TD (td.yml) : même contrôle, puis dist/sujet.pdf, et dist/corrige.pdf dans un dépôt -CORR.
 
 inputs:
   version:
@@ -33,6 +34,24 @@ runs:
         uv sync --frozen --quiet --project "$GITHUB_ACTION_PATH"
         # les étapes suivantes appellent `cielir-cours` : on met son environnement en tête du PATH
         echo "$GITHUB_ACTION_PATH/.venv/bin" >> "$GITHUB_PATH"
+
+    # 1 bis. Cours ou TD : `cours.yml` ou `td.yml` à la racine, jamais les deux. Les étapes
+    #    propres à chaque type portent un `if:` sur cette sortie ; le reste est commun.
+    - name: Reconnaître le type de dépôt (cours ou TD)
+      id: type
+      shell: bash
+      run: |
+        if [ -f td.yml ] && [ -f cours.yml ]; then
+          echo "::error title=Type ambigu::td.yml et cours.yml sont tous deux présents : un dépôt est un cours ou un TD, pas les deux."
+          exit 1
+        elif [ -f td.yml ]; then
+          echo "type=td" >> "$GITHUB_OUTPUT"
+        elif [ -f cours.yml ]; then
+          echo "type=cours" >> "$GITHUB_OUTPUT"
+        else
+          echo "::error title=Type inconnu::ni cours.yml ni td.yml à la racine du dépôt."
+          exit 1
+        fi
 
     # 2. Refuser un tag malformé AVANT toute génération. Le motif vient du kit (TAG_VALIDE).
     - name: Contrôler le tag
@@ -96,6 +115,7 @@ runs:
 
     # 6. Les deux PDF papier. La date est celle du commit étiqueté : la même à chaque rejeu.
     - name: Produire cours.pdf et cours-a-trous.pdf
+      if: steps.type.outputs.type == 'cours'
       shell: bash
       env:
         VERSION: ${{ inputs.version }}
@@ -109,6 +129,7 @@ runs:
 
     # 7. Le site : l'accueil et la fiche complète à l'écran. Les slides y sont ajoutées à l'étape 8.
     - name: Produire l'accueil et la fiche en ligne
+      if: steps.type.outputs.type == 'cours'
       shell: bash
       env:
         VERSION: ${{ inputs.version }}
@@ -119,6 +140,7 @@ runs:
     # 8. Le deck : copie portant la version, images à côté, thème du kit, puis Marp (image
     #    épinglée) pour le PDF et pour le HTML. Même démarche que `make slides` du kit.
     - name: Produire slides.pdf et le HTML des slides (sous dist/site/slides/)
+      if: steps.type.outputs.type == 'cours'
       shell: bash
       env:
         VERSION: ${{ inputs.version }}
@@ -151,3 +173,17 @@ runs:
         fi
         rm -rf "$tmp"
         ls -l dist dist/site dist/site/slides
+
+    # 9. TD : sujet.pdf, et corrige.pdf dans un dépôt -CORR. Le kit déduit l'exemplaire du nom
+    #    du dépôt (GITHUB_REPOSITORY) et refuse tout autre nom ; un dépôt sujet où subsiste une
+    #    réponse est refusé. Pas de site ni de slides pour un TD.
+    - name: Produire les PDF du TD
+      if: steps.type.outputs.type == 'td'
+      shell: bash
+      env:
+        VERSION: ${{ inputs.version }}
+      run: |
+        date=$(git log -1 --format=%cs)
+        mkdir -p dist
+        cielir-cours td . --version "$VERSION" --date "$date" -o dist
+        ls -l dist

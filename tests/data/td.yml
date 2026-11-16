@@ -1,0 +1,13 @@
+sequence: uml
+sequence_libelle: Modélisation UML
+auteur: J.Serrand
+numero: 1
+slug: diagClasses
+titre: Diagramme de classes UML
+discipline: Informatique
+classe: 2CIELIR
+etablissement: Lycée Louis Rascol, Albi
+duree: 3 h
+capacites:
+  - "Lire une classe UML"
+  - "Interpréter une multiplicité"

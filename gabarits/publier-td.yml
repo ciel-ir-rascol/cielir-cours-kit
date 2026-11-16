@@ -1,0 +1,67 @@
+# Publication d'un TD CIEL-IR.
+# Fichier à copier tel quel dans .github/workflows/publier.yml du dépôt sujet ET du dépôt -CORR :
+# il ne contient rien de propre à un TD. Le kit reconnaît un TD à son td.yml, et déduit du nom
+# du dépôt l'exemplaire à produire :
+#     <séquence>-tdNN-<nom>        → sujet.pdf (refusé si une réponse y subsiste)
+#     <séquence>-tdNN-<nom>-CORR   → sujet.pdf et corrige.pdf
+#
+# Pour publier : poussez un tag de la forme vN.NN, le même dans les deux dépôts.
+#     git tag v1.01 && git push origin v1.01
+# Un tag mal formé (v1.2, 1.01, v1.01-rc) arrête tout, avec un message qui dit ce qui est attendu.
+#
+# Ce qui se passe, dans l'ordre :
+#   1. construire : contrôle qu'aucune information personnelle ne traîne (sinon : arrêt),
+#                   puis fabrique les PDF.
+#   2. release    : crée la release du tag avec les PDF.
+# Un TD n'a ni site ni slides : pas de GitHub Pages. Rien de généré n'est enregistré dans le dépôt.
+
+name: Publier
+
+on:
+  push:
+    tags: ['v*']          # uniquement sur tag : jamais sur un simple push de branche
+
+permissions:
+  contents: read
+
+jobs:
+  construire:
+    runs-on: ubuntu-latest
+    outputs:
+      kit: ${{ steps.kit.outputs.kit }}   # tag et SHA de l'outillage, pour les notes de release
+    steps:
+      - uses: actions/checkout@v7
+
+      # L'outillage vit dans le kit ; « @v1 » suit ses évolutions compatibles.
+      - id: kit
+        uses: ciel-ir-rascol/cielir-cours-kit@v1
+        with:
+          version: ${{ github.ref_name }}
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: pdf
+          path: dist/*.pdf
+          if-no-files-found: error
+
+  release:
+    needs: construire
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write          # nécessaire pour créer la release
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: pdf
+          path: dist
+
+      - name: Créer la release avec les PDF
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+          KIT: ${{ needs.construire.outputs.kit }}
+        run: |
+          gh release create "$TAG" dist/*.pdf \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "$TAG" \
+            --notes "Version $TAG du TD. Générée avec le kit $KIT."

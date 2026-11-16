@@ -17,8 +17,12 @@ from cielircours.config import Cours
 _TITRE = re.compile(r"[ ]{0,3}#[ \t]+(?P<texte>.*?)(?:[ \t]+#+)?[ \t]*\r?")
 
 
-def retirer_titre(source: str, cours: Cours) -> str:
-    """`source` sans son titre de niveau 1 d'ouverture ; `ValueError` s'il contredit `cours.yml`."""
+def retirer_titre(source: str, cours: Cours, fichier: str = "COURS.md", config: str = "cours.yml") -> str:
+    """`source` sans son titre de niveau 1 d'ouverture ; `ValueError` s'il contredit `cours.yml`.
+
+    `cours` est tout objet qui porte `titre_page` : un `Cours`, ou un `TD` (avec `fichier='TD.md'`
+    et `config='td.yml'`, pour que le message nomme les bons fichiers).
+    """
     lignes = source.splitlines(keepends=True)
     i = 0
     while i < len(lignes) and not lignes[i].strip():
@@ -31,7 +35,7 @@ def retirer_titre(source: str, cours: Cours) -> str:
     trouve = m.group("texte")
     if trouve != cours.titre_page:
         raise ValueError(
-            "le titre de niveau 1 de COURS.md ne dit pas ce que dit cours.yml "
+            f"le titre de niveau 1 de {fichier} ne dit pas ce que dit {config} "
             f"(titre_page) : attendu « # {cours.titre_page} », trouvé « # {trouve} »"
         )
     i += 1

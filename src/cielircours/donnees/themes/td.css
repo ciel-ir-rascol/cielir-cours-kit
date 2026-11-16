@@ -1,0 +1,57 @@
+/* Compléments de mise en page d'un TD, chargés après cours.css (qui reste inchangée).
+   Tout se lit en noir et blanc : chaque encadré porte son titre en toutes lettres. */
+
+/* ---------- Bandeau de partie : durée indicative et niveau ---------- */
+.partie {
+  margin: -2pt 0 6pt;
+  font-size: 8.5pt;
+  color: #333;
+}
+.partie .duree::before { content: "Durée indicative : "; }
+.partie .niveau { margin-left: 6pt; letter-spacing: 0.08em; }
+
+/* ---------- Encadrés titrés : ressource, document technique, document réponse ---------- */
+.ressource, .dt, .dr, .reponse {
+  margin: 8pt 0;
+  padding: 6pt 8pt;
+  break-inside: avoid;
+}
+.ressource > :last-child, .dt > :last-child, .dr > :last-child, .reponse > :last-child { margin-bottom: 0; }
+.bloc-titre {
+  margin: 0 0 4pt;
+  font-weight: 700;
+  font-size: 8.5pt;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.ressource { border-left: 3pt solid #4a90b0; background: #f1f7fb; }
+.dt { border: 0.8pt solid #000; }
+.dt .bloc-titre { border-bottom: 0.6pt solid #000; padding-bottom: 2pt; }
+
+/* Un DR se détache et se rend avec la copie : il commence toujours une page. */
+/* Il occupe sa page seul : ce qui le suit (autre DR, auto-évaluation) passe à la page suivante. */
+.dr { border: 1.2pt solid #000; break-before: page; break-after: page; break-inside: auto; }
+.dr-nom { margin: 0 0 6pt; font-size: 9pt; }
+.dr img { max-width: 100%; }
+
+/* ---------- Réponse : n'existe que dans le corrigé ---------- */
+.reponse { border: 0.8pt dashed var(--corr); color: var(--corr); }
+.reponse::before {
+  content: "Réponse";
+  display: block;
+  margin-bottom: 3pt;
+  font-weight: 700;
+  font-size: 8.5pt;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.reponse pre, .reponse code { color: inherit; }
+
+/* ---------- Auto-évaluation ---------- */
+.autoevaluation { margin-top: 14pt; break-inside: avoid; }
+/* Un titre de section, pas une partie du TD : ni numéro, ni incrément (comme .capacites h2). */
+.autoevaluation h2 { counter-increment: none; }
+.autoevaluation h2::before { content: none; }
+.autoevaluation table { width: 100%; border-collapse: collapse; }
+.autoevaluation th, .autoevaluation td { border: 0.6pt solid #000; padding: 3pt 5pt; }
+.autoevaluation td.case { text-align: center; width: 13%; font-size: 12pt; }
