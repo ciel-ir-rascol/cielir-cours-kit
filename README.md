@@ -17,6 +17,8 @@ Un dépôt de cours ne contient que son contenu : le cours en Markdown, son diap
 
 Les deux fiches sortent du **même** `COURS.md` : une seule source, deux rendus. Un corrigé ne peut donc pas diverger de l'exemplaire des étudiants.
 
+Le kit produit aussi les **TD** : à partir de `td.yml` et `TD.md`, `sujet.pdf` et `corrige.pdf`, sans site ni slides. Voir [Écrire un TD](#écrire-un-td).
+
 ## `cours.yml` : ce qui se saisit une fois
 
 | Champ | Rôle |
@@ -148,6 +150,55 @@ La balise ouvrante est **seule sur sa ligne**, et son `</div>` la referme ; les 
 Le passage de l'autre support est **retiré**, jamais masqué : du CSS laisserait le texte dans le document, et le kit a déjà tranché ainsi pour les étiquettes des schémas. Une marque non refermée, ou que le filtre ne sait pas lire, **arrête la génération** — sinon un bloc entier disparaîtrait d'un document sans que rien ne le signale.
 
 Le `<div>` a été préféré à une syntaxe `:::` parce qu'il se dégrade bien : sur GitHub, dans VS Code, dans n'importe quel rendu markdown, le contenu s'affiche et la marque reste invisible.
+
+## Écrire un TD
+
+Un TD est **un document papier**, traité sur table : ni fiche en ligne, ni slides, ni site. L'étudiant répond sur une copie à part ; seuls les **documents réponse** (DR), des schémas à compléter, se rendent avec la copie. Un TD vit dans **deux dépôts** :
+
+| Dépôt | Contient | Produit |
+| --- | --- | --- |
+| `<séquence>-tdNN-<nom>-CORR` | **la source unique**, `TD.md` réponses comprises | `sujet.pdf` et `corrige.pdf` |
+| `<séquence>-tdNN-<nom>` | le même TD **sans aucune réponse**, écrit par `cielir-cours extraire-sujet` | `sujet.pdf` |
+
+On n'écrit que dans le `-CORR`. Le dépôt sujet est lu par les étudiants dès le début : il ne se modifie jamais à la main, il se régénère.
+
+### `td.yml`
+
+Les champs de `cours.yml`, sauf `bloc`, `tp` et `logo`, plus :
+
+| Champ | Rôle |
+| --- | --- |
+| `numero` | entier de 1 à 99 : `td01` dans le nom du dépôt, « TD01 - <titre> » dans le cartouche |
+| `cours`, `tp` | facultatifs : listes de **noms de dépôts** liés |
+| `autoevaluation` | `true` par défaut : un tableau d'auto-évaluation, tiré de `capacites`, clôt le TD |
+
+Le nom du dépôt est `{sequence}-td{numero:02d}-{slug}`, avec `-CORR` pour le corrigé. Tout autre nom est refusé à la publication.
+
+### Le balisage de `TD.md`
+
+| Élément | Écriture | Rendu |
+| --- | --- | --- |
+| question | paragraphe qui commence par `**Q.**` | numérotée Q1, Q2… sur tout le document |
+| réponse | `<div class="reponse">` … `</div>`, juste après sa question | encadré « Réponse » dans le corrigé, **retiré** du sujet |
+| ressource de cours | `<div class="ressource" titre="…">` | encadré « Ressource », en tête ou au fil des parties |
+| document technique | `<div class="dt" titre="…">` | numéroté DT1, DT2… |
+| document réponse | `<div class="dr" titre="…">` contenant un SVG | numéroté DR1, DR2…, seul sur sa page, avec « Nom : … à rendre avec la copie » ; les éléments `remplissable` du SVG sont retirés du sujet |
+| bandeau de partie | `<p class="partie" duree="20 min" niveau="2"></p>` sous le `##` | durée indicative et niveau en étoiles (1 à 4), l'un ou l'autre facultatif |
+
+Les blocs suivent la grammaire des passages réservés : balise ouvrante seule sur sa ligne, ligne vide, markdown libre, `</div>`. Chaque question a sa réponse, sauf si elle cite un DR (`DR1`) : sa réponse est alors le DR rempli. Une réponse qui ne suit aucune question est refusée. **Refusés dans un TD** : les trous `<ins>` et les marques `ecran`/`papier`.
+
+### Produire et publier
+
+```bash
+cielir-cours extraire-sujet ../<td>-CORR ../<td>      # écrit TD.md, td.yml et img/** du sujet
+cielir-cours td ../<td>-CORR --exemplaire corrige --version v1.01 --date 2026-11-16 -o build/td
+```
+
+`extraire-sujet` relit ce qu'il écrit : la moindre trace de réponse (`class="reponse"`, `remplissable`, même dans un bloc de code) et rien n'est déposé. Sans `--exemplaire`, `td` déduit l'exemplaire du nom du dépôt et le contrôle ; dans un dépôt sujet, une trace de réponse arrête tout.
+
+Copier `gabarits/publier-td.yml` dans `.github/workflows/publier.yml` des **deux** dépôts, puis pousser **le même tag** dans chacun. La release du sujet porte `sujet.pdf`, celle du `-CORR` les deux PDF. Pas de GitHub Pages.
+
+Le TD témoin, `temoin-td/`, exerce chacun de ces éléments (`tests/test_temoin_td.py`) : `make temoin-td`, puis `make servir-td` pour le relire.
 
 ## Publier un cours
 
