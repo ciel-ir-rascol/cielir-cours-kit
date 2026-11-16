@@ -41,3 +41,11 @@ def url_du_depot(racine: Path, cours: Cours, env: Mapping[str, str]) -> str:
     if not _DEPOT.fullmatch(depot):
         depot = _depuis_remote(racine) or ""
     return f"https://github.com/{depot}" if depot else cours.url_depot
+
+
+def nom_du_depot(racine: Path, env: Mapping[str, str]) -> str | None:
+    """Le nom seul du dépôt (« uml-td01-diagClasses-CORR ») : `GITHUB_REPOSITORY`, sinon le remote."""
+    depot = env.get("GITHUB_REPOSITORY", "").strip()
+    if not _DEPOT.fullmatch(depot):
+        depot = _depuis_remote(racine) or ""
+    return depot.split("/", 1)[1] if "/" in depot else None

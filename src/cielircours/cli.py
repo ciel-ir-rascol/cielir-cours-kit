@@ -1,4 +1,4 @@
-"""Ligne de commande : `cielir-cours pdf | deck | site | verifier`.
+"""Ligne de commande : `cielir-cours pdf | deck | site | verifier | td | extraire-sujet`.
 
 Codes de sortie : 0 succès ; 1 infractions trouvées par `verifier` ; 2 erreur (usage,
 fichier absent, configuration invalide, ressource introuvable, trou mal formé…).
@@ -13,12 +13,21 @@ from importlib.resources import files
 from pathlib import Path
 
 from cielircours.confidentialite import controler
-from cielircours.config import ConfigInvalide, lire_config
+from cielircours.config import ConfigInvalide, lire_config, lire_td
 from cielircours.deck import preparer_deck
-from cielircours.depot import url_du_depot
+from cielircours.depot import nom_du_depot, url_du_depot
 from cielircours.mdtext import Mode
-from cielircours.rendu import Publication, SchemeInterdit, SourceIntrouvable, ecrire_pdf, rendre_html
+from cielircours.rendu import (
+    Publication,
+    SchemeInterdit,
+    SourceIntrouvable,
+    ecrire_pdf,
+    ecrire_pdf_td,
+    rendre_html,
+    rendre_html_td,
+)
 from cielircours.site import ecrire_site
+from cielircours.td import Exemplaire, controler_sujet, extraire_sujet
 
 # Un tag de dépôt de cours : v, un numéro de séquence, un point, deux chiffres (v1.02, v12.03).
 # Exporté : l'action GitHub du kit le reprend pour refuser un tag malformé avant toute génération.
@@ -69,7 +78,61 @@ def _parser() -> argparse.ArgumentParser:
     verifier = sous.add_parser("verifier", help="cherche des informations personnelles dans un dépôt")
     verifier.add_argument("racine", type=Path, nargs="?", default=Path("."))
     verifier.add_argument("--motifs", type=Path, help="fichier de motifs (défaut : celui du kit)")
+    td = sous.add_parser("td", help="sujet.pdf (et corrige.pdf dans un -CORR) d'un dépôt de TD")
+    td.add_argument("racine", type=Path, help="le dépôt : td.yml et TD.md")
+    td.add_argument("--version", required=True, type=_version, help="par exemple v1.02")
+    td.add_argument("--date", required=True, type=_date, help="AAAA-MM-JJ")
+    td.add_argument("-o", "--sortie", required=True, type=Path, help="dossier des PDF (créé au besoin)")
+    td.add_argument("--exemplaire", choices=[e.value for e in Exemplaire],
+                    help="forcer le dépôt sujet ou corrigé (sinon : déduit du nom du dépôt, contrôlé)")
+
+    extraire = sous.add_parser("extraire-sujet", help="écrit le dépôt sujet d'un TD depuis son -CORR")
+    extraire.add_argument("corr", type=Path, help="le dépôt -CORR")
+    extraire.add_argument("sujet", type=Path, help="le dépôt sujet")
     return parser
+
+
+def _exemplaire_du_depot(racine: Path, nom_attendu_sujet: str, nom_attendu_corr: str) -> Exemplaire:
+    nom = nom_du_depot(racine, os.environ)
+    if nom is None:
+        raise ValueError(
+            f"{racine} : nom du dépôt introuvable (ni GITHUB_REPOSITORY, ni remote origin sur "
+            "github.com) : passer --exemplaire sujet ou --exemplaire corrige"
+        )
+    if nom == nom_attendu_corr:
+        return Exemplaire.CORRIGE
+    if nom == nom_attendu_sujet:
+        return Exemplaire.SUJET
+    raise ValueError(
+        f"le dépôt s'appelle « {nom} », mais td.yml attend « {nom_attendu_sujet} » (sujet) "
+        f"ou « {nom_attendu_corr} » (corrigé)"
+    )
+
+
+def _td(args: argparse.Namespace) -> int:
+    racine = args.racine.resolve()
+    td = lire_td(racine / "td.yml")
+    if args.exemplaire:
+        depot = Exemplaire(args.exemplaire)
+    else:
+        depot = _exemplaire_du_depot(racine, td.depot_sujet, td.depot_corr)
+    if depot is Exemplaire.SUJET:
+        controler_sujet(racine)
+    source = (racine / "TD.md").read_text(encoding="utf-8")
+    pub = Publication(args.version, args.date)
+    args.sortie.mkdir(parents=True, exist_ok=True)
+    exemplaires = [Exemplaire.SUJET] if depot is Exemplaire.SUJET else [Exemplaire.SUJET, Exemplaire.CORRIGE]
+    for ex in exemplaires:
+        sortie = args.sortie / f"{ex.value}.pdf"
+        ecrire_pdf_td(rendre_html_td(source, td, pub, ex), racine, sortie, ex)
+        print(f"{sortie} ({ex.value}, {args.version})")
+    return 0
+
+
+def _extraire_sujet(args: argparse.Namespace) -> int:
+    for rel in extraire_sujet(args.corr, args.sujet):
+        print(args.sujet / rel)
+    return 0
 
 
 def _pdf(args: argparse.Namespace) -> int:
@@ -120,7 +183,14 @@ def _verifier(args: argparse.Namespace) -> int:
     return 0
 
 
-_COMMANDES = {"pdf": _pdf, "deck": _deck, "site": _site, "verifier": _verifier}
+_COMMANDES = {
+    "pdf": _pdf,
+    "deck": _deck,
+    "site": _site,
+    "verifier": _verifier,
+    "td": _td,
+    "extraire-sujet": _extraire_sujet,
+}
 
 
 def main(argv: list[str] | None = None) -> int:

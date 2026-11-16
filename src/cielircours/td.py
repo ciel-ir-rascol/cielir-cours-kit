@@ -224,3 +224,17 @@ def extraire_sujet(corr: Path, sujet: Path) -> list[Path]:
     finally:
         shutil.rmtree(attente, ignore_errors=True)
     return fichiers
+
+
+def controler_sujet(racine: Path) -> None:
+    """Refuse un dépôt sujet où subsiste une trace de réponse (TD.md, td.yml ou img/**)."""
+    racine = Path(racine)
+    for rel in _fichiers_du_sujet(racine):
+        if rel.suffix.lower() in {".md", ".yml", ".svg"} and (racine / rel).is_file():
+            texte = (racine / rel).read_bytes().decode("utf-8", errors="replace")
+            if m := _FUITE.search(texte):
+                raise ValueError(
+                    f"{rel.as_posix()} : trace de réponse (« {m.group(0)} ») dans un dépôt sujet. "
+                    "Les réponses ne vivent que dans le -CORR ; le sujet se régénère par "
+                    "`cielir-cours extraire-sujet`."
+                )
