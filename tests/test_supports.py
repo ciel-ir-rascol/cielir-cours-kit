@@ -137,3 +137,48 @@ def test_une_incise_contenant_un_autre_span_arrete_la_generation():
 def test_une_incise_non_refermee_arrete_la_generation():
     with pytest.raises(ValueError, match="non refermée|autre <span>"):
         filtrer('Début <span class="ecran">sans fin.\n', Support.PAPIER)
+
+
+# --- retirer_blocs : retrait générique d'un bloc par classe (mode TD) -------------------------
+
+from cielircours.supports import compter_blocs, retirer_blocs  # noqa: E402
+
+
+def test_retirer_blocs_retire_le_bloc_et_sa_ligne_blanche():
+    source = 'a\n\n<div class="reponse">\n\nR\n\n</div>\n\nb'
+    assert retirer_blocs(source, "reponse") == "a\n\nb"
+
+
+def test_retirer_blocs_compte_les_div_imbriques():
+    source = ('a\n\n<div class="reponse">\n\n<div class="cols">\n\nX\n\n</div>\n\nR\n\n</div>\n\nb')
+    sortie = retirer_blocs(source, "reponse")
+    assert sortie == "a\n\nb"
+
+
+def test_retirer_blocs_saute_le_code():
+    source = ('a\n\n<div class="reponse">\n\nR1\n\n```html\n</div>\n```\n\nR2\n\n</div>\n\nb')
+    sortie = retirer_blocs(source, "reponse")
+    assert "R1" not in sortie and "R2" not in sortie
+    assert sortie == "a\n\nb"
+
+
+@pytest.mark.parametrize("ouvrante", ["<div class='reponse'>", '<div class="reponse autre">',
+                                       '<DIV CLASS="reponse">'])
+def test_retirer_blocs_refuse_une_graphie_illisible(ouvrante):
+    with pytest.raises(ValueError, match="attendu"):
+        retirer_blocs(f"a\n\n{ouvrante}\n\nR\n\n</div>\n", "reponse")
+
+
+def test_retirer_blocs_non_referme():
+    with pytest.raises(ValueError, match="non refermé"):
+        retirer_blocs('a\n\n<div class="reponse">\n\nR\n', "reponse")
+
+
+def test_retirer_blocs_sans_marque_identique():
+    source = "# T\n\nTexte <div class=\"cols\">\n\n```\n<div class=\"reponse\">\n```\n"
+    assert retirer_blocs(source, "reponse") == source
+
+
+def test_compter_blocs_hors_code():
+    source = '<div class="reponse">\n\nR\n\n</div>\n\n```\n<div class="reponse">\n```\n'
+    assert compter_blocs(source, "reponse") == 1

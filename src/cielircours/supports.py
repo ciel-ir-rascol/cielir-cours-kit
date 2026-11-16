@@ -184,3 +184,91 @@ def _controler(sortie: str, support: Support, autre: Support) -> None:
             '`<div class="ecran">` ou `<div class="papier">`, seuls sur leur ligne, en '
             f"minuscules et entre guillemets doubles. Trouvé : …{extrait}…"
         )
+
+
+# --- Blocs de classe quelconque : le mode TD retire ses réponses par le même mécanisme -------
+
+
+def _motifs_de(classe: str) -> tuple[re.Pattern[str], re.Pattern[str], re.Pattern[str]]:
+    nom = re.escape(classe)
+    ouvrante = re.compile(rf'^\s*<div\s+class="{nom}"(?:\s+[a-z]+="[^"]*")*\s*>\s*$')
+    exacte = re.compile(rf'<div\s+class="{nom}"')
+    large = re.compile(rf"""class\s*=\s*["']?[^"'>]*\b{nom}\b""", re.IGNORECASE)
+    return ouvrante, exacte, large
+
+
+def _lignes_hors_code(lignes: list[str]):
+    """Indices des lignes qui ne sont pas dans un bloc de code (délimiteurs compris exclus)."""
+    cloture: str | None = None
+    for i, ligne in enumerate(lignes):
+        fence = _FENCE.match(ligne)
+        if cloture is not None:
+            if fence and ligne.strip().startswith(cloture):
+                cloture = None
+            continue
+        if fence:
+            cloture = fence.group("cloture")
+            continue
+        yield i
+
+
+def _controler_graphie(source: str, classe: str) -> None:
+    _, exacte, large = _motifs_de(classe)
+    utile = _hors_code(source)
+    for m in large.finditer(utile):
+        debut = utile.rfind("<", 0, m.start())
+        if debut == -1 or not exacte.match(utile, debut):
+            extrait = utile[max(0, m.start() - 30):m.end() + 30].replace("\n", " ")
+            raise ValueError(
+                f'marque « {classe} » écrite d\'une façon que le filtre ne sait pas lire : attendu '
+                f'`<div class="{classe}">`, seul sur sa ligne, en minuscules et entre guillemets '
+                f"doubles. Trouvé : …{extrait}…"
+            )
+
+
+def compter_blocs(source: str, classe: str) -> int:
+    """Nombre de blocs `<div class="classe">` posés dans `source`, hors blocs de code."""
+    ouvrante, _, _ = _motifs_de(classe)
+    lignes = source.split("\n")
+    return sum(1 for i in _lignes_hors_code(lignes) if ouvrante.match(lignes[i]))
+
+
+def retirer_blocs(source: str, classe: str) -> str:
+    """`source` privée de tous ses blocs `<div class="classe">`, avec leur contenu.
+
+    Même grammaire que les marques de support : balise ouvrante seule sur sa ligne, `<div>`
+    imbriqués comptés, blocs de code sautés. Une source sans marque revient telle quelle. Une
+    marque écrite d'une façon illisible, ou non refermée, est une erreur : un bloc qui échappe
+    au filtre finirait dans le document de l'autre lecteur.
+    """
+    _controler_graphie(source, classe)
+    ouvrante, _, _ = _motifs_de(classe)
+    lignes = source.split("\n")
+    a_retirer: set[int] = set()
+    hors_code = list(_lignes_hors_code(lignes))
+    for i in hors_code:
+        if i in a_retirer or not ouvrante.match(lignes[i]):
+            continue
+        try:
+            fin = _fin_du_bloc(lignes, i)
+        except ValueError:
+            raise ValueError(
+                f"bloc « {classe} » non refermé, ouvert ligne {i + 1} : « {lignes[i].strip()} ». "
+                f'Chaque <div class="{classe}"> attend son </div>.'
+            ) from None
+        a_retirer.update(range(i, fin + 1))
+    if not a_retirer:
+        return source
+    gardees: list[str] = []
+    i = 0
+    while i < len(lignes):
+        if i in a_retirer:
+            while i in a_retirer:
+                i += 1
+            # la ligne blanche qui suivait le bloc disparaît avec lui
+            while i < len(lignes) and not lignes[i].strip() and gardees and not gardees[-1].strip():
+                i += 1
+            continue
+        gardees.append(lignes[i])
+        i += 1
+    return "\n".join(gardees)
