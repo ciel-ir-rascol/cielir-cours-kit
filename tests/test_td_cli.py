@@ -78,3 +78,12 @@ def test_extraire_sujet_cli(tmp_path, capsys):
     out = capsys.readouterr().out
     assert "TD.md" in out and "td.yml" in out
     assert "Trois" not in (tmp_path / "sujet" / "TD.md").read_text(encoding="utf-8")
+
+
+def test_sujet_extrait_puis_rendu(tmp_path, monkeypatch):
+    corr = _depot(tmp_path)
+    sujet = tmp_path / SUJET
+    assert main(["extraire-sujet", str(corr), str(sujet)]) == 0
+    monkeypatch.setenv("GITHUB_REPOSITORY", f"ciel-ir-rascol/{SUJET}")
+    assert _td(sujet, tmp_path / "dist") == 0
+    assert (tmp_path / "dist" / "sujet.pdf").is_file()

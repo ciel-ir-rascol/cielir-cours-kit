@@ -122,9 +122,10 @@ def _td(args: argparse.Namespace) -> int:
     pub = Publication(args.version, args.date)
     args.sortie.mkdir(parents=True, exist_ok=True)
     exemplaires = [Exemplaire.SUJET] if depot is Exemplaire.SUJET else [Exemplaire.SUJET, Exemplaire.CORRIGE]
+    corrigee = depot is Exemplaire.CORRIGE  # la source d'un dépôt sujet n'a plus ses réponses
     for ex in exemplaires:
         sortie = args.sortie / f"{ex.value}.pdf"
-        ecrire_pdf_td(rendre_html_td(source, td, pub, ex), racine, sortie, ex)
+        ecrire_pdf_td(rendre_html_td(source, td, pub, ex, source_corrigee=corrigee), racine, sortie, ex)
         print(f"{sortie} ({ex.value}, {args.version})")
     return 0
 

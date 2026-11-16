@@ -123,3 +123,21 @@ def test_titre_niveau_1():
     assert "# TD01" not in corrige("# TD01 - Diagramme de classes UML\n\nTexte.\n")
     with pytest.raises(ValueError, match="TD01 - Diagramme de classes UML"):
         corrige("# TD02 - Autre\n\nTexte.\n")
+
+
+@pytest.mark.parametrize("bloc", ['<div class="reponse">SECRET</div>',
+                                  '> <div class="reponse">\n>\n> SECRET\n>\n> </div>'])
+def test_trace_de_reponse_refusee_au_sujet(bloc):
+    with pytest.raises(ValueError, match="réponse"):
+        sujet(f"**Q.** Compléter le DR1.\n\n{bloc}\n")
+
+
+def test_reponse_avec_attribut_retiree_du_sujet():
+    source = '**Q.** Compléter le DR1.\n\n<div class="reponse" data-x="a">\n\nSECRET\n\n</div>\n'
+    assert "SECRET" not in sujet(source)
+
+
+def test_source_du_depot_sujet_sans_reponses():
+    source = "**Q.** Combien ?\n\n**Q.** Pourquoi ?\n"
+    sortie = preparer_source(source, TD, Exemplaire.SUJET, source_corrigee=False)
+    assert "**Q1.** Combien ?" in sortie and "**Q2.** Pourquoi ?" in sortie

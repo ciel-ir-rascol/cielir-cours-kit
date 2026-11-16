@@ -112,7 +112,9 @@ _TYPES_TD = {Exemplaire.SUJET: "Sujet", Exemplaire.CORRIGE: "Corrigé"}
 _MODES_TD = {Exemplaire.SUJET: Mode.TROUS, Exemplaire.CORRIGE: Mode.COMPLET}
 
 
-def rendre_html_td(source: str, td: TD, pub: Publication, exemplaire: Exemplaire) -> str:
+def rendre_html_td(
+    source: str, td: TD, pub: Publication, exemplaire: Exemplaire, source_corrigee: bool = True
+) -> str:
     themes = files("cielircours.donnees") / "themes"
     gabarit = (files("cielircours.donnees") / "gabarits" / "td.html.j2").read_text(encoding="utf-8")
     return _environnement().from_string(gabarit).render(
@@ -122,7 +124,7 @@ def rendre_html_td(source: str, td: TD, pub: Publication, exemplaire: Exemplaire
         pub=pub,
         exemplaire=exemplaire,
         type_document=_TYPES_TD[exemplaire],
-        corps=rendre_corps(preparer_source(source, td, exemplaire), _MODES_TD[exemplaire]),
+        corps=rendre_corps(preparer_source(source, td, exemplaire, source_corrigee), _MODES_TD[exemplaire]),
     )
 
 

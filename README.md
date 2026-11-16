@@ -185,7 +185,7 @@ Le nom du dépôt est `{sequence}-td{numero:02d}-{slug}`, avec `-CORR` pour le c
 | document réponse | `<div class="dr" titre="…">` contenant un SVG | numéroté DR1, DR2…, seul sur sa page, avec « Nom : … à rendre avec la copie » ; les éléments `remplissable` du SVG sont retirés du sujet |
 | bandeau de partie | `<p class="partie" duree="20 min" niveau="2"></p>` sous le `##` | durée indicative et niveau en étoiles (1 à 4), l'un ou l'autre facultatif |
 
-Les blocs suivent la grammaire des passages réservés : balise ouvrante seule sur sa ligne, ligne vide, markdown libre, `</div>`. Chaque question a sa réponse, sauf si elle cite un DR (`DR1`) : sa réponse est alors le DR rempli. Une réponse qui ne suit aucune question est refusée. **Refusés dans un TD** : les trous `<ins>` et les marques `ecran`/`papier`.
+Les blocs suivent la grammaire des passages réservés : balise ouvrante seule sur sa ligne, ligne vide, markdown libre, `</div>`. Chaque question a sa réponse, sauf si elle cite un DR (`DR1`) : sa réponse est alors le DR rempli. Une réponse qui ne suit aucune question est refusée. **Refusés dans un TD** : les trous `<ins>` et les marques `ecran`/`papier`. Les `<div>` et `</div>` seuls sur leur ligne doivent s'équilibrer : un `</div>` cité en exemple se met dans un bloc de code délimité par ` ``` `, jamais indenté de quatre espaces. Une réponse sur une seule ligne, ou dans une citation `>`, est refusée : le sujet n'est produit que si plus aucune trace de réponse n'y subsiste.
 
 ### Produire et publier
 

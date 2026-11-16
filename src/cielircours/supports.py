@@ -189,9 +189,48 @@ def _controler(sortie: str, support: Support, autre: Support) -> None:
 # --- Blocs de classe quelconque : le mode TD retire ses réponses par le même mécanisme -------
 
 
+# Un attribut de balise ouvrante de bloc : `titre="…"`, `data-x="…"`.
+ATTRIBUT = r'[a-z][a-z-]*="[^"]*"'
+
+# Pour retirer un bloc, seules comptent les balises SEULES sur leur ligne : un `</div>` cité en
+# ligne (code, commentaire, exemple) ne ferme rien. Le source doit être équilibré en balises
+# seules : un `</div>` d'un bloc de code indenté refermerait trop tôt, et la fin de la réponse
+# resterait — l'équilibre le détecte, car le vrai `</div>` resterait alors orphelin.
+_DIV_SEULE_OUVRANTE = re.compile(r'^\s*<div\b[^>]*>\s*$', re.IGNORECASE)
+_DIV_SEULE_FERMANTE = re.compile(r'^\s*</div\s*>\s*$', re.IGNORECASE)
+
+
+def _fin_stricte(lignes: list[str], debut: int, hors_code: set[int], classe: str) -> int:
+    profondeur = 0
+    for i in range(debut, len(lignes)):
+        if i not in hors_code:
+            continue
+        if _DIV_SEULE_OUVRANTE.match(lignes[i]):
+            profondeur += 1
+        elif _DIV_SEULE_FERMANTE.match(lignes[i]):
+            profondeur -= 1
+            if profondeur == 0:
+                return i
+    raise ValueError(
+        f"bloc « {classe} » non refermé, ouvert ligne {debut + 1} : « {lignes[debut].strip()} ». "
+        f'Chaque <div class="{classe}"> attend son </div>, seul sur sa ligne.'
+    )
+
+
+def _controler_equilibre(lignes: list[str], hors_code: list[int], classe: str) -> None:
+    ouvertes = sum(1 for i in hors_code if _DIV_SEULE_OUVRANTE.match(lignes[i]))
+    fermees = sum(1 for i in hors_code if _DIV_SEULE_FERMANTE.match(lignes[i]))
+    if ouvertes != fermees:
+        raise ValueError(
+            f"balises <div> non équilibrées ({ouvertes} ouvrantes, {fermees} </div> seules sur leur "
+            f"ligne) : un bloc « {classe} » ne peut pas être retiré sûrement. Un </div> cité dans "
+            "un exemple se met dans un bloc de code délimité par ``` (pas indenté de 4 espaces)."
+        )
+
+
 def _motifs_de(classe: str) -> tuple[re.Pattern[str], re.Pattern[str], re.Pattern[str]]:
     nom = re.escape(classe)
-    ouvrante = re.compile(rf'^\s*<div\s+class="{nom}"(?:\s+[a-z]+="[^"]*")*\s*>\s*$')
+    ouvrante = re.compile(rf'^\s*<div\s+class="{nom}"(?:\s+{ATTRIBUT})*\s*>\s*$')
     exacte = re.compile(rf'<div\s+class="{nom}"')
     large = re.compile(rf"""class\s*=\s*["']?[^"'>]*\b{nom}\b""", re.IGNORECASE)
     return ouvrante, exacte, large
@@ -246,17 +285,15 @@ def retirer_blocs(source: str, classe: str) -> str:
     lignes = source.split("\n")
     a_retirer: set[int] = set()
     hors_code = list(_lignes_hors_code(lignes))
+    if not any(ouvrante.match(lignes[i]) for i in hors_code):
+        return source
+    ensemble = set(hors_code)
     for i in hors_code:
         if i in a_retirer or not ouvrante.match(lignes[i]):
             continue
-        try:
-            fin = _fin_du_bloc(lignes, i)
-        except ValueError:
-            raise ValueError(
-                f"bloc « {classe} » non refermé, ouvert ligne {i + 1} : « {lignes[i].strip()} ». "
-                f'Chaque <div class="{classe}"> attend son </div>.'
-            ) from None
+        fin = _fin_stricte(lignes, i, ensemble, classe)
         a_retirer.update(range(i, fin + 1))
+    _controler_equilibre(lignes, hors_code, classe)
     if not a_retirer:
         return source
     gardees: list[str] = []

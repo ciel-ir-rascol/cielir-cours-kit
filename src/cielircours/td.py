@@ -29,10 +29,12 @@ from cielircours.config import TD, lire_td
 from cielircours.schemas import filtrer_svg
 from cielircours.supports import (
     _CLASSE_LARGE,
+    ATTRIBUT,
     _controler_graphie,
-    _fin_du_bloc,
+    _fin_stricte,
     _hors_code,
     _lignes_hors_code,
+    _motifs_de,
     retirer_blocs,
 )
 from cielircours.titre import retirer_titre
@@ -47,12 +49,13 @@ REPONSE = "reponse"
 _BLOCS_TITRES = ("ressource", "dt", "dr")
 
 _QUESTION = re.compile(r"^\*\*Q\.\*\*")
-_OUVRANTE_REPONSE = re.compile(r'^\s*<div\s+class="reponse"\s*>\s*$')
+# la même grammaire que celle qui retire les réponses : ce qui est apparié est ce qui est retiré
+_OUVRANTE_REPONSE = _motifs_de("reponse")[0]
 _OUVRANTE_BLOC = re.compile(
-    r'^\s*<div\s+class="(?P<classe>ressource|dt|dr)"(?P<attrs>(?:\s+[a-z]+="[^"]*")*)\s*>\s*$'
+    rf'^\s*<div\s+class="(?P<classe>ressource|dt|dr)"(?P<attrs>(?:\s+{ATTRIBUT})*)\s*>\s*$'
 )
-_PARTIE = re.compile(r'^\s*<p\s+class="partie"(?P<attrs>(?:\s+[a-z]+="[^"]*")*)\s*>\s*</p>\s*$')
-_ATTR = re.compile(r'([a-z]+)="([^"]*)"')
+_PARTIE = re.compile(rf'^\s*<p\s+class="partie"(?P<attrs>(?:\s+{ATTRIBUT})*)\s*>\s*</p>\s*$')
+_ATTR = re.compile(r'([a-z][a-z-]*)="([^"]*)"')
 _TITRE = re.compile(r"^#{1,6}\s")
 _INS = re.compile(r"</?ins\b", re.IGNORECASE)
 _CITE_UN_DR = re.compile(r"\bDR\s?[0-9]+\b")
@@ -70,21 +73,26 @@ def _refuser_les_interdits(source: str) -> None:
         )
 
 
-def _apparier(lignes: list[str]) -> None:
-    """Chaque question a sa réponse (ou cite un DR), chaque réponse suit une question."""
+def _apparier(lignes: list[str], exiger_reponses: bool = True) -> None:
+    """Chaque question a sa réponse (ou cite un DR), chaque réponse suit une question.
+
+    `exiger_reponses=False` : la source d'un dépôt sujet, d'où les réponses ont été retirées.
+    """
     numero = 0
     ouverte: dict | None = None  # {"numero", "texte", "repondue"}
 
     def fermer() -> None:
-        if ouverte and not ouverte["repondue"] and not _CITE_UN_DR.search(" ".join(ouverte["texte"])):
+        if exiger_reponses and ouverte and not ouverte["repondue"] and not _CITE_UN_DR.search(" ".join(ouverte["texte"])):
             raise ValueError(
                 f"la question Q{ouverte['numero']} n'a pas de réponse : un bloc "
                 '<div class="reponse"> est attendu juste après elle (sauf si elle porte sur un DR). '
                 f"Question : « {' '.join(ouverte['texte'])[:80]} »"
             )
 
+    hors_code = list(_lignes_hors_code(lignes))
+    ensemble = set(hors_code)
     sautees: set[int] = set()
-    for i in _lignes_hors_code(lignes):
+    for i in hors_code:
         if i in sautees:
             continue
         ligne = lignes[i]
@@ -99,7 +107,7 @@ def _apparier(lignes: list[str]) -> None:
                     "place juste après le paragraphe **Q.** de sa question, une seule par question."
                 )
             ouverte["repondue"] = True
-            sautees.update(range(i, _fin_du_bloc(lignes, i) + 1))
+            sautees.update(range(i, _fin_stricte(lignes, i, ensemble, REPONSE) + 1))
         elif _TITRE.match(ligne) or _OUVRANTE_BLOC.match(ligne):
             fermer()
             ouverte = None
@@ -152,17 +160,39 @@ def _numeroter(lignes: list[str]) -> list[str]:
     return sortie
 
 
-def preparer_source(source: str, td: TD, exemplaire: Exemplaire) -> str:
-    """La source markdown prête à rendre pour `exemplaire` ; `ValueError` à la moindre incohérence."""
+_TRACE_REPONSE = re.compile(r"""class\s*=\s*["']?[^"'>]*\breponse\b""", re.IGNORECASE)
+
+
+def _refuser_une_trace(source: str, origine: str) -> None:
+    if m := _TRACE_REPONSE.search(_hors_code(source)):
+        raise ValueError(
+            f"{origine} : une trace de réponse subsiste (« {m.group(0)} »). Une réponse s'écrit "
+            '<div class="reponse"> seul sur sa ligne, puis une ligne vide, son contenu, et </div> '
+            "seul sur sa ligne ; jamais dans une citation ni sur une seule ligne."
+        )
+
+
+def preparer_source(source: str, td: TD, exemplaire: Exemplaire, source_corrigee: bool = True) -> str:
+    """La source markdown prête à rendre pour `exemplaire` ; `ValueError` à la moindre incohérence.
+
+    `source_corrigee=False` : la source vient d'un dépôt sujet. Elle ne doit contenir aucune
+    réponse, et ses questions n'en attendent pas.
+    """
     if not isinstance(exemplaire, Exemplaire):
         raise TypeError(f"exemplaire attendu : un Exemplaire ({', '.join(Exemplaire)}), reçu {exemplaire!r}")
     _refuser_les_interdits(source)
     for classe in (REPONSE, *_BLOCS_TITRES):
         _controler_graphie(source, classe)
     source = retirer_titre(source, td, fichier="TD.md", config="td.yml")
-    _apparier(source.split("\n"))
+    if not source_corrigee:
+        if exemplaire is not Exemplaire.SUJET:
+            raise ValueError("un dépôt sujet ne produit que le sujet : il n'a pas les réponses")
+        _refuser_une_trace(source, "TD.md du dépôt sujet")
+    _apparier(source.split("\n"), exiger_reponses=source_corrigee)
     if exemplaire is Exemplaire.SUJET:
         source = retirer_blocs(source, REPONSE)
+        # dernier garde-fou : ce que le filtre n'a pas su retirer ne part pas chez les élèves
+        _refuser_une_trace(source, "sujet")
     return "\n".join(_numeroter(source.split("\n")))
 
 

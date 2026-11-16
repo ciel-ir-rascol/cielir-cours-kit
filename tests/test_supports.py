@@ -182,3 +182,19 @@ def test_retirer_blocs_sans_marque_identique():
 def test_compter_blocs_hors_code():
     source = '<div class="reponse">\n\nR\n\n</div>\n\n```\n<div class="reponse">\n```\n'
     assert compter_blocs(source, "reponse") == 1
+
+
+@pytest.mark.parametrize("piege", ["Il manque `</div>` ici.", "<!-- </div> -->", "Un <div> en ligne </div> fermé."])
+def test_retirer_blocs_div_en_ligne_ne_ferme_pas(piege):
+    source = f'a\n\n<div class="reponse">\n\n{piege}\n\nSECRET\n\n</div>\n\nb'
+    assert retirer_blocs(source, "reponse") == "a\n\nb"
+
+
+def test_retirer_blocs_desequilibre_refuse():
+    source = 'a\n\n<div class="reponse">\n\n    </div>\n\nSECRET\n\n</div>\n\nb'
+    with pytest.raises(ValueError, match="équilibr"):
+        retirer_blocs(source, "reponse")
+
+
+def test_retirer_blocs_attribut_a_tiret():
+    assert retirer_blocs('a\n\n<div class="reponse" data-x="1">\n\nS\n\n</div>\n\nb', "reponse") == "a\n\nb"
