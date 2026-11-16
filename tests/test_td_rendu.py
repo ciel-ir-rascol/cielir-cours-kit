@@ -53,7 +53,9 @@ def test_cartouche(ex, libelle):
 
 
 def test_autoevaluation():
-    html = rendre_html_td(SOURCE, TD, PUB, Exemplaire.SUJET)
+    assert "autoevaluation" not in rendre_html_td(SOURCE, TD, PUB, Exemplaire.SUJET)  # par défaut
+    avec = dataclasses.replace(TD, autoevaluation=True)
+    html = rendre_html_td(SOURCE, avec, PUB, Exemplaire.SUJET)
     assert '<section class="autoevaluation">' in html
     for c in TD.capacites + ["Acquis", "En cours", "Non acquis"]:
         assert c in html

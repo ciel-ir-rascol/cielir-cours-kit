@@ -125,7 +125,7 @@ class TD:
     cours: list[str]
     tp: list[str]
     capacites: list[str]
-    autoevaluation: bool = True
+    autoevaluation: bool = False  # un TD n'est pas évalué : le tableau ne vient que sur demande
 
     @property
     def titre_page(self) -> str:
@@ -175,7 +175,7 @@ def lire_td(chemin: Path) -> TD:
         if not isinstance(brut[champ], str) or not brut[champ].strip():
             raise ConfigInvalide(f"{chemin} : {champ} doit être un texte non vide")
 
-    autoevaluation = brut.get("autoevaluation", True)
+    autoevaluation = brut.get("autoevaluation", False)
     if not isinstance(autoevaluation, bool):
         raise ConfigInvalide(f"{chemin} : autoevaluation doit valoir true ou false : {autoevaluation!r}")
 

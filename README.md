@@ -153,7 +153,7 @@ Le `<div>` a été préféré à une syntaxe `:::` parce qu'il se dégrade bien 
 
 ## Écrire un TD
 
-Un TD est **un document papier**, traité sur table : ni fiche en ligne, ni slides, ni site. L'étudiant répond sur une copie à part ; seuls les **documents réponse** (DR), des schémas à compléter, se rendent avec la copie. Un TD vit dans **deux dépôts** :
+Un TD est **un document papier**, travaillé en séance : ni fiche en ligne, ni slides, ni site. Il n'est pas évalué. Les **documents réponse** (DR) sont des schémas à compléter directement sur le sujet. Un TD vit dans **deux dépôts** :
 
 | Dépôt | Contient | Produit |
 | --- | --- | --- |
@@ -170,7 +170,7 @@ Les champs de `cours.yml`, sauf `bloc`, `tp` et `logo`, plus :
 | --- | --- |
 | `numero` | entier de 1 à 99 : `td01` dans le nom du dépôt, « TD01 - <titre> » dans le cartouche |
 | `cours`, `tp` | facultatifs : listes de **noms de dépôts** liés |
-| `autoevaluation` | `true` par défaut : un tableau d'auto-évaluation, tiré de `capacites`, clôt le TD |
+| `autoevaluation` | `false` par défaut ; `true` : un tableau d'auto-positionnement, tiré de `capacites`, clôt le TD |
 
 Le nom du dépôt est `{sequence}-td{numero:02d}-{slug}`, avec `-CORR` pour le corrigé. Tout autre nom est refusé à la publication.
 
@@ -182,7 +182,7 @@ Le nom du dépôt est `{sequence}-td{numero:02d}-{slug}`, avec `-CORR` pour le c
 | réponse | `<div class="reponse">` … `</div>`, juste après sa question | encadré « Réponse » dans le corrigé, **retiré** du sujet |
 | ressource de cours | `<div class="ressource" titre="…">` | encadré « Ressource », en tête ou au fil des parties |
 | document technique | `<div class="dt" titre="…">` | numéroté DT1, DT2… |
-| document réponse | `<div class="dr" titre="…">` contenant un SVG | numéroté DR1, DR2…, seul sur sa page, avec « Nom : … à rendre avec la copie » ; les éléments `remplissable` du SVG sont retirés du sujet |
+| document réponse | `<div class="dr" titre="…">` contenant un SVG | numéroté DR1, DR2…, seul sur sa page ; les éléments `remplissable` du SVG sont retirés du sujet |
 | bandeau de partie | `<p class="partie" duree="20 min" niveau="2"></p>` sous le `##` | durée indicative et niveau en étoiles (1 à 4), l'un ou l'autre facultatif |
 
 Les blocs suivent la grammaire des passages réservés : balise ouvrante seule sur sa ligne, ligne vide, markdown libre, `</div>`. Chaque question a sa réponse, sauf si elle cite un DR (`DR1`) : sa réponse est alors le DR rempli. Une réponse qui ne suit aucune question est refusée. **Refusés dans un TD** : les trous `<ins>` et les marques `ecran`/`papier`. Les `<div>` et `</div>` seuls sur leur ligne doivent s'équilibrer : un `</div>` cité en exemple se met dans un bloc de code délimité par ` ``` `, jamais indenté de quatre espaces. Une réponse sur une seule ligne, ou dans une citation `>`, est refusée : le sujet n'est produit que si plus aucune trace de réponse n'y subsiste.

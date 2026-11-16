@@ -77,8 +77,9 @@ def test_dt_dr_numerotes():
     sortie = corrige(source)
     assert '<div class="dt"><p class="bloc-titre">DT1 - Badge</p>' in sortie
     assert '<div class="dt"><p class="bloc-titre">DT2 - Tests</p>' in sortie
-    assert ('<div class="dr"><p class="bloc-titre">DR1 - Relations</p>'
-            '<p class="dr-nom">Nom : ……………… — à rendre avec la copie</p>') in sortie
+    assert '<div class="dr"><p class="bloc-titre">DR1 - Relations</p>\n' in sortie + "\n"
+    # un TD n'est pas évalué : rien à rendre, pas de nom à écrire
+    assert "rendre" not in sortie and "Nom :" not in sortie
 
 
 def test_ressource():

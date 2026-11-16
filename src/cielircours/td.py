@@ -6,7 +6,7 @@ Un TD s'écrit une fois, dans le `TD.md` du dépôt `-CORR`, réponses comprises
     <div class="reponse"> … </div>      sa réponse, juste après ; retirée du sujet
     <div class="ressource" titre="…">   élément de cours, n'importe où
     <div class="dt" titre="…">          document technique, numéroté DT1, DT2…
-    <div class="dr" titre="…">          document réponse, numéroté DR1, DR2…, sur sa propre page
+    <div class="dr" titre="…">          document réponse (schéma à compléter), DR1, DR2…, sur sa page
     <p class="partie" duree="…" niveau="n"></p>   bandeau d'une partie (niveau de 1 à 4)
 
 Deux exemplaires en sortent : le corrigé (tout) et le sujet (sans aucune réponse, et sans les
@@ -153,8 +153,6 @@ def _numeroter(lignes: list[str]) -> list[str]:
                 compteurs[classe] += 1
                 tete = f"{classe.upper()}{compteurs[classe]} - {html.escape(titre)}"
             sortie[i] = f'<div class="{classe}"><p class="bloc-titre">{tete}</p>'
-            if classe == "dr":
-                sortie[i] += '<p class="dr-nom">Nom : ……………… — à rendre avec la copie</p>'
         elif m := _PARTIE.match(ligne):
             sortie[i] = _bandeau(dict(_ATTR.findall(m.group("attrs"))), i + 1)
     return sortie
