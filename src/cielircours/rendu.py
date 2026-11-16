@@ -9,10 +9,11 @@ from jinja2 import Environment, StrictUndefined
 from weasyprint import HTML
 from weasyprint.urls import FatalURLFetchingError, URLFetcher, URLFetcherResponse
 
-from cielircours.config import Cours
+from cielircours.config import TD, Cours
 from cielircours.mdtext import Mode, rendre_corps
 from cielircours.schemas import filtrer_svg, retirer_remplissables
 from cielircours.supports import Support, filtrer
+from cielircours.td import Exemplaire, preparer_source
 from cielircours.titre import retirer_titre
 
 _TYPES_DOCUMENT = {Mode.COMPLET: "Cours", Mode.TROUS: "Cours à trous"}
@@ -101,3 +102,30 @@ def ecrire_pdf(html: str, base_url: Path, sortie: Path, mode: Mode) -> None:
             raise SchemeInterdit(detail) from e
         raise SourceIntrouvable(detail) from e
     rendu.write_pdf(sortie)
+
+
+# --- TD -------------------------------------------------------------------------------------
+
+_TYPES_TD = {Exemplaire.SUJET: "Sujet", Exemplaire.CORRIGE: "Corrigé"}
+# Le sujet se rend comme une fiche à trous : c'est ce mode qui retire des schémas leurs éléments
+# `remplissable` (les réponses d'un DR). Le texte, lui, n'a pas de trous : `<ins>` est refusé.
+_MODES_TD = {Exemplaire.SUJET: Mode.TROUS, Exemplaire.CORRIGE: Mode.COMPLET}
+
+
+def rendre_html_td(source: str, td: TD, pub: Publication, exemplaire: Exemplaire) -> str:
+    themes = files("cielircours.donnees") / "themes"
+    gabarit = (files("cielircours.donnees") / "gabarits" / "td.html.j2").read_text(encoding="utf-8")
+    return _environnement().from_string(gabarit).render(
+        feuille=Path(str(themes / "cours.css")).as_uri(),
+        feuille_td=Path(str(themes / "td.css")).as_uri(),
+        td=td,
+        pub=pub,
+        exemplaire=exemplaire,
+        type_document=_TYPES_TD[exemplaire],
+        corps=rendre_corps(preparer_source(source, td, exemplaire), _MODES_TD[exemplaire]),
+    )
+
+
+def ecrire_pdf_td(html: str, base_url: Path, sortie: Path, exemplaire: Exemplaire) -> None:
+    """Écrit le PDF d'un exemplaire de TD ; pour le sujet, les schémas perdent leurs réponses."""
+    ecrire_pdf(html, base_url, sortie, _MODES_TD[exemplaire])

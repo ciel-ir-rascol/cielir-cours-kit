@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>{{ td.titre }}</title>
+<link rel="stylesheet" href="{{ feuille }}">
+<link rel="stylesheet" href="{{ feuille_td }}">
+</head>
+<body class="td td-{{ exemplaire.value }}">
+
+<div class="entete"><span class="entete-gauche">{{ td.sequence }}</span><span class="entete-droit">{{ td.titre }}</span></div>
+<div class="pied-gauche">{{ td.discipline }} – {{ td.classe }}</div>
+<div class="pied-droit">{{ td.etablissement }} · {{ td.auteur }}</div>
+
+<header class="cartouche">
+  <div class="cartouche-ligne">
+    <h1 class="titre">{{ td.titre_page }}</h1>
+    <span class="matiere">{{ td.discipline }} – {{ td.classe }}</span>
+  </div>
+  <div class="cartouche-ligne">
+    <span class="type">{{ type_document }}</span>
+    <span class="sequence">{{ td.sequence }}</span>
+    <span class="etablissement">{{ td.etablissement }}</span>
+    <span class="meta">
+      {%- if td.duree %}<span class="duree">{{ td.duree }}</span> {% endif -%}
+      <span class="version">{{ pub.libelle }}</span>
+    </span>
+  </div>
+</header>
+
+{% if td.capacites %}
+<section class="capacites">
+  <h2>Capacités attendues</h2>
+  <ul>
+  {% for c in td.capacites %}
+    <li>{{ c }}</li>
+  {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+<main class="corps">
+{{ corps | safe }}
+</main>
+
+{% if td.autoevaluation and td.capacites %}
+<section class="autoevaluation">
+  <h2>Auto-évaluation — en fin de séance, cochez les cases</h2>
+  <table>
+    <thead><tr><th>Capacité</th><th>Acquis</th><th>En cours</th><th>Non acquis</th></tr></thead>
+    <tbody>
+    {% for c in td.capacites %}
+      <tr><td>{{ c }}</td><td class="case">☐</td><td class="case">☐</td><td class="case">☐</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endif %}
+
+</body>
+</html>
