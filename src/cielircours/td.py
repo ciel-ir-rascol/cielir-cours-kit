@@ -18,10 +18,15 @@ Un TD n'a pas de trous et pas d'écran : `<ins>` et les marques `ecran`/`papier`
 from __future__ import annotations
 
 import html
+import os
 import re
+import shutil
+import tempfile
 from enum import StrEnum
+from pathlib import Path
 
-from cielircours.config import TD
+from cielircours.config import TD, lire_td
+from cielircours.schemas import filtrer_svg
 from cielircours.supports import (
     _CLASSE_LARGE,
     _controler_graphie,
@@ -159,3 +164,63 @@ def preparer_source(source: str, td: TD, exemplaire: Exemplaire) -> str:
     if exemplaire is Exemplaire.SUJET:
         source = retirer_blocs(source, REPONSE)
     return "\n".join(_numeroter(source.split("\n")))
+
+
+# --- Le dépôt sujet -------------------------------------------------------------------------
+
+# La relecture est volontairement plus stricte que le filtre : la moindre trace, même citée dans
+# un bloc de code, même en majuscules, arrête tout. Le dépôt sujet est lu par les élèves.
+_FUITE = re.compile(r'class\s*=\s*["\']?reponse|remplissable', re.IGNORECASE)
+
+
+def _fichiers_du_sujet(corr: Path) -> list[Path]:
+    """Chemins, relatifs à `corr`, des fichiers que le sujet reçoit : TD.md, td.yml, img/**."""
+    fichiers = [Path("TD.md"), Path("td.yml")]
+    images = corr / "img"
+    if images.is_dir():
+        fichiers += sorted(p.relative_to(corr) for p in images.rglob("*") if p.is_file())
+    return fichiers
+
+
+def extraire_sujet(corr: Path, sujet: Path) -> list[Path]:
+    """Écrit dans `sujet` le TD sans aucune réponse ; renvoie les chemins écrits, relatifs à `sujet`.
+
+    - `TD.md` : la source du `-CORR` sans ses blocs `reponse` (les `**Q.**` restent à numéroter :
+      c'est une source, pas un rendu) ;
+    - `td.yml` : copié à l'identique ;
+    - `img/**` : les SVG perdent leurs éléments `remplissable`, le reste est copié tel quel.
+
+    Les autres fichiers de `sujet` ne sont ni lus ni modifiés. Tout est écrit d'abord à côté, puis
+    relu : une trace de réponse dans un seul fichier, et rien n'est déposé dans `sujet`.
+    """
+    corr, sujet = Path(corr), Path(sujet)
+    source = (corr / "TD.md").read_text(encoding="utf-8")
+    preparer_source(source, lire_td(corr / "td.yml"), Exemplaire.CORRIGE)  # le TD doit être sain
+
+    fichiers = _fichiers_du_sujet(corr)
+    sujet.mkdir(parents=True, exist_ok=True)
+    attente = Path(tempfile.mkdtemp(prefix=".extraire-sujet-", dir=sujet.parent))
+    try:
+        for rel in fichiers:
+            cible = attente / rel
+            cible.parent.mkdir(parents=True, exist_ok=True)
+            if rel == Path("TD.md"):
+                cible.write_text(retirer_blocs(source, REPONSE), encoding="utf-8")
+            elif rel.suffix.lower() == ".svg":
+                cible.write_bytes(filtrer_svg((corr / rel).read_bytes()))
+            else:
+                shutil.copyfile(corr / rel, cible)
+        for rel in fichiers:
+            if rel.suffix.lower() in {".md", ".yml", ".svg"}:
+                texte = (attente / rel).read_bytes().decode("utf-8", errors="replace")
+                if m := _FUITE.search(texte):
+                    raise ValueError(
+                        f"{rel.as_posix()} : une trace de réponse subsiste dans le sujet "
+                        f"(« {m.group(0)} ») ; rien n'a été écrit dans {sujet}."
+                    )
+        for rel in fichiers:
+            (sujet / rel).parent.mkdir(parents=True, exist_ok=True)
+            os.replace(attente / rel, sujet / rel)
+    finally:
+        shutil.rmtree(attente, ignore_errors=True)
+    return fichiers
